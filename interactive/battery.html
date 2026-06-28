@@ -6,6 +6,7 @@
 <title>蓄電池運用・アービトラージ（インタラクティブ）</title>
 <link rel="stylesheet" href="lib/tool.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="lib/stats.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -26,6 +27,8 @@
       <h2>ディスパッチ閾値（百分位）</h2>
       <div class="ctl"><label>充電：価格がこの%以下<span class="val" id="cpctval">35</span></label><input type="range" id="cpct" min="10" max="60" step="5" value="35"></div>
       <div class="ctl"><label>放電：価格がこの%以上<span class="val" id="dpctval">65</span></label><input type="range" id="dpct" min="40" max="90" step="5" value="65"></div>
+      <h2>価格の不確実性（予測の価値）</h2>
+      <div class="ctl"><label>価格予測誤差 σ<span class="val" id="sigmaval">0</span></label><input type="range" id="sigma" min="0" max="15" step="1" value="0"></div>
     </div>
 
     <div>
@@ -39,6 +42,17 @@
   </div>
 
   <div class="note" id="note"></div>
+
+  <div id="forecast" style="display:none">
+    <h2 style="font-size:1rem;margin-top:16px">価格が不確実なとき：予測の価値（教材6bのEVPI直感）</h2>
+    <div class="metrics">
+      <div class="metric"><div class="k">固定計画（予測=平均で立てて実価格に適用）</div><div class="v" id="detProfit">–</div></div>
+      <div class="metric"><div class="k">完全予測（実価格でディスパッチし直す）</div><div class="v ok" id="wsProfit">–</div></div>
+      <div class="metric"><div class="k">予測誤差のコスト＝予測の価値</div><div class="v" id="gapProfit">–</div></div>
+    </div>
+    <div class="note" id="fcNote"></div>
+  </div>
+
   <details>
     <summary>🎯 観察点 / よくある誤解</summary>
     <ul>
@@ -54,8 +68,9 @@
 <script>
 const $=id=>document.getElementById(id);
 const C={price:'#ea4335',charge:'#4285f4',discharge:'#34a853',soc:'#f9ab00'};
-let S={cap:10,pmax:3,eff:0.9,base:20,day:12,eve:8,cpct:35,dpct:65};
+let S={cap:10,pmax:3,eff:0.9,base:20,day:12,eve:8,cpct:35,dpct:65,sigma:0};
 const T=24;
+const L=window.LP;
 
 function priceProfile(){
   const p=[]; for(let t=0;t<T;t++){
@@ -78,8 +93,22 @@ function dispatch(price){
   return {c,d,soc:socArr,cth,dth};
 }
 
+// 予測価値：固定計画（平均価格で立て実価格に適用）vs 完全予測（実価格で立て直す）
+function forecastValue(meanPrice){
+  const n=40, g=L.gaussianGen(L.mulberry32('bat'+S.sigma)); // σで決まる再現シナリオ
+  const plan=dispatch(meanPrice); // 予測=平均で立てた固定スケジュール
+  let det=0, ws=0;
+  for(let s=0;s<n;s++){
+    const real=meanPrice.map(v=>Math.max(0, v+S.sigma*g()));
+    det += real.reduce((a,p,t)=>a+p*(plan.d[t]-plan.c[t]),0);      // 固定計画を実価格で評価
+    const adapt=dispatch(real);                                     // 実価格で立て直す
+    ws  += real.reduce((a,p,t)=>a+p*(adapt.d[t]-adapt.c[t]),0);
+  }
+  return {det:det/n, ws:ws/n, gap:(ws-det)/n};
+}
+
 function update(){
-  for(const k of ['cap','pmax','eff','base','day','eve','cpct','dpct']){
+  for(const k of ['cap','pmax','eff','base','day','eve','cpct','dpct','sigma']){
     const el=$(k+'val'); if(el) el.textContent=(k==='eff')?S[k].toFixed(2):(k==='pmax')?S[k].toFixed(1):S[k];
   }
   const price=priceProfile(), {c,d,soc,cth,dth}=dispatch(price);
@@ -105,8 +134,20 @@ function update(){
     `平均充電 ${avgC.toFixed(1)} ${avgC<avgD?'<':'≥'} 平均放電 ${avgD.toFixed(1)}。`+
     (avgC<avgD?' 安く買って高く売る＝アービトラージ成立。':' 利幅なし（閾値や価格差を見直す）。')+
     ` η を下げると往復ロスで利益が減る。`;
+
+  // 予測の価値（σ>0 のとき）
+  if(S.sigma>0){
+    const fv=forecastValue(price);
+    $('forecast').style.display='block';
+    $('detProfit').textContent=fv.det.toFixed(1);
+    $('wsProfit').textContent=fv.ws.toFixed(1);
+    $('gapProfit').textContent=fv.gap.toFixed(1);
+    $('fcNote').innerHTML=`σ=${S.sigma} の予測誤差があると、平均価格で立てた<b>固定計画（${fv.det.toFixed(0)}）</b>は`+
+      `<b>完全予測（${fv.ws.toFixed(0)}）</b>に <b>${fv.gap.toFixed(0)}</b> 及ばない。これが「予測誤差のコスト＝予測の価値」`+
+      `（教材6bの WS−EEV ギャップ＝EVPI の直感）。実運用は実時間で再最適化(recourse)するので両者の中間。`;
+  } else { $('forecast').style.display='none'; }
 }
-['cap','pmax','eff','base','day','eve','cpct','dpct'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
+['cap','pmax','eff','base','day','eve','cpct','dpct','sigma'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
 update();
 </script>
 </body>
