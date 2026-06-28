@@ -19,8 +19,8 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 [▶ 全画面で開く](pdf_cdf.html){target=_blank}
 
-<iframe src="pdf_cdf.html" title="PDF・CDF・区間確率" loading="lazy"
-  style="width:100%;height:880px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+<iframe src="pdf_cdf.html" title="PDF・CDF・区間確率" loading="lazy" data-fit
+  style="width:100%;height:1500px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
 
 関連ノート：[Module 2 確率変数と分布](../notes/02_random_variables_and_distributions.md)。
 
@@ -33,8 +33,8 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 [▶ 全画面で開く](bayes.html){target=_blank}
 
-<iframe src="bayes.html" title="ベイズ更新・基準率の誤謬" loading="lazy"
-  style="width:100%;height:900px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+<iframe src="bayes.html" title="ベイズ更新・基準率の誤謬" loading="lazy" data-fit
+  style="width:100%;height:1560px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
 
 関連ノート：[Module 1 事象と確率](../notes/01_events_and_probability.md)。
 
@@ -47,8 +47,8 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 [▶ 全画面で開く](montecarlo.html){target=_blank}
 
-<iframe src="montecarlo.html" title="モンテカルロ収束" loading="lazy"
-  style="width:100%;height:760px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+<iframe src="montecarlo.html" title="モンテカルロ収束" loading="lazy" data-fit
+  style="width:100%;height:1200px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
 
 関連ノート：[Module 5 シナリオとモンテカルロ](../notes/05_scenarios_and_monte_carlo.md)。
 
@@ -61,8 +61,8 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 [▶ 全画面で開く](comparator.html){target=_blank}
 
-<iframe src="comparator.html" title="6形式コンパレータ" loading="lazy"
-  style="width:100%;height:880px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+<iframe src="comparator.html" title="6形式コンパレータ" loading="lazy" data-fit
+  style="width:100%;height:1500px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
 
 関連ノート：[Module 6 不確実性下の最適化](../notes/06_optimization_under_uncertainty.md)。
 
@@ -75,7 +75,7 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 [▶ 全画面で開く](battery.html){target=_blank}
 
-<iframe src="battery.html" title="蓄電池運用" loading="lazy"
+<iframe src="battery.html" title="蓄電池運用" loading="lazy" data-fit
   style="width:100%;height:780px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
 
 関連ノート：[Module 6b 二段階確率計画](../notes/06b_two_stage_stochastic_programming.md)。
@@ -83,4 +83,17 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 ---
 
 > **5本すべてブラウザ内で動作**します（インストール不要）。Streamlit版（ローカル/Community Cloud 実行）の解説は各 `apps/*/` を参照。
+
+<script>
+// 同一オリジンの iframe を中身の高さに自動フィット（内部スクロール・余白を解消、内容変更に追従）
+(function(){
+  function fit(f){ try{ var h=f.contentDocument.body.scrollHeight; if(h>120) f.style.height=(h+16)+'px'; }catch(e){} }
+  function fitAll(){ document.querySelectorAll('iframe[data-fit]').forEach(fit); }
+  document.querySelectorAll('iframe[data-fit]').forEach(function(f){
+    f.addEventListener('load', function(){ fit(f); [300,800,1600].forEach(function(d){ setTimeout(function(){ fit(f); }, d); }); });
+  });
+  var t; window.addEventListener('resize', function(){ clearTimeout(t); t=setTimeout(fitAll, 250); });
+  setTimeout(fitAll, 1000);
+})();
+</script>
 > 進捗は [development log](../development_log.md) を参照。
