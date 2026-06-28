@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ベイズ更新・基準率の誤謬（インタラクティブ）</title>
+<link rel="stylesheet" href="lib/tool.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>ベイズ更新ビジュアライザ — 基準率の誤謬</h1>
+  <div class="sub">感度99%の優秀な警報でも、故障が稀なら「警報＝本物」とは限らない。事前・感度・誤警報率を動かして事後確率の決まり方を体感する。
+    <a href="../notes/01_events_and_probability/">Module 1 のノート →</a></div>
+
+  <div class="panel">
+    <div class="controls">
+      <h2>パラメータ（保護リレー例）</h2>
+      <div class="ctl"><label>事前確率 P(F)（基準率）<span class="val" id="priorval">0.010</span></label>
+        <input type="range" id="prior" min="0.001" max="0.5" step="0.001" value="0.01"></div>
+      <div class="ctl"><label>感度 P(警報|F)<span class="val" id="sensval">0.99</span></label>
+        <input type="range" id="sens" min="0.5" max="1" step="0.01" value="0.99"></div>
+      <div class="ctl"><label>誤警報率 P(警報|¬F)<span class="val" id="fprval">0.050</span></label>
+        <input type="range" id="fpr" min="0.001" max="0.5" step="0.001" value="0.05"></div>
+      <h2>内訳の母数 n</h2>
+      <div class="seg" id="ncases">
+        <button data-n="100">100</button>
+        <button data-n="1000" class="on">1000</button>
+        <button data-n="10000">10000</button>
+      </div>
+      <h2>逐次：独立な警報の回数</h2>
+      <div class="ctl"><label>回数<span class="val" id="nseqval">2</span></label>
+        <input type="range" id="nseq" min="1" max="6" step="1" value="2"></div>
+    </div>
+
+    <div>
+      <div class="metrics">
+        <div class="metric"><div class="k">事後 P(F | 警報あり)</div><div class="v" id="postpos">–</div></div>
+        <div class="metric"><div class="k">事後 P(F | 警報なし)</div><div class="v" id="postneg">–</div></div>
+        <div class="metric"><div class="k">感度 P(警報|F)（混同注意）</div><div class="v" id="sensmetric">–</div></div>
+      </div>
+      <div class="note" id="warnNote" style="display:none"></div>
+      <div class="plots">
+        <div id="barPlot" class="plot"></div>
+        <div id="curvePlot" class="plot"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:1rem;margin-top:18px">逐次ベイズ更新：独立な警報を重ねる</h2>
+  <div id="seqPlot" style="width:100%;height:300px"></div>
+  <div class="note" id="seqNote"></div>
+
+  <details>
+    <summary>🎯 観察点 / よくある誤解</summary>
+    <ul>
+      <li>基準率 P(F) を下げると事後が急落（感度99%でも事後17%）。偽陽性の母数が効く。</li>
+      <li>誤警報率を下げる（特異度↑）と、低基準率では感度を上げるより事後が改善。</li>
+      <li>独立な警報を重ねると事後が跳ね上がる（1回17%→2回80%）。「今日の事後＝明日の事前」。</li>
+      <li>誤解：「感度99%なら鳴れば99%本物」／「P(A|B)=P(B|A)」。いずれも誤り。</li>
+    </ul>
+  </details>
+  <div class="foot">ベイズ：P(F|警報)=P(警報|F)P(F)/[P(警報|F)P(F)+P(警報|¬F)P(¬F)]。逐次はオッズ×尤度比^k。Plotly.js で描画。</div>
+</div>
+
+<script>
+const C={tp:'#34a853',fp:'#ea4335',fn:'#fbbc04',tn:'#cccccc',blue:'#4285f4',red:'#ea4335',purple:'#a142f4'};
+const $=id=>document.getElementById(id);
+let S={prior:0.01,sens:0.99,fpr:0.05,n:1000,nseq:2};
+
+const postPos=(p,s,f)=> s*p/(s*p+f*(1-p));
+const postNeg=(p,s,f)=> (1-s)*p/((1-s)*p+(1-f)*(1-p));
+const odds=p=>p/(1-p), prob=o=>o/(1+o);
+const seqUpdate=(p,s,f,k)=> prob(odds(p)*Math.pow(s/f,k));
+
+function fmtpct(x){ return (x*100).toFixed(x<0.01?2:1)+'%'; }
+
+function update(){
+  const {prior:p,sens:s,fpr:f,n,nseq}=S;
+  $('priorval').textContent=p.toFixed(3); $('sensval').textContent=s.toFixed(2);
+  $('fprval').textContent=f.toFixed(3); $('nseqval').textContent=nseq;
+  const pp=postPos(p,s,f), pn=postNeg(p,s,f);
+  $('postpos').textContent=fmtpct(pp); $('postneg').textContent=fmtpct(pn); $('sensmetric').textContent=fmtpct(s);
+
+  // 内訳
+  const nf=n*p, nnf=n*(1-p);
+  const tp=nf*s, fn=nf*(1-s), fp=nnf*f, tn=nnf*(1-f), alarms=tp+fp;
+  const wn=$('warnNote');
+  if(pp<0.5 && s>=0.9){ wn.style.display='block';
+    wn.innerHTML=`⚠️ 感度 ${fmtpct(s)} の優秀な警報でも、事後は <b>${fmtpct(pp)}</b>。警報の多く（${fp.toFixed(0)}/${alarms.toFixed(0)} 件）は誤警報。これが<b>基準率の誤謬</b>。`;
+  } else wn.style.display='none';
+
+  Plotly.react('barPlot',[{
+    x:['真陽性<br>故障&警報','偽陽性<br>正常&警報','偽陰性<br>故障&無警報','真陰性<br>正常&無警報'],
+    y:[tp,fp,fn,tn], type:'bar',
+    marker:{color:[C.tp,C.fp,C.fn,C.tn]},
+    text:[tp,fp,fn,tn].map(v=>v.toFixed(1)), textposition:'outside'
+  }],{margin:{t:36,r:8,b:48,l:45},
+     title:{text:`${n}件中：警報${alarms.toFixed(1)}件→本物${tp.toFixed(1)}件=${fmtpct(pp)}`,font:{size:12}},
+     yaxis:{title:'件数 / '+n+'件'},xaxis:{tickfont:{size:9}}},{displayModeBar:false,responsive:true});
+
+  // 事後 vs 基準率
+  const bs=[],ys=[]; for(let b=0.001;b<=0.5;b+=0.002){bs.push(b);ys.push(postPos(b,s,f));}
+  Plotly.react('curvePlot',[
+    {x:bs,y:ys,mode:'lines',line:{color:C.blue,width:3},name:'P(F|警報)'},
+    {x:[p],y:[pp],mode:'markers',marker:{color:C.red,size:12},name:'現在'}
+  ],{margin:{t:36,r:8,b:40,l:45},title:{text:'事後確率は基準率に強く依存',font:{size:12}},
+     xaxis:{title:'基準率 P(F)'},yaxis:{title:'P(F|警報)',range:[0,1]},
+     shapes:[{type:'line',x0:0,x1:0.5,y0:0.5,y1:0.5,line:{color:'#999',dash:'dot',width:1}}],
+     legend:{orientation:'h',y:-0.25}},{displayModeBar:false,responsive:true});
+
+  // 逐次更新
+  const xs=[],ps=[]; for(let k=0;k<=nseq;k++){xs.push(k);ps.push(seqUpdate(p,s,f,k));}
+  Plotly.react('seqPlot',[{x:xs,y:ps,mode:'lines+markers+text',line:{color:C.purple,width:3},
+     marker:{size:9}, text:ps.map(fmtpct), textposition:'top center'}],
+    {margin:{t:30,r:8,b:40,l:45},title:{text:'独立な警報を重ねると事後が更新（今日の事後＝明日の事前）',font:{size:12}},
+     xaxis:{title:'観測した警報の回数',dtick:1},yaxis:{title:'事後 P(F)',range:[0,1]},
+     shapes:[{type:'line',x0:0,x1:nseq,y0:0.5,y1:0.5,line:{color:'#999',dash:'dot',width:1}}]},
+    {displayModeBar:false,responsive:true});
+  $('seqNote').innerHTML=`1回の警報では <b>${fmtpct(ps[1])}</b> でも、独立な警報を ${nseq} 回重ねると <b>${fmtpct(ps[nseq])}</b>。`+
+    ` ただし<b>警報が独立</b>（共通原因がない）という仮定が要る。`;
+}
+
+['prior','sens','fpr'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
+$('nseq').addEventListener('input',e=>{S.nseq=parseInt(e.target.value);update();});
+document.querySelectorAll('#ncases button').forEach(b=>b.addEventListener('click',e=>{
+  document.querySelectorAll('#ncases button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); S.n=parseInt(b.dataset.n); update();
+}));
+update();
+</script>
+</body>
+</html>

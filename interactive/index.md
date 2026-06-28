@@ -26,5 +26,19 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-> このページは順次拡充します。今後追加予定：ベイズ更新、モンテカルロ収束、6形式コンパレータ、蓄電池運用。
+## 2. ベイズ更新ビジュアライザ — 基準率の誤謬（Module 1）
+
+感度99%の優秀な警報でも、故障が稀なら「警報＝本物」とは限らない。事前確率・感度・誤警報率を動かし、
+事後確率・1000件の内訳・事後vs基準率曲線・逐次更新を観察する。
+
+[▶ 全画面で開く](bayes.html){target=_blank}
+
+<iframe src="bayes.html" title="ベイズ更新・基準率の誤謬" loading="lazy"
+  style="width:100%;height:900px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+
+関連ノート：[Module 1 事象と確率](../notes/01_events_and_probability.md)。
+
+---
+
+> このページは順次拡充します。今後追加予定：モンテカルロ収束、6形式コンパレータ、蓄電池運用。
 > 進捗は [development log](../development_log.md) を参照。
