@@ -1,0 +1,25 @@
+# lec_prob 依存パッケージ
+# 推奨: python3 -m venv --system-site-packages .venv && pip install -r requirements.txt
+#
+# バージョンは 2026-06 時点で動作確認した下限を指定（上限は付けず、当面は新しめでも動く想定）。
+
+# --- 数値計算・データ ---
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+
+# --- 可視化 ---
+matplotlib>=3.7
+plotly>=5.18
+
+# --- インタラクティブツール（Streamlit） ---
+# width="stretch" など新しめの API を使うため 1.58 以上を推奨
+streamlit>=1.58
+
+# --- 数理最適化（Module 6 で使用） ---
+# まだ未使用のモジュールがあるため、Module 6 着手時に導入で可
+cvxpy>=1.4
+
+# --- ノートブック（任意） ---
+# jupyterlab>=4.0
+# ipykernel>=6.0

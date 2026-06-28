@@ -1,0 +1,229 @@
+% references.bib — lec_prob 教材の参考文献
+% ---------------------------------------------------------------------------
+% 【DOI 確認ステータス】2026-06-28 に主要な査読論文8本の DOI・巻号・ページを
+% 出版社(INFORMS/SIAM/Wiley/Springer/Elsevier/IEEE)・Crossref で確認し一致を確認した
+% （`verified = {2026-06-28}` 付与）：
+%   rockafellar2000 (10.21314/JOR.2000.038), artzner1999 (10.1111/1467-9965.00068),
+%   nemirovski2006 (10.1137/050622328), bertsimas2004 (10.1287/opre.1030.0065),
+%   delage2010 (10.1287/opre.1090.0741), esfahani2018 (10.1007/s10107-017-1172-1),
+%   bertsimas2013 (10.1109/TPWRS.2012.2205021), roald2023 (10.1016/j.epsr.2022.108725).
+% 教科書の Springer/Princeton DOI は出版社パターンに基づく（書名・年は確認済み、
+% DOI 桁の最終確認は任意）。新規追加時も同様に出版社/Crossref で確認し verified を付す。
+% ---------------------------------------------------------------------------
+
+% ===== 確率の基礎（教科書） =====
+@book{ross2019first,
+  author    = {Ross, Sheldon M.},
+  title     = {A First Course in Probability},
+  edition   = {10th},
+  publisher = {Pearson},
+  year      = {2019},
+  note      = {Module 0--3 の主参照（事象・確率変数・期待値）}
+}
+
+@book{blitzstein2019introduction,
+  author    = {Blitzstein, Joseph K. and Hwang, Jessica},
+  title     = {Introduction to Probability},
+  edition   = {2nd},
+  publisher = {CRC Press},
+  year      = {2019},
+  note      = {条件付き確率・ベイズの直感が丁寧}
+}
+
+@book{bertsekas2008introduction,
+  author    = {Bertsekas, Dimitri P. and Tsitsiklis, John N.},
+  title     = {Introduction to Probability},
+  edition   = {2nd},
+  publisher = {Athena Scientific},
+  year      = {2008}
+}
+
+@book{wasserman2004all,
+  author    = {Wasserman, Larry},
+  title     = {All of Statistics: A Concise Course in Statistical Inference},
+  publisher = {Springer},
+  year      = {2004},
+  doi       = {10.1007/978-0-387-21736-9},
+  note      = {Module 4（データ→分布）。経験分布・推定}
+}
+
+@book{casella2002statistical,
+  author    = {Casella, George and Berger, Roger L.},
+  title     = {Statistical Inference},
+  edition   = {2nd},
+  publisher = {Duxbury},
+  year      = {2002}
+}
+
+% ===== 確率的最適化・ロバスト最適化（教科書） =====
+@book{birge2011introduction,
+  author    = {Birge, John R. and Louveaux, Fran\c{c}ois},
+  title     = {Introduction to Stochastic Programming},
+  edition   = {2nd},
+  publisher = {Springer},
+  year      = {2011},
+  doi       = {10.1007/978-1-4614-0237-4},
+  note      = {Module 5--6。二段階確率計画・SAA の標準的入門}
+}
+
+@book{shapiro2014lectures,
+  author    = {Shapiro, Alexander and Dentcheva, Darinka and Ruszczy\'nski, Andrzej},
+  title     = {Lectures on Stochastic Programming: Modeling and Theory},
+  edition   = {2nd},
+  publisher = {SIAM},
+  series    = {MOS-SIAM Series on Optimization},
+  year      = {2014},
+  note      = {理論的基礎。リスク尺度・SAA の収束}
+}
+
+@book{bental2009robust,
+  author    = {Ben-Tal, Aharon and El Ghaoui, Laurent and Nemirovski, Arkadi},
+  title     = {Robust Optimization},
+  publisher = {Princeton University Press},
+  series    = {Princeton Series in Applied Mathematics},
+  year      = {2009},
+  doi       = {10.1515/9781400831050},
+  note      = {Module 6。ロバスト最適化の体系的教科書}
+}
+
+@book{boyd2004convex,
+  author    = {Boyd, Stephen and Vandenberghe, Lieven},
+  title     = {Convex Optimization},
+  publisher = {Cambridge University Press},
+  year      = {2004},
+  note      = {凸最適化の基礎（cvxpy の背景）}
+}
+
+@book{savage2012flaw,
+  author    = {Savage, Sam L.},
+  title     = {The Flaw of Averages: Why We Underestimate Risk in the Face of Uncertainty},
+  publisher = {Wiley},
+  year      = {2012},
+  note      = {Module 0。平均の落とし穴の一般向け解説}
+}
+
+% ===== リスク尺度・チャンス制約（論文） =====
+@article{rockafellar2000optimization,
+  author  = {Rockafellar, R. Tyrrell and Uryasev, Stanislav},
+  title   = {Optimization of Conditional Value-at-Risk},
+  journal = {Journal of Risk},
+  volume  = {2},
+  number  = {3},
+  pages   = {21--41},
+  year    = {2000},
+  doi     = {10.21314/JOR.2000.038},
+  verified = {2026-06-28},
+  note    = {CVaR の凸最適化定式化（Module 3, 6）}
+}
+
+@article{artzner1999coherent,
+  author  = {Artzner, Philippe and Delbaen, Freddy and Eber, Jean-Marc and Heath, David},
+  title   = {Coherent Measures of Risk},
+  journal = {Mathematical Finance},
+  volume  = {9},
+  number  = {3},
+  pages   = {203--228},
+  year    = {1999},
+  doi     = {10.1111/1467-9965.00068},
+  verified = {2026-06-28},
+  note    = {リスク尺度の公理（なぜ CVaR が良い性質をもつか）}
+}
+
+@article{nemirovski2006convex,
+  author  = {Nemirovski, Arkadi and Shapiro, Alexander},
+  title   = {Convex Approximations of Chance Constrained Programs},
+  journal = {SIAM Journal on Optimization},
+  volume  = {17},
+  number  = {4},
+  pages   = {969--996},
+  year    = {2006},
+  doi     = {10.1137/050622328},
+  verified = {2026-06-28},
+  note    = {チャンス制約の凸近似（Module 6）}
+}
+
+% ===== ロバスト・分布ロバスト（論文） =====
+@article{bertsimas2004price,
+  author  = {Bertsimas, Dimitris and Sim, Melvyn},
+  title   = {The Price of Robustness},
+  journal = {Operations Research},
+  volume  = {52},
+  number  = {1},
+  pages   = {35--53},
+  year    = {2004},
+  doi     = {10.1287/opre.1030.0065},
+  verified = {2026-06-28},
+  note    = {予算制約付き不確実性集合（保守性の調整）}
+}
+
+@article{delage2010distributionally,
+  author  = {Delage, Erick and Ye, Yinyu},
+  title   = {Distributionally Robust Optimization Under Moment Uncertainty with Application to Data-Driven Problems},
+  journal = {Operations Research},
+  volume  = {58},
+  number  = {3},
+  pages   = {595--612},
+  year    = {2010},
+  doi     = {10.1287/opre.1090.0741},
+  verified = {2026-06-28},
+  note    = {モーメント曖昧性集合に基づく DRO（Module 6）}
+}
+
+@article{esfahani2018data,
+  author  = {Mohajerin Esfahani, Peyman and Kuhn, Daniel},
+  title   = {Data-Driven Distributionally Robust Optimization Using the {Wasserstein} Metric: Performance Guarantees and Tractable Reformulations},
+  journal = {Mathematical Programming},
+  volume  = {171},
+  number  = {1--2},
+  pages   = {115--166},
+  year    = {2018},
+  doi     = {10.1007/s10107-017-1172-1},
+  verified = {2026-06-28},
+  note    = {Wasserstein 距離に基づく DRO（Module 6 発展）}
+}
+
+% ===== 電力システム応用 =====
+@book{conejo2010decision,
+  author    = {Conejo, Antonio J. and Carri\'on, Miguel and Morales, Juan M.},
+  title     = {Decision Making Under Uncertainty in Electricity Markets},
+  publisher = {Springer},
+  series    = {International Series in Operations Research \& Management Science},
+  year      = {2010},
+  doi       = {10.1007/978-1-4419-7421-1},
+  note      = {電力市場×確率計画の標準テキスト}
+}
+
+@book{morales2014integrating,
+  author    = {Morales, Juan M. and Conejo, Antonio J. and Madsen, Henrik and Pinson, Pierre and Zugno, Marco},
+  title     = {Integrating Renewables in Electricity Markets: Operational Problems},
+  publisher = {Springer},
+  series    = {International Series in Operations Research \& Management Science},
+  year      = {2014},
+  doi       = {10.1007/978-1-4614-9411-9},
+  note      = {再エネ統合の運用問題（需要・PV・風力の不確実性）}
+}
+
+@article{bertsimas2013adaptive,
+  author  = {Bertsimas, Dimitris and Litvinov, Eugene and Sun, Xu Andy and Zhao, Jinye and Zheng, Tongxin},
+  title   = {Adaptive Robust Optimization for the Security Constrained Unit Commitment Problem},
+  journal = {IEEE Transactions on Power Systems},
+  volume  = {28},
+  number  = {1},
+  pages   = {52--63},
+  year    = {2013},
+  doi     = {10.1109/TPWRS.2012.2205021},
+  verified = {2026-06-28},
+  note    = {ロバスト最適化×起動停止計画（Module 6 の代表応用）}
+}
+
+@article{roald2023power,
+  author  = {Roald, Line A. and Pozo, David and Papavasiliou, Anthony and Molzahn, Daniel K. and Kazempour, Jalal and Conejo, Antonio},
+  title   = {Power Systems Optimization Under Uncertainty: A Review of Methods and Applications},
+  journal = {Electric Power Systems Research},
+  volume  = {214},
+  pages   = {108725},
+  year    = {2023},
+  doi     = {10.1016/j.epsr.2022.108725},
+  verified = {2026-06-28},
+  note    = {不確実性下の電力系統最適化の包括的レビュー}
+}

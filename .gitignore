@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# 仮想環境
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+
+# ローカル状態・機密（公開リポジトリに含めない）
+.claude/
+logs/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# MkDocs ビルド出力（GitHub Actions で生成・公開するため追跡しない）
+site/
+
+# 生成物（再生成可能な図は figures/ に置くが、巨大な中間生成物は無視）
+*.tmp
+scratch/
+
+# データ（大きい生データは追跡しない。サンプルCSVは明示的に追加）
+data/raw/

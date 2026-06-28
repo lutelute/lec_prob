@@ -1,0 +1,9 @@
+# GitHub Pages サイト（MkDocs Material）のビルド用依存。
+# バージョンは固定（2026-06 動作確認）。
+# 背景：MkDocs 2.0（後方非互換）リスクを避けるため厳密にピン留めする。
+# 更新時はローカルで `mkdocs build --strict` が通ることを確認してから上げる。
+
+mkdocs==1.6.1
+mkdocs-material==9.7.6
+mkdocs-same-dir==0.1.5
+pymdown-extensions==11.0
