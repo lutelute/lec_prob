@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>確率的最適化コンパレータ（6形式・インタラクティブ）</title>
+<link rel="stylesheet" href="lib/tool.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="lib/stats.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>確率的最適化コンパレータ（6形式）</h1>
+  <div class="sub">同じ容量調達問題を6形式で解く。決定 x* がどう変わるかで「なぜこの形式を選ぶか」を学ぶ。
+    これが教材の到達点。<a href="../notes/06_optimization_under_uncertainty/">Module 6 のノート →</a></div>
+
+  <div class="panel">
+    <div class="controls">
+      <h2>需要 N(μ, σ²)</h2>
+      <div class="ctl"><label>平均 μ<span class="val" id="muval">100</span></label><input type="range" id="mu" min="50" max="150" step="1" value="100"></div>
+      <div class="ctl"><label>標準偏差 σ<span class="val" id="sdval">15</span></label><input type="range" id="sd" min="1" max="40" step="1" value="15"></div>
+      <h2>コスト（非対称性が鍵）</h2>
+      <div class="ctl"><label>不足の単価 c_s<span class="val" id="csval">10</span></label><input type="range" id="cs" min="1" max="20" step="1" value="10"></div>
+      <div class="ctl"><label>過剰の単価 c_o<span class="val" id="coval">1</span></label><input type="range" id="co" min="1" max="20" step="1" value="1"></div>
+      <h2>リスクのパラメータ</h2>
+      <div class="ctl"><label>チャンス制約 ε（許容不足確率）<span class="val" id="epsval">0.10</span></label><input type="range" id="eps" min="0.01" max="0.30" step="0.01" value="0.1"></div>
+      <div class="ctl"><label>CVaR 信頼水準 α<span class="val" id="alphaval">0.90</span></label><input type="range" id="alpha" min="0.5" max="0.99" step="0.01" value="0.9"></div>
+      <div class="ctl"><label>ロバスト集合の幅 k（±kσ）<span class="val" id="kval">3.0</span></label><input type="range" id="k" min="1" max="4" step="0.5" value="3"></div>
+    </div>
+
+    <div>
+      <div class="plots">
+        <div id="mapPlot" class="plot"></div>
+        <div id="barPlot" class="plot"></div>
+      </div>
+      <div id="table" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="note" id="note"></div>
+  <details>
+    <summary>🎯 観察点 / どの形式を選ぶか</summary>
+    <ul>
+      <li>c_s/c_o（非対称性）を 1 に近づけると、<b>コスト由来の形式（決定論・期待値・ロバスト・CVaR・DRO）が μ へ集まる</b>（平均の罠が消える）。チャンス制約だけは ε で決まるので分位点に残る。</li>
+      <li>ε を小さく→チャンスの x* 上昇。α を上げる→CVaR の x* 上昇。k を広げる→ロバストが急上昇。</li>
+      <li>各形式は<b>自分の目的では最良・他では譲る</b>：②=期待費用最小、⑤=CVaR最小、④=不足確率≈ε、③=最安全だが高コスト。</li>
+      <li>①決定論は平均すら最小化しない（非対称コストを無視）。形式選択＝価値判断。</li>
+    </ul>
+  </details>
+  <div class="foot">統一問題＝容量調達(newsvendor)。C(x,ξ)=c_s·max(ξ−x,0)+c_o·max(x−ξ,0)。CVaRはサンプル近似（Rockafellar–Uryasev）、Scarfは閉形式。数理は <code>lib/stats.js</code>、Plotly.js。</div>
+</div>
+
+<script>
+const L=window.LP, $=id=>document.getElementById(id);
+let S={mu:100,sd:15,cs:10,co:1,eps:0.1,alpha:0.9,k:3};
+// 形式（保守性の順）
+const COL={det:'#9aa0a6',exp:'#4285f4',chance:'#34a853',dro:'#a142f4',cvar:'#f9ab00',rob:'#ea4335'};
+function gauss(n,seed){const g=L.gaussianGen(L.mulberry32(seed));const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=S.mu+S.sd*g();return a;}
+const cost=(x,d)=>S.cs*Math.max(d-x,0)+S.co*Math.max(x-d,0);
+
+function cvarMin(sOpt){
+  const xs=L.linspace(S.mu-3.5*S.sd,S.mu+3.5*S.sd,141); let best=xs[0],bv=Infinity;
+  for(const x of xs){ const c=sOpt.map(d=>cost(x,d)).sort((a,b)=>a-b);
+    const kk=Math.ceil(S.alpha*c.length); let s=0; for(let i=kk;i<c.length;i++)s+=c[i];
+    const v=s/(c.length-kk); if(v<bv){bv=v;best=x;} }
+  return best;
+}
+function evalX(x,sEval){
+  let sum=0,short=0; const c=new Float64Array(sEval.length);
+  for(let i=0;i<sEval.length;i++){ c[i]=cost(x,sEval[i]); sum+=c[i]; if(sEval[i]>x)short++; }
+  const cs2=Array.from(c).sort((a,b)=>a-b); const kk=Math.ceil(S.alpha*cs2.length);
+  let s=0; for(let i=kk;i<cs2.length;i++)s+=cs2[i];
+  return {mean:sum/sEval.length, short:short/sEval.length, cvar:s/(cs2.length-kk)};
+}
+
+function update(){
+  $('muval').textContent=S.mu;$('sdval').textContent=S.sd;$('csval').textContent=S.cs;$('coval').textContent=S.co;
+  $('epsval').textContent=S.eps.toFixed(2);$('alphaval').textContent=S.alpha.toFixed(2);$('kval').textContent=S.k.toFixed(1);
+  const sOpt=gauss(3000,'opt'), sEval=gauss(20000,'eval');
+  const forms=[
+    {k:'det',name:'①決定論',x:S.mu,note:'平均で計画',col:COL.det},
+    {k:'chance',name:'④チャンス制約',x:L.normPpf(1-S.eps,S.mu,S.sd),note:'P(不足)≤ε',col:COL.chance},
+    {k:'exp',name:'②期待値最小化',x:L.normPpf(S.cs/(S.cs+S.co),S.mu,S.sd),note:'平均費用最小',col:COL.exp},
+    {k:'dro',name:'⑥分布ロバスト',x:S.mu+S.sd/2*(Math.sqrt(S.cs/S.co)-Math.sqrt(S.co/S.cs)),note:'Scarf(平均分散)',col:COL.dro},
+    {k:'cvar',name:'⑤CVaR最小化',x:cvarMin(sOpt),note:'尾部の平均',col:COL.cvar},
+    {k:'rob',name:'③ロバスト',x:(S.cs*(S.mu+S.k*S.sd)+S.co*(S.mu-S.k*S.sd))/(S.cs+S.co),note:'区間±kσの最悪',col:COL.rob},
+  ];
+  forms.forEach(f=>{const e=evalX(f.x,sEval); f.mean=e.mean; f.short=e.short; f.cvar=e.cvar;});
+  const ord=forms.slice().sort((a,b)=>a.x-b.x);
+  const minE=Math.min(...forms.map(f=>f.mean)), minC=Math.min(...forms.map(f=>f.cvar));
+
+  // 決定マップ：需要分布 + x* 縦線
+  const lo=L.normPpf(0.001,S.mu,S.sd), hi=L.normPpf(0.999,S.mu,S.sd);
+  const xs=L.linspace(lo,Math.max(hi,Math.max(...forms.map(f=>f.x))+5),300), pdf=xs.map(x=>L.normPdf(x,S.mu,S.sd));
+  const ymax=Math.max(...pdf);
+  const traces=[{x:xs,y:pdf,mode:'lines',line:{color:'#bbb',width:2},fill:'tozeroy',fillcolor:'rgba(180,180,180,.15)',name:'需要 ξ'}];
+  ord.forEach(f=>traces.push({x:[f.x,f.x],y:[0,ymax*1.05],mode:'lines',line:{color:f.col,width:2.5},name:`${f.name} ${f.x.toFixed(0)}`}));
+  Plotly.react('mapPlot',traces,{margin:{t:30,r:8,b:38,l:42},title:{text:'決定マップ：6形式の最適容量 x*',font:{size:12}},
+    xaxis:{title:'容量 x / 需要 ξ'},yaxis:{title:'密度',rangemode:'tozero'},legend:{font:{size:9}}},{displayModeBar:false,responsive:true});
+
+  // x* バー（保守性順）
+  Plotly.react('barPlot',[{type:'bar',orientation:'h',
+    y:ord.map(f=>f.name), x:ord.map(f=>f.x), marker:{color:ord.map(f=>f.col)},
+    text:ord.map(f=>f.x.toFixed(1)), textposition:'outside'}],
+    {margin:{t:30,r:30,b:38,l:96},title:{text:'最適決定 x*（上=楽観/安, 下=保守/高）',font:{size:12}},
+     xaxis:{title:'x*',range:[Math.min(...forms.map(f=>f.x))-8,Math.max(...forms.map(f=>f.x))+12]}},{displayModeBar:false,responsive:true});
+
+  // 評価表
+  let rows=forms.map(f=>{
+    const eb=Math.abs(f.mean-minE)<1e-6?' style="background:#e6f4ea;font-weight:700"':'';
+    const cb=Math.abs(f.cvar-minC)<1e-6?' style="background:#fef7e0;font-weight:700"':'';
+    return `<tr><td style="text-align:left;border-left:4px solid ${f.col}">${f.name}</td>
+      <td>${f.x.toFixed(1)}</td><td${eb}>${f.mean.toFixed(1)}</td><td>${f.short.toFixed(3)}</td><td${cb}>${f.cvar.toFixed(1)}</td>
+      <td style="text-align:left;color:#5f6368">${f.note}</td></tr>`;
+  }).join('');
+  $('table').innerHTML=`<table class="mini" style="width:100%"><thead><tr>
+    <th style="text-align:left">形式</th><th>最適 x*</th><th>期待費用 E[C]</th><th>不足確率</th><th>CVaR<sub>${S.alpha.toFixed(2)}</sub></th><th style="text-align:left">ねらい</th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+
+  const be=forms.find(f=>Math.abs(f.mean-minE)<1e-6).name, bc=forms.find(f=>Math.abs(f.cvar-minC)<1e-6).name;
+  $('note').innerHTML=`<b>期待費用が最小</b>：${be}（②が平均を最小化）／ <b>CVaRが最小</b>：${bc}（⑤が尾部を最小化）。`+
+    ` 各形式は自分の目的では最良・他では譲る＝<b>形式選択は価値判断</b>。決定が ${Math.min(...forms.map(f=>f.x)).toFixed(0)}〜${Math.max(...forms.map(f=>f.x)).toFixed(0)} と変わる。`;
+}
+['mu','sd','cs','co','eps','alpha','k'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
+update();
+</script>
+</body>
+</html>

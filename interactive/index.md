@@ -54,5 +54,19 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-> このページは順次拡充します。今後追加予定：6形式コンパレータ、蓄電池運用。
+## 4. 確率的最適化コンパレータ — 6形式（Module 6・到達点）
+
+同じ容量調達問題を **決定論／期待値／ロバスト／チャンス制約／CVaR／分布ロバスト** の6形式で解き、
+最適決定 x* が **100〜137** と変わるのを体感する。コスト非対称性・ε・α・k を動かして「なぜこの形式を選ぶか」を学ぶ。
+
+[▶ 全画面で開く](comparator.html){target=_blank}
+
+<iframe src="comparator.html" title="6形式コンパレータ" loading="lazy"
+  style="width:100%;height:880px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+
+関連ノート：[Module 6 不確実性下の最適化](../notes/06_optimization_under_uncertainty.md)。
+
+---
+
+> このページは順次拡充します。今後追加予定：蓄電池運用。
 > 進捗は [development log](../development_log.md) を参照。
