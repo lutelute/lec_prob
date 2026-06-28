@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>モンテカルロ収束（インタラクティブ）</title>
+<link rel="stylesheet" href="lib/tool.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="lib/stats.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>モンテカルロ収束ビジュアライザ</h1>
+  <div class="sub">平均は 1/√N で速く収束、希少事象（尾）は遅い、SAA はシナリオ数で収束——を動かして体感する。
+    <a href="../notes/05_scenarios_and_monte_carlo/">Module 5 のノート →</a></div>
+
+  <div class="panel">
+    <div class="controls">
+      <h2>① 実験の種類</h2>
+      <div class="seg" id="mode">
+        <button data-m="mean" class="on">E[X]の収束</button>
+        <button data-m="rare">希少事象</button>
+        <button data-m="saa">SAA最適q</button>
+      </div>
+      <h2>② 分布 N(μ, σ²)</h2>
+      <div class="ctl"><label>平均 μ<span class="val" id="muval">100</span></label>
+        <input type="range" id="mu" min="50" max="150" step="1" value="100"></div>
+      <div class="ctl"><label>標準偏差 σ<span class="val" id="sdval">15</span></label>
+        <input type="range" id="sd" min="1" max="40" step="1" value="15"></div>
+      <div id="modeCtl"></div>
+      <h2>③ 乱数</h2>
+      <button class="seg" id="resample" style="cursor:pointer;justify-content:center;font-weight:700">🎲 再サンプリング（別シード）</button>
+      <div class="sub" style="margin-top:6px">seed=<span id="seedval">42</span></div>
+    </div>
+
+    <div>
+      <div class="metrics" id="metrics"></div>
+      <div id="plot" style="width:100%;height:430px"></div>
+    </div>
+  </div>
+
+  <div class="note" id="note"></div>
+  <details>
+    <summary>🎯 観察点 / よくある誤解</summary>
+    <ul>
+      <li>E[X]：N×100 で CI 幅 ÷10（1/√N）。点推定には必ず CI を添える。</li>
+      <li>希少事象：閾値 c を上げると真の確率が小さくなり、小Nで0ヒット＝確率0と誤推定。～数十/p 必要。</li>
+      <li>SAA：シナリオ数が小さいと最適 q がぶれる＝有限シナリオの不確実性。真値は臨界分位点。</li>
+      <li>🎲 再サンプリングで結果が変わる＝モンテカルロ自体のばらつき。</li>
+    </ul>
+  </details>
+  <div class="foot">SE(θ̂_N)=σ/√N。希少事象は重点サンプリング/層別/極値理論で対処。数理は <code>lib/stats.js</code>、Plotly.js で描画。</div>
+</div>
+
+<script>
+const L=window.LP, $=id=>document.getElementById(id);
+const C={blue:'#4285f4',red:'#ea4335',purple:'#a142f4',green:'#34a853'};
+let S={mode:'mean',mu:100,sd:15,seed:42,c:145,cs:10,co:1};
+
+function gauss(n){ const g=L.gaussianGen(L.mulberry32('mc'+S.seed)); const a=new Float64Array(n);
+  for(let i=0;i<n;i++) a[i]=S.mu+S.sd*g(); return a; }
+function logspace(a,b,n){ const out=[]; for(let i=0;i<n;i++){ out.push(Math.round(Math.exp(Math.log(a)+(Math.log(b)-Math.log(a))*i/(n-1)))); } return [...new Set(out)]; }
+function fmt(x,n=3){ return (Math.abs(x)>=100)?x.toFixed(1):x.toFixed(n); }
+
+function buildModeCtl(){
+  let h='';
+  if(S.mode==='rare') h=`<h2>閾値 c</h2><div class="ctl"><label>P(X&gt;c) の c<span class="val" id="cval">${S.c}</span></label>
+    <input type="range" id="c" min="${S.mu}" max="${S.mu+4*S.sd}" step="1" value="${Math.min(S.c,S.mu+4*S.sd)}"></div>`;
+  else if(S.mode==='saa') h=`<h2>容量問題のコスト</h2>
+    <div class="ctl"><label>不足単価 c_s<span class="val" id="csval">${S.cs}</span></label><input type="range" id="cs" min="1" max="20" step="1" value="${S.cs}"></div>
+    <div class="ctl"><label>過剰単価 c_o<span class="val" id="coval">${S.co}</span></label><input type="range" id="co" min="1" max="20" step="1" value="${S.co}"></div>`;
+  $('modeCtl').innerHTML=h;
+  if(S.mode==='rare'){ $('c').max=S.mu+4*S.sd; $('c').addEventListener('input',e=>{S.c=parseFloat(e.target.value);$('cval').textContent=S.c;update();}); }
+  if(S.mode==='saa'){ $('cs').addEventListener('input',e=>{S.cs=parseFloat(e.target.value);$('csval').textContent=S.cs;update();});
+    $('co').addEventListener('input',e=>{S.co=parseFloat(e.target.value);$('coval').textContent=S.co;update();}); }
+}
+function metric(k,v,cls){ return `<div class="metric"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`; }
+
+function update(){
+  $('muval').textContent=S.mu; $('sdval').textContent=S.sd; $('seedval').textContent=S.seed;
+  if(S.mode==='mean') runMean();
+  else if(S.mode==='rare') runRare();
+  else runSAA();
+}
+
+function runMean(){
+  const Nmax=50000, s=gauss(Nmax);
+  const cum=new Float64Array(Nmax+1); for(let i=0;i<Nmax;i++) cum[i+1]=cum[i]+s[i];
+  const ns=logspace(1,Nmax,120);
+  const est=ns.map(n=>cum[n]/n), ciU=ns.map(n=>S.mu+1.96*S.sd/Math.sqrt(n)), ciL=ns.map(n=>S.mu-1.96*S.sd/Math.sqrt(n));
+  Plotly.react('plot',[
+    {x:ns,y:ciU,mode:'lines',line:{width:0},showlegend:false,hoverinfo:'skip'},
+    {x:ns,y:ciL,mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(66,133,244,.15)',name:'95%CI'},
+    {x:ns,y:est,mode:'lines',line:{color:C.blue,width:1.5},name:'逐次推定 θ̂_N'},
+    {x:[1,Nmax],y:[S.mu,S.mu],mode:'lines',line:{color:C.red,dash:'dash'},name:'真値 '+S.mu}
+  ],{margin:{t:30,r:10,b:42,l:48},xaxis:{type:'log',title:'サンプル数 N（対数）'},
+     yaxis:{title:'E[X] の推定',range:[S.mu-8,S.mu+8]},title:{text:'平均は 1/√N で速く収束',font:{size:13}},
+     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+  const ciFull=1.96*S.sd/Math.sqrt(Nmax);
+  $('metrics').innerHTML=metric('最終推定値（N=5万）',fmt(est[est.length-1],3))+metric('真値',S.mu)+metric('95%CI半幅',`±${fmt(ciFull,3)}`,'ok');
+  $('note').innerHTML='<b>観察</b>：CI 幅は 1/√N。精度10倍にはサンプル100倍。点推定だけでなく必ず CI を添える。🎲 を押すとシードが変わり、特に小Nの推定がぶれる。';
+}
+
+function runRare(){
+  const Ns=[300,1000,3000,10000,30000,100000,300000], Nmax=Ns[Ns.length-1], s=gauss(Nmax);
+  const ind=new Float64Array(Nmax); let run=0; const cum=new Float64Array(Nmax+1);
+  for(let i=0;i<Nmax;i++){ cum[i+1]=cum[i]+(s[i]>S.c?1:0); }
+  const ptrue=1-L.normCdf(S.c,S.mu,S.sd);
+  const est=Ns.map(n=>cum[n]/n), hits=Ns.map(n=>cum[n]);
+  Plotly.react('plot',[
+    {x:Ns,y:est,mode:'lines+markers',line:{color:C.purple,width:2},name:'MC推定'},
+    {x:[Ns[0],Nmax],y:[ptrue,ptrue],mode:'lines',line:{color:C.red,dash:'dash'},name:'真値 '+ptrue.toExponential(2)}
+  ],{margin:{t:30,r:10,b:42,l:55},xaxis:{type:'log',title:'サンプル数 N（対数）'},
+     yaxis:{title:`P(X>${S.c}) の推定`},title:{text:'希少事象は小Nで不安定（0ヒットも）',font:{size:13}},
+     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+  const need=Math.round(30/Math.max(ptrue,1e-9));
+  $('metrics').innerHTML=metric(`真の確率 P(X>${S.c})`,ptrue.toExponential(2))+
+    metric('N=300 のヒット数',hits[0],hits[0]<3?'warn':'')+metric('安定推定に必要なN目安',need.toLocaleString());
+  $('note').innerHTML=`真値 ${ptrue.toExponential(2)}。期待ヒット数が少ないと <b>0ヒット→確率0と誤推定</b>。安定推定にはおおむね ≳ 数十/p ≈ ${need.toLocaleString()} サンプル。閾値 c を上げると一気に難しくなる。`;
+}
+
+function runSAA(){
+  const Ns=[20,50,100,300,1000,3000,10000], Nmax=Ns[Ns.length-1], s=gauss(Nmax);
+  const qs=L.linspace(S.mu-3*S.sd,S.mu+3*S.sd,201);
+  const qtrue=L.normPpf(S.cs/(S.cs+S.co),S.mu,S.sd);
+  const qhat=Ns.map(n=>{ let best=qs[0],bv=Infinity;
+    for(const q of qs){ let c=0; for(let i=0;i<n;i++){ const d=s[i]; c+= d>q? S.cs*(d-q): S.co*(q-d); } c/=n; if(c<bv){bv=c;best=q;} }
+    return best; });
+  Plotly.react('plot',[
+    {x:Ns,y:qhat,mode:'lines+markers',line:{color:C.green,width:2},name:'SAA q̂'},
+    {x:[Ns[0],Nmax],y:[qtrue,qtrue],mode:'lines',line:{color:C.red,dash:'dash'},name:'真の最適 '+fmt(qtrue,1)}
+  ],{margin:{t:30,r:10,b:42,l:48},xaxis:{type:'log',title:'シナリオ数 N（対数）'},
+     yaxis:{title:'SAA 最適容量 q̂'},title:{text:'SAA：シナリオ数で最適解が臨界分位点へ収束',font:{size:13}},
+     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+  $('metrics').innerHTML=metric('臨界比',(S.cs/(S.cs+S.co)).toFixed(3))+metric('真の最適 q*',fmt(qtrue,2))+metric('SAA q̂（N=1万）',fmt(qhat[qhat.length-1],2),'ok');
+  $('note').innerHTML=`真の最適 q* = 臨界比 ${(S.cs/(S.cs+S.co)).toFixed(3)} 分位点 = ${fmt(qtrue,2)}。少シナリオでは q̂ がぶれる＝<b>有限シナリオの不確実性</b>。c_s≫c_o ほど安全側（高い q）へ。`;
+}
+
+['mu','sd'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
+document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',e=>{
+  document.querySelectorAll('#mode button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  S.mode=b.dataset.m; buildModeCtl(); update();
+}));
+$('resample').addEventListener('click',()=>{ S.seed=(S.seed*1103515245+12345)%2147483647; update(); });
+buildModeCtl(); update();
+</script>
+</body>
+</html>

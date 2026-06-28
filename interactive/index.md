@@ -40,5 +40,19 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-> このページは順次拡充します。今後追加予定：モンテカルロ収束、6形式コンパレータ、蓄電池運用。
+## 3. モンテカルロ収束ビジュアライザ（Module 5）
+
+平均は 1/√N で速く収束、希少事象（尾）は遅い、SAA はシナリオ数で収束——を3モードで体感する。
+「🎲 再サンプリング」で、モンテカルロ自体のばらつき（特に小N・希少事象）を観察する。
+
+[▶ 全画面で開く](montecarlo.html){target=_blank}
+
+<iframe src="montecarlo.html" title="モンテカルロ収束" loading="lazy"
+  style="width:100%;height:760px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+
+関連ノート：[Module 5 シナリオとモンテカルロ](../notes/05_scenarios_and_monte_carlo.md)。
+
+---
+
+> このページは順次拡充します。今後追加予定：6形式コンパレータ、蓄電池運用。
 > 進捗は [development log](../development_log.md) を参照。
