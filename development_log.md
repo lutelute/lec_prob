@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-06-29 — イテレーション17（サイトのローカルプレビュー確認と仕上げ）※ユーザー依頼
+
+### 実施
+- `mkdocs serve` でローカルプレビューを起動し、Playwright（ヘッドレス）でホーム/ノート/ロードマップを実描画・スクリーンショット確認（claude-in-chrome 拡張が未接続のため Playwright を使用）。
+- レンダリング検証：MathJax 数式212個、埋め込みSVG図、Mermaid 依存グラフ（色分け）すべて正常描画。
+
+### 見つけた課題と修正
+1. **見出し内の数式が TOC で生 LaTeX 表示**（`\(E[X]\)` 等）→ 5見出しから `$...$` を除去し平文化（本文の数式は維持）。notes/03（2箇所）、notes/05（3箇所）。
+2. **README の相対リンクが strict ビルドを失敗させる**（`requirements-docs.txt`＝.txtはMkDocsのリンク検証対象外で WARNING）→ 当該2リンクをインラインコード化、`requirements*.txt` と `.github/` を exclude_docs に明示。
+
+### 検証
+- `mkdocs build --strict` 再実行 **exit 0・実警告ゼロ**（残る表示は ProperDocs 宣伝バナーのみ）。TOC が平文表示になったことをブラウザ再確認。
+
+### 状態
+- 公開サイトはレンダリング・strict ビルドとも健全。Action は通る。
+- `.gitignore` に site/・preview_*.png・.playwright-mcp/ を追加。
+
+---
+
 ## 2026-06-29 — イテレーション16（GitHub Pages 公開サイト構築）※新goal
 
 ### 新goal

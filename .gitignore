@@ -22,6 +22,10 @@ logs/
 # MkDocs ビルド出力（GitHub Actions で生成・公開するため追跡しない）
 site/
 
+# プレビュー用スクリーンショット・ブラウザ自動化の作業物
+preview_*.png
+.playwright-mcp/
+
 # 生成物（再生成可能な図は figures/ に置くが、巨大な中間生成物は無視）
 *.tmp
 scratch/

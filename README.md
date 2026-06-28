@@ -179,10 +179,10 @@ mkdocs build --strict
    git push -u origin main
    ```
 2. リポジトリの **Settings → Pages → Build and deployment → Source** を **GitHub Actions** に設定する。
-3. 以降、`main` への push で [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) が自動でビルド・公開する。
+3. 以降、`main` への push で `.github/workflows/deploy-pages.yml` が自動でビルド・公開する。
 4. 公開 URL：`https://<ユーザー名>.github.io/lec_prob/`
 
-> **依存のピン留め**：サイトのビルド依存は [`requirements-docs.txt`](requirements-docs.txt) で固定（MkDocs 2.0 の後方非互換リスクを避けるため）。
+> **依存のピン留め**：サイトのビルド依存は `requirements-docs.txt` で固定（MkDocs 2.0 の後方非互換リスクを避けるため）。
 > 学習者は、リポジトリ（GitHub 上で Markdown を直接閲覧）でも、Pages サイト（整形済み）でも、Obsidian（Vault として開く）でも、同じ教材を読めます。
 
 > **ツールについて**：インタラクティブツール（Streamlit）は静的サイトでは動きません。サイトには各ツールの解説を載せ、
