@@ -74,6 +74,7 @@ exclude_docs: |
 
 nav:
   - ホーム: README.md
+  - ▶ ブラウザで動かす: interactive/index.md
   - ロードマップ:
       - 学習地図: roadmap/learning_map.md
       - 概念地図: roadmap/concept_map.md
