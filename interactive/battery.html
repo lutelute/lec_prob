@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>蓄電池運用・アービトラージ（インタラクティブ）</title>
+<link rel="stylesheet" href="lib/tool.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>蓄電池運用ビジュアライザ — アービトラージと SoC</h1>
+  <div class="sub">安いとき充電・高いとき放電。蓄電池は「エネルギーの時間シフト」で価値を生む。価格・諸元・閾値を動かして SoC 軌道と利益を体感する。
+    <a href="../notes/06b_two_stage_stochastic_programming/">Module 6b のノート →</a></div>
+
+  <div class="panel">
+    <div class="controls">
+      <h2>蓄電池の諸元</h2>
+      <div class="ctl"><label>容量 [MWh]<span class="val" id="capval">10</span></label><input type="range" id="cap" min="2" max="20" step="1" value="10"></div>
+      <div class="ctl"><label>最大出力 [MW]<span class="val" id="pmaxval">3.0</span></label><input type="range" id="pmax" min="1" max="8" step="0.5" value="3"></div>
+      <div class="ctl"><label>往復効率 η<span class="val" id="effval">0.90</span></label><input type="range" id="eff" min="0.6" max="1" step="0.01" value="0.9"></div>
+      <h2>価格プロファイル</h2>
+      <div class="ctl"><label>ベース価格<span class="val" id="baseval">20</span></label><input type="range" id="base" min="5" max="40" step="1" value="20"></div>
+      <div class="ctl"><label>日内変動の振幅<span class="val" id="dayval">12</span></label><input type="range" id="day" min="0" max="25" step="1" value="12"></div>
+      <div class="ctl"><label>夕方ピークの高さ<span class="val" id="eveval">8</span></label><input type="range" id="eve" min="0" max="20" step="1" value="8"></div>
+      <h2>ディスパッチ閾値（百分位）</h2>
+      <div class="ctl"><label>充電：価格がこの%以下<span class="val" id="cpctval">35</span></label><input type="range" id="cpct" min="10" max="60" step="5" value="35"></div>
+      <div class="ctl"><label>放電：価格がこの%以上<span class="val" id="dpctval">65</span></label><input type="range" id="dpct" min="40" max="90" step="5" value="65"></div>
+    </div>
+
+    <div>
+      <div class="metrics">
+        <div class="metric"><div class="k">アービトラージ利益</div><div class="v" id="profit">–</div></div>
+        <div class="metric"><div class="k">平均充電価格</div><div class="v" id="cprice">–</div></div>
+        <div class="metric"><div class="k">平均放電価格</div><div class="v ok" id="dprice">–</div></div>
+      </div>
+      <div id="plot" style="width:100%;height:430px"></div>
+    </div>
+  </div>
+
+  <div class="note" id="note"></div>
+  <details>
+    <summary>🎯 観察点 / よくある誤解</summary>
+    <ul>
+      <li>充電は価格の谷、放電は山。平均充電価格 &lt; 平均放電価格 で利益が出る。</li>
+      <li>往復効率 η を下げると利益が減る（充放電ロス）。容量を増やしても価格差・出力で頭打ち。</li>
+      <li>閾値を狭める（充電%↓・放電%↑）と取引回数は減るが1回あたりの利幅は大きい。</li>
+      <li>これは<b>近視眼的な閾値コントローラ</b>：価格が閾値を超えた時点で放電するため、後にもっと高い夕方ピークが来ても先に放電し切ることがある。先読みする最適LPなら高値に温存できる。<b>単純ルールの限界＝最適化の価値</b>。最適LP・不確実性下の運用は Module 6b へ。</li>
+    </ul>
+  </details>
+  <div class="foot">SoC遷移：SoC(t+1)=SoC(t)+√η·充電−放電/√η。利益=Σ 価格·(放電−充電)。閉始SoC=0、残量は未売却。Plotly.js で描画。</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const C={price:'#ea4335',charge:'#4285f4',discharge:'#34a853',soc:'#f9ab00'};
+let S={cap:10,pmax:3,eff:0.9,base:20,day:12,eve:8,cpct:35,dpct:65};
+const T=24;
+
+function priceProfile(){
+  const p=[]; for(let t=0;t<T;t++){
+    const daily=S.day*Math.sin((t-9)/24*2*Math.PI);
+    const dh=((t-19)%24+24)%24, dd=Math.min(dh,24-dh);
+    const evening=S.eve*Math.exp(-(dd*dd)/6);
+    p.push(S.base+daily+evening);
+  } return p;
+}
+function percentile(arr,q){ const s=[...arr].sort((a,b)=>a-b); const i=(s.length-1)*q/100; const lo=Math.floor(i),hi=Math.ceil(i); return s[lo]+(s[hi]-s[lo])*(i-lo); }
+
+function dispatch(price){
+  const rt=Math.sqrt(S.eff); const cth=percentile(price,S.cpct), dth=percentile(price,S.dpct);
+  let soc=0; const c=new Array(T).fill(0), d=new Array(T).fill(0), socArr=[0];
+  for(let t=0;t<T;t++){
+    if(price[t]<=cth && soc<S.cap-1e-9){ const ch=Math.min(S.pmax,(S.cap-soc)/rt); c[t]=ch; soc+=rt*ch; }
+    else if(price[t]>=dth && soc>1e-9){ const dis=Math.min(S.pmax,soc*rt); d[t]=dis; soc-=dis/rt; }
+    socArr.push(soc);
+  }
+  return {c,d,soc:socArr,cth,dth};
+}
+
+function update(){
+  for(const k of ['cap','pmax','eff','base','day','eve','cpct','dpct']){
+    const el=$(k+'val'); if(el) el.textContent=(k==='eff')?S[k].toFixed(2):(k==='pmax')?S[k].toFixed(1):S[k];
+  }
+  const price=priceProfile(), {c,d,soc,cth,dth}=dispatch(price);
+  const hours=Array.from({length:T},(_,i)=>i);
+  const sumC=c.reduce((a,b)=>a+b,0), sumD=d.reduce((a,b)=>a+b,0);
+  const profit=price.reduce((a,p,t)=>a+p*(d[t]-c[t]),0);
+  const avgC=sumC>1e-9? price.reduce((a,p,t)=>a+p*c[t],0)/sumC : 0;
+  const avgD=sumD>1e-9? price.reduce((a,p,t)=>a+p*d[t],0)/sumD : 0;
+  $('profit').textContent=profit.toFixed(1); $('cprice').textContent=avgC.toFixed(1); $('dprice').textContent=avgD.toFixed(1);
+
+  Plotly.react('plot',[
+    {x:hours,y:price,mode:'lines',line:{color:C.price,width:2.5},name:'価格',yaxis:'y'},
+    {x:hours,y:c,type:'bar',marker:{color:C.charge},opacity:0.6,name:'充電',yaxis:'y2'},
+    {x:hours,y:d.map(v=>-v),type:'bar',marker:{color:C.discharge},opacity:0.6,name:'放電',yaxis:'y2'},
+    {x:Array.from({length:T+1},(_,i)=>i),y:soc,mode:'lines',line:{color:C.soc,width:2,dash:'dot'},name:'SoC [MWh]',yaxis:'y2'}
+  ],{margin:{t:30,r:48,b:40,l:45},barmode:'relative',
+     title:{text:`閾値ディスパッチ（利益 ${profit.toFixed(1)}）：安い時間に充電・高い時間に放電`,font:{size:12}},
+     xaxis:{title:'時刻 [h]',dtick:3},
+     yaxis:{title:'価格'},yaxis2:{title:'充放電[MW]/SoC[MWh]',overlaying:'y',side:'right'},
+     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+
+  $('note').innerHTML=`充電閾値=${cth.toFixed(1)}（${S.cpct}%ile）以下で充電、放電閾値=${dth.toFixed(1)}（${S.dpct}%ile）以上で放電。`+
+    `平均充電 ${avgC.toFixed(1)} ${avgC<avgD?'<':'≥'} 平均放電 ${avgD.toFixed(1)}。`+
+    (avgC<avgD?' 安く買って高く売る＝アービトラージ成立。':' 利幅なし（閾値や価格差を見直す）。')+
+    ` η を下げると往復ロスで利益が減る。`;
+}
+['cap','pmax','eff','base','day','eve','cpct','dpct'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
+update();
+</script>
+</body>
+</html>

@@ -68,5 +68,19 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-> このページは順次拡充します。今後追加予定：蓄電池運用。
+## 5. 蓄電池運用ビジュアライザ — アービトラージと SoC（Module 6b）
+
+安いとき充電・高いとき放電。蓄電池の SoC ダイナミクスを可視化し、価格プロファイル・容量・効率・閾値を動かして
+「エネルギーの時間シフトで価値を生む」を体感する。
+
+[▶ 全画面で開く](battery.html){target=_blank}
+
+<iframe src="battery.html" title="蓄電池運用" loading="lazy"
+  style="width:100%;height:780px;border:1px solid #dadce0;border-radius:10px;margin:8px 0"></iframe>
+
+関連ノート：[Module 6b 二段階確率計画](../notes/06b_two_stage_stochastic_programming.md)。
+
+---
+
+> **5本すべてブラウザ内で動作**します（インストール不要）。Streamlit版（ローカル/Community Cloud 実行）の解説は各 `apps/*/` を参照。
 > 進捗は [development log](../development_log.md) を参照。
