@@ -1,50 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" font-family="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 486" font-family="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif">
   <defs>
     <marker id="arr" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
       <path d="M0,0 L6,3 L0,6 Z" fill="#5f6368"/>
     </marker>
   </defs>
-  <rect width="760" height="470" fill="#ffffff"/>
+  <rect width="480" height="486" fill="#ffffff"/>
 
-  <!-- 不確実さの3つの顔 -->
-  <rect x="30" y="24" width="700" height="176" rx="14" fill="#f8f9fa" stroke="#dadce0"/>
-  <text x="380" y="50" text-anchor="middle" font-size="17" font-weight="700" fill="#202124">不確実さ の 3つの顔</text>
+  <text x="240" y="28" text-anchor="middle" font-size="18" font-weight="700" fill="#202124">不確実さ の 3つの顔</text>
 
   <!-- 事象 -->
-  <rect x="50" y="66" width="216" height="118" rx="10" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
-  <text x="158" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#1a56c4">事象</text>
-  <text x="158" y="120" text-anchor="middle" font-size="13" fill="#3c4043">起こる / 起こらない</text>
-  <text x="158" y="140" text-anchor="middle" font-size="13" fill="#5f6368">故障・停電・N−1</text>
-  <text x="158" y="168" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1a56c4">→ P(A)・信頼性</text>
+  <rect x="20" y="44" width="440" height="62" rx="10" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
+  <text x="40" y="72" font-size="18" font-weight="700" fill="#1a56c4">事象</text>
+  <text x="110" y="72" font-size="15" fill="#3c4043">故障・停電（起こる/起こらない）</text>
+  <text x="110" y="94" font-size="14.5" font-weight="600" fill="#1a56c4">→ P(A)・信頼性で表す</text>
 
   <!-- ばらつき -->
-  <rect x="272" y="66" width="216" height="118" rx="10" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
-  <text x="380" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#137333">ばらつき</text>
-  <text x="380" y="120" text-anchor="middle" font-size="13" fill="#3c4043">量が揺れる・減らせない</text>
-  <text x="380" y="140" text-anchor="middle" font-size="13" fill="#5f6368">需要・PV・風・天候</text>
-  <text x="380" y="168" text-anchor="middle" font-size="13.5" font-weight="600" fill="#137333">→ 確率分布</text>
+  <rect x="20" y="116" width="440" height="62" rx="10" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
+  <text x="40" y="144" font-size="18" font-weight="700" fill="#137333">ばらつき</text>
+  <text x="140" y="144" font-size="15" fill="#3c4043">需要・PV・天候（量が揺れる）</text>
+  <text x="140" y="166" font-size="14.5" font-weight="600" fill="#137333">→ 確率分布で表す</text>
 
   <!-- 誤差 -->
-  <rect x="494" y="66" width="216" height="118" rx="10" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
-  <text x="602" y="94" text-anchor="middle" font-size="16" font-weight="700" fill="#c5221f">誤差</text>
-  <text x="602" y="120" text-anchor="middle" font-size="13" fill="#3c4043">知らない・情報で減る</text>
-  <text x="602" y="140" text-anchor="middle" font-size="13" fill="#5f6368">測定・推定・予報</text>
-  <text x="602" y="168" text-anchor="middle" font-size="13.5" font-weight="600" fill="#c5221f">→ 区間・ベイズ・集合</text>
+  <rect x="20" y="188" width="440" height="62" rx="10" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="40" y="216" font-size="18" font-weight="700" fill="#c5221f">誤差</text>
+  <text x="110" y="216" font-size="15" fill="#3c4043">測定・推定・予報（知らない＝減る）</text>
+  <text x="110" y="238" font-size="14.5" font-weight="600" fill="#c5221f">→ 区間・ベイズ・集合で表す</text>
 
-  <!-- 矢印: 確率で表す -->
-  <line x1="380" y1="200" x2="380" y2="250" stroke="#5f6368" stroke-width="2" marker-end="url(#arr)"/>
-  <text x="396" y="230" font-size="13" fill="#5f6368">確率で「表す」</text>
+  <!-- 矢印 -->
+  <line x1="240" y1="252" x2="240" y2="290" stroke="#5f6368" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="256" y="276" font-size="13" fill="#5f6368">確率で「表す」</text>
 
   <!-- 価値判断 -->
-  <rect x="150" y="258" width="460" height="86" rx="12" fill="#fef7e0" stroke="#f9ab00" stroke-width="1.5"/>
-  <text x="380" y="286" text-anchor="middle" font-size="16" font-weight="700" fill="#b06000">何を大事にするか（価値判断）</text>
-  <text x="380" y="316" text-anchor="middle" font-size="14" fill="#3c4043">平均で得する ・ 最悪を避ける ・ 失敗の確率 ・ 大損を避ける</text>
+  <rect x="40" y="296" width="400" height="64" rx="12" fill="#fef7e0" stroke="#f9ab00" stroke-width="1.5"/>
+  <text x="240" y="324" text-anchor="middle" font-size="16" font-weight="700" fill="#b06000">何を大事にするか（価値判断）</text>
+  <text x="240" y="348" text-anchor="middle" font-size="14" fill="#3c4043">平均で得る ・ 最悪を避ける ・ 失敗の確率 ・ 大損</text>
 
-  <!-- 矢印: 決定 -->
-  <line x1="380" y1="344" x2="380" y2="392" stroke="#5f6368" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- 矢印 -->
+  <line x1="240" y1="360" x2="240" y2="400" stroke="#5f6368" stroke-width="2" marker-end="url(#arr)"/>
 
   <!-- 決定 -->
-  <rect x="276" y="400" width="208" height="54" rx="12" fill="#4285f4"/>
-  <text x="380" y="426" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">決定</text>
-  <text x="380" y="445" text-anchor="middle" font-size="12" fill="#e8f0fe">＋ 受け入れるリスク</text>
+  <rect x="150" y="408" width="180" height="58" rx="12" fill="#4285f4"/>
+  <text x="240" y="434" text-anchor="middle" font-size="17" font-weight="700" fill="#ffffff">決定</text>
+  <text x="240" y="455" text-anchor="middle" font-size="12" fill="#e8f0fe">＋ 受け入れるリスク</text>
 </svg>
