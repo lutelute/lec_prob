@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  {% set _title = page.title ~ " · " ~ config.site_name if page and page.title and not page.is_homepage else config.site_name %}
+  {% set _desc = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
+  {% set _img = config.site_url ~ "assets/social-card.png" %}
+  {% set _url = page.canonical_url if page and page.canonical_url else config.site_url %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ _title }}">
+  <meta property="og:description" content="{{ _desc }}">
+  <meta property="og:image" content="{{ _img }}">
+  <meta property="og:url" content="{{ _url }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ _title }}">
+  <meta name="twitter:description" content="{{ _desc }}">
+  <meta name="twitter:image" content="{{ _img }}">
+{% endblock %}

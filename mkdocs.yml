@@ -1,12 +1,14 @@
-site_name: 確率・確率分布・確率的最適化 — 段階的学習
-site_description: 確率を「何を不確実量とし、どの確率表現と最適化形式を選ぶか」を説明できるようになるための段階的教材。電力・エネルギー応用つき。
+site_name: 確率・確率分布・確率的最適化 — 触って学ぶ
+site_description: 公式暗記でなく「不確実性を何で表し、何を大事にして決めるか」を、図と触って動くツールで学ぶ確率的最適化の入門教材（電力・エネルギー応用）。インストール不要。
 site_author: lec_prob
+site_url: https://lutelute.github.io/lec_prob/
 docs_dir: .
 use_directory_urls: true
 
 theme:
   name: material
   language: ja
+  custom_dir: overrides
   features:
     - navigation.sections
     - navigation.top

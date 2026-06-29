@@ -1,7 +1,16 @@
-# lec_prob — 確率・確率分布・確率的最適化の段階的学習環境
+# 確率を、触って学ぶ。
 
-> **一言で言うと**：確率を「答えを出す計算手法」ではなく、
-> **「何を不確実な量としてモデル化し、どの確率表現と最適化形式を選び、その選択が意思決定へどう影響するか」を説明できるようになるための言語**として学ぶ教材群です。
+[![site](https://img.shields.io/badge/🌐_公開サイト-lutelute.github.io%2Flec__prob-3457d5)](https://lutelute.github.io/lec_prob/)
+[![tests](https://github.com/lutelute/lec_prob/actions/workflows/test.yml/badge.svg)](https://github.com/lutelute/lec_prob/actions/workflows/test.yml)
+[![pages](https://github.com/lutelute/lec_prob/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/lutelute/lec_prob/actions/workflows/deploy-pages.yml)
+
+**確率的最適化を、公式暗記でなく「不確実性を何で表し、何を大事にして決めるか」で学ぶ入門教材。**
+図と、**ブラウザでそのまま動く6つのツール**（インストール不要）で、読んで・触って身につけます。電力・エネルギー応用つき。
+
+> **対象**：確率の基礎に不安はあるが、電力・制御・最適化に確率を応用したい人。
+> **ゴール**：同じ意思決定問題を6形式で比べ、**「なぜこの形式を選ぶか」を自分の言葉で説明できる**こと。
+>
+> 👉 まず [🧭 確率の使い方（触って学ぶ）](https://lutelute.github.io/lec_prob/notes/how_to_use_probability/) を開く。
 
 > ## 🚀 まずこれだけ（30分の最短コース）
 >
