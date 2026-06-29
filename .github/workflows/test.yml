@@ -1,0 +1,37 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  js-tools:
+    name: JSツール共通ライブラリ（stats.js）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: stats.js を scipy 参照値で検証
+        run: node interactive/lib/stats.test.mjs
+
+  python-cores:
+    name: Streamlitツールの数理コア（self-test）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 依存（数値・最適化のみ）
+        run: pip install numpy scipy cvxpy
+      - name: 各 core.py の self-test
+        run: |
+          set -e
+          for c in apps/*/core.py; do
+            echo "--- $c ---"
+            python "$c"
+          done

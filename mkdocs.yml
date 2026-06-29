@@ -138,4 +138,6 @@ nav:
       - 6形式コンパレータ: apps/stochastic_optimization_comparator/README.md
   - 文献:
       - 読書ガイド: references/reading_list.md
-  - 開発ログ: development_log.md
+  - 開発:
+      - 構成・拡張ガイド: ARCHITECTURE.md
+      - 開発ログ: development_log.md
