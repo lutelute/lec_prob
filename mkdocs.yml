@@ -96,6 +96,7 @@ nav:
       - 5 シナリオとモンテカルロ: notes/05_scenarios_and_monte_carlo.md
       - 6 不確実性下の最適化: notes/06_optimization_under_uncertainty.md
       - 6b 二段階確率計画（発展）: notes/06b_two_stage_stochastic_programming.md
+      - 7 ケーススタディ（実データ→決定）: notes/07_case_study.md
   - 演習:
       - 構成・使い方: exercises/README.md
       - 初級:
@@ -141,6 +142,9 @@ nav:
       - シナリオ木: apps/scenario_tree_visualizer/README.md
       - 蓄電池運用: apps/battery_dispatch/README.md
       - 6形式コンパレータ: apps/stochastic_optimization_comparator/README.md
+  - リファレンス:
+      - チートシート（1枚）: reference/cheatsheet.md
+      - 用語集: reference/glossary.md
   - 文献:
       - 読書ガイド: references/reading_list.md
   - 開発:
