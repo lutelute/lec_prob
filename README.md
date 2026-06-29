@@ -1,5 +1,7 @@
 # 確率を、触って学ぶ。
 
+[![確率を、触って学ぶ。](assets/social-card.png)](https://lutelute.github.io/lec_prob/)
+
 [![site](https://img.shields.io/badge/🌐_公開サイト-lutelute.github.io%2Flec__prob-3457d5)](https://lutelute.github.io/lec_prob/)
 [![tests](https://github.com/lutelute/lec_prob/actions/workflows/test.yml/badge.svg)](https://github.com/lutelute/lec_prob/actions/workflows/test.yml)
 [![pages](https://github.com/lutelute/lec_prob/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/lutelute/lec_prob/actions/workflows/deploy-pages.yml)
@@ -25,7 +27,7 @@
 >
 > これで「曖昧な状況 → 具体的な決定」に確率を使う感覚がつかめます。あとは必要なモジュールを[学習地図](roadmap/learning_map.md)から。
 >
-> **インストール不要**：5本のインタラクティブツールは[ブラウザでそのまま動きます](interactive/index.md)。
+> **インストール不要**：6本のインタラクティブツールは[ブラウザでそのまま動きます](interactive/index.md)。
 
 ---
 
@@ -189,7 +191,7 @@ python3 apps/stochastic_optimization_comparator/core.py
 
 この教材は **MkDocs（Material テーマ）** で静的サイト化され、**GitHub Pages** で公開されています。
 数式（MathJax）・Mermaid 図・SVG 図・全ノート/演習/ツール解説がブラウザで読め、
-**5本のインタラクティブツールはブラウザ内でそのまま動きます**（[▶ ツール一覧](interactive/index.md)）。
+**6本のインタラクティブツールはブラウザ内でそのまま動きます**（[▶ ツール一覧](interactive/index.md)）。
 `main` への push で [`.github/workflows/deploy-pages.yml`] が自動ビルド・デプロイします。
 
 ### ローカルでプレビュー
@@ -213,8 +215,8 @@ mkdocs build --strict
 > **依存のピン留め**：サイトのビルド依存は `requirements-docs.txt` で固定（MkDocs 2.0 の後方非互換リスクを避けるため）。
 > 学習者は、リポジトリ（GitHub 上で Markdown を直接閲覧）でも、Pages サイト（整形済み）でも、Obsidian（Vault として開く）でも、同じ教材を読めます。
 
-> **ツールについて**：インタラクティブツール（Streamlit）は静的サイトでは動きません。サイトには各ツールの解説を載せ、
-> 実行はローカル（`streamlit run apps/.../app.py`）または Streamlit Community Cloud で行ってください。
+> **ツールについて**：[▶ ブラウザで動かす](interactive/index.md) の6本は**素のJS+Plotlyで実装**され、GitHub Pages 上でそのまま動きます（`node interactive/lib/stats.test.mjs` で数理を検証、CIで自動実行）。
+> より重い計算版（cvxpy等）は Streamlit 版（`streamlit run apps/.../app.py`）をローカルで。拡張の作法は [構成・拡張ガイド](ARCHITECTURE.md)。
 
 ---
 

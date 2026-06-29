@@ -15,4 +15,22 @@
   <meta name="twitter:title" content="{{ _title }}">
   <meta name="twitter:description" content="{{ _desc }}">
   <meta name="twitter:image" content="{{ _img }}">
+  <meta name="keywords" content="確率,確率分布,確率的最適化,不確実性,期待値,CVaR,チャンス制約,ロバスト最適化,モンテカルロ,ベイズ,電力系統,予備力,newsvendor,インタラクティブ教材">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "{{ config.site_name }}",
+    "description": "{{ config.site_description }}",
+    "url": "{{ config.site_url }}",
+    "image": "{{ _img }}",
+    "inLanguage": "ja",
+    "isAccessibleForFree": true,
+    "learningResourceType": ["course", "interactive media"],
+    "educationalLevel": "undergraduate",
+    "teaches": ["確率分布", "期待値とリスク", "モンテカルロ法", "確率的最適化（期待値・ロバスト・チャンス制約・CVaR・分布ロバスト）"],
+    "about": ["確率論", "確率的最適化", "電力システム工学"],
+    "license": "https://github.com/lutelute/lec_prob"
+  }
+  </script>
 {% endblock %}

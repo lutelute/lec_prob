@@ -13,6 +13,7 @@ title: ブラウザで動かす（インタラクティブ・ツール）
   <a href="#t3" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #a142f4"><b>③ モンテカルロ収束</b><br><span style="color:#5f6368;font-size:.85em">1/√N・希少事象・SAA（M5）</span></a>
   <a href="#t4" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #ea4335"><b>④ 6形式コンパレータ</b><br><span style="color:#5f6368;font-size:.85em">到達点：x*が100〜137（M6）</span></a>
   <a href="#t5" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #f9ab00"><b>⑤ 蓄電池運用</b><br><span style="color:#5f6368;font-size:.85em">SoC・アービトラージ（M6b）</span></a>
+  <a href="#t6" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #00897b"><b>⑥ 理解度チェック</b><br><span style="color:#5f6368;font-size:.85em">8問で確かめる（全体）</span></a>
 </div>
 
 !!! tip "使い方"
@@ -75,7 +76,18 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-> **5本すべてブラウザ内で動作**します（インストール不要）。Streamlit版（ローカル実行）の解説は各 `apps/*/` を参照。
+## 6. 理解度チェック — 触って確かめる8問（全モジュール） {#t6}
+
+学んだことが身についたか、8問で確かめる。選ぶと正誤と解説が出て、**どこを復習すればよいか**が分かる。
+密度≠確率・基準率の誤謬・形式選択・平均の罠・1/√N・偶然/認識・CVaR・EVPI を横断。
+
+[▶ 全画面で開く](quiz.html){target=_blank}
+
+<div class="tool-embed" data-src="quiz.html" data-h="560"></div>
+
+---
+
+> **6本すべてブラウザ内で動作**します（インストール不要）。Streamlit版（ローカル実行）の解説は各 `apps/*/` を参照。
 
 <style>
 .tool-embed{margin:10px 0}
