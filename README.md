@@ -168,8 +168,12 @@ python3 apps/stochastic_optimization_comparator/core.py
 
 ## 9. Web サイトとして読む（GitHub Pages）
 
-この教材は **MkDocs（Material テーマ）** で静的サイト化され、**GitHub Pages** で公開できます。
-数式（MathJax）・Mermaid 図・SVG 図・全ノート/演習/ツール解説がブラウザで読めます。
+**🌐 公開中：https://lutelute.github.io/lec_prob/** ／ リポジトリ：https://github.com/lutelute/lec_prob
+
+この教材は **MkDocs（Material テーマ）** で静的サイト化され、**GitHub Pages** で公開されています。
+数式（MathJax）・Mermaid 図・SVG 図・全ノート/演習/ツール解説がブラウザで読め、
+**5本のインタラクティブツールはブラウザ内でそのまま動きます**（[▶ ツール一覧](interactive/index.md)）。
+`main` への push で [`.github/workflows/deploy-pages.yml`] が自動ビルド・デプロイします。
 
 ### ローカルでプレビュー
 ```bash

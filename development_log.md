@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-06-29 — GitHub 公開（push＋Pages デプロイ）★Web公開達成
+
+### 背景（ユーザー指摘）
+- 「githubに当たらない」＝ローカルコミットのみでリモート未push。実際に GitHub へ上げる。
+
+### 実施
+- `gh repo create lutelute/lec_prob --public --source=. --push`：リポジトリ作成。
+- **メールプライバシー対応**：初回 push が GH007（実メール `lutebass@gmail.com` 露出）で拒否 → 全14コミットの author/committer を `git filter-branch` で noreply（`17675761+lutelute@users.noreply.github.com`）に書換え、`git config` も更新して再 push 成功。
+- `gh api -X POST repos/.../pages -f build_type=workflow`：Pages を Actions ソースで有効化。
+- 初回ワークフローは Pages 未有効で deploy 404 失敗 → 有効化後 `gh run rerun` で **成功**。
+
+### 検証（本番URL）
+- https://lutelute.github.io/lec_prob/ → HTTP 200。interactive/・comparator.html・lib/stats.js すべて 200。
+- **本番 Pages 上でインタラクティブ動作を Playwright 検証**：comparator でスライダー ε0.1→0.05 → チャンスx* 119.2→124.7 即時更新。コンソールエラーは favicon 404 のみ（無害）。
+- README §9 に公開URL（https://lutelute.github.io/lec_prob/ ）とリポジトリURLを明記。
+
+### 結果
+- 教材・サイト・5インタラクティブツールが **GitHub 上で公開・稼働**。学習者は URL を開くだけで読んで動かして学べる。goal「GitHub＋Pages での公開で学習者がWebで学べる状態」を実機で達成。
+
+---
+
 ## 2026-06-29 — イテレーション29（全体最終確認・締めくくり）★goal達成
 
 ### 最終確認（すべて green）
