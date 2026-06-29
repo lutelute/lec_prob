@@ -6,23 +6,30 @@ type: guide
 # 確率の使い方
 
 確率は「曖昧」を「具体的な決定」に変える言語です。未来を当てる道具ではありません。
+「不確実」はひとつではなく、**事象**（起こる/起こらない）・**ばらつき**（量の揺れ、減らせない）・**誤差**（知らないこと、情報で減る）と顔が違い、表し方も違います。
 
 <div markdown style="text-align:center;margin:1.2em 0">
-![不確実さの3つの顔（事象・ばらつき・誤差）→ 確率で表す → 価値判断 → 決定](../figures/uncertainty_concept_map.svg){ width="440" }
+![不確実さの3つの顔（事象・ばらつき・誤差）→ 確率で表す → 価値判断 → 決定](../figures/uncertainty_concept_map.svg){ width="620" }
 </div>
 
-「不確実」はひとつではありません。**事象**（起こる/起こらない）・**ばらつき**（量の揺れ、減らせない）・**誤差**（知らないこと、情報で減る）——顔が違えば表し方も違い、決定は **「何を大事にするか」を選んで初めて**決まります。
+そして決定は、**「何を大事にするか」を選んで初めて**決まります。下のツールで触って確かめてください。
 
-## 同じ状況でも、大事にするもので決定は変わる
+## 触って学ぶ：何を大事にするかで、決定が変わる
 
-例：明日のピーク需要 $D\approx100\pm15$ に容量をどれだけ確保するか（供給不足の損 ≫ 余剰の損）。「ばらつき」のケースです。
+「ばらつき」のケース——明日のピーク需要 $D\approx100\pm15$ に、容量をどれだけ確保するか。
+**スライダーを動かす**と供給不足の確率とコストが変わります。立場のボタンも押してみてください。
 
-| 大事にするもの | 確保量 | 供給不足の確率 |
-|---|---|---|
-| 平均だけ見る | 100 | 50% |
-| 期待コストを最小に | 113 | 20% |
-| 不足を5%以下に | 125 | 5% |
+<iframe id="decideframe" src="../../interactive/decide.html" title="触って学ぶ：確率→決定" style="width:100%;height:640px;border:1px solid #dadce0;border-radius:10px"></iframe>
 
-同じ需要・同じコストでも、重視するものが変われば決定も変わる。これが「確率を使う」ということです。
+<script>
+(function(){
+  var f=document.getElementById('decideframe'); if(!f) return;
+  function fit(){ try{ var h=f.contentDocument.body.scrollHeight; if(h>200) f.style.height=(h+16)+'px'; }catch(e){} }
+  f.addEventListener('load', function(){ [200,800,1600].forEach(function(d){ setTimeout(fit,d); }); });
+  window.addEventListener('resize', function(){ clearTimeout(f._t); f._t=setTimeout(fit,250); });
+})();
+</script>
 
-→ この問題は [▶ コンパレータ](../interactive/index.md) で動かせます。「事象」（故障率・停電）は [Module 1](01_events_and_probability.md)・[ベイズ](../interactive/index.md)、「誤差」（推定の不確かさ）は [Module 4](04_from_data_to_distribution.md) へ。
+平均ぴったり（100）は半分の日が供給不足。不足が余剰より痛いぶん、平均より多めが正解——同じ状況でも重視点で決定が変わる。これが「確率を使う」ということです。
+
+→ 6形式すべての比較は [▶ コンパレータ](../interactive/index.md)。「事象」（故障率・停電）は [Module 1](01_events_and_probability.md)・[ベイズ](../interactive/index.md)、「誤差」（推定の不確かさ）は [Module 4](04_from_data_to_distribution.md) へ。

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>触って学ぶ：確率はどう「決定」に変わるか</title>
+<link rel="stylesheet" href="lib/tool.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="lib/stats.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>触って学ぶ：同じ状況でも「何を大事にするか」で決定は変わる</h1>
+  <p class="sub">明日のピーク需要は不確実（青い山＝確率分布）。<b>あなたが確保する量 q を動かす</b>と、供給不足の確率とコストが変わります。「不足」は「余剰」よりずっと痛い設定です。</p>
+  <div class="panel">
+    <div class="controls">
+      <h2>あなたの決定</h2>
+      <div class="ctl"><label>確保する量 q <span class="val" id="qval">113</span></label><input type="range" id="q" min="70" max="145" step="1" value="113"></div>
+      <h2>立場を選んでみる</h2>
+      <div class="seg" id="seg">
+        <button type="button" data-q="100">平均で決める</button>
+        <button type="button" data-q="113" class="on">コスト最小</button>
+        <button type="button" data-q="125">不足5%以下</button>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="k">供給不足の確率 P(D &gt; q)</div><div class="v" id="pshort">–</div></div>
+        <div class="metric"><div class="k">期待コスト（小さいほど良い）</div><div class="v" id="ecost">–</div></div>
+      </div>
+    </div>
+    <div class="plots"><div class="plot" id="plot"></div></div>
+  </div>
+  <div class="note" id="note"></div>
+</div>
+<script>
+const L=window.LP, $=id=>document.getElementById(id);
+const MU=100, SD=15, CS=200, CO=50;       // 需要 N(100,15)、不足損 cs ≫ 余剰損 co
+let q=113;
+
+const eShort=q=>{const m=MU-q; return m*L.normCdf(m/SD,0,1)+SD*L.normSPdf(m/SD);}; // E[(D-q)+]
+
+function update(){
+  $('qval').textContent=q;
+  const pShort=1-L.normCdf(q,MU,SD);
+  const es=eShort(q), ex=es+(q-MU);        // E[(q-D)+] = E[(D-q)+] + (q-μ)
+  const cost=CS*es+CO*ex;
+  $('pshort').textContent=(pShort*100).toFixed(0)+'%';
+  $('ecost').textContent=cost.toFixed(0);
+
+  const xs=L.linspace(55,150,180), pdf=xs.map(x=>L.normPdf(x,MU,SD));
+  const tx=xs.filter(x=>x>=q), ty=tx.map(x=>L.normPdf(x,MU,SD));
+  const peak=L.normPdf(MU,MU,SD);
+  Plotly.react('plot',[
+    {x:xs,y:pdf,type:'scatter',mode:'lines',line:{color:'#4285f4',width:2.5},name:'需要の分布',hoverinfo:'skip'},
+    {x:[q,...tx,tx[tx.length-1]||q],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(234,67,53,0.30)',name:'供給不足',hoverinfo:'skip'},
+    {x:[q,q],y:[0,peak*1.08],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'確保量 q',hoverinfo:'skip'}
+  ],{margin:{t:8,r:10,b:42,l:48},xaxis:{title:'需要 ／ 確保量',range:[55,150]},
+     yaxis:{title:'確率密度',rangemode:'tozero'},showlegend:true,
+     legend:{orientation:'h',y:1.12},height:330},{displayModeBar:false,responsive:true});
+
+  const stance = q<=101 ? '<b>平均で決める</b>：平均ぴったり。でも需要が平均を超える確率は約50% ——「平均で計画」は半分の日が供給不足。'
+    : q>=124 ? '<b>不足5%以下</b>：信頼度を優先して多めに確保（チャンス制約）。余剰コストは増えるが供給支障はめったに起きない。'
+    : '<b>コスト最小</b>：不足が余剰より重いぶん、平均より多めが最適（0.8分位点）。';
+  $('note').innerHTML=stance+' &nbsp;|&nbsp; 同じ需要・同じコストでも、<b>何を大事にするかで確保量が変わる</b>。これが「確率を使って決める」ということ。';
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on', +b.dataset.q===q));
+}
+$('q').addEventListener('input',e=>{q=+e.target.value; update();});
+document.querySelectorAll('#seg button').forEach(b=>b.addEventListener('click',()=>{q=+b.dataset.q; $('q').value=q; update();}));
+update();
+</script>
+</body>
+</html>
