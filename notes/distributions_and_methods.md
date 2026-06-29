@@ -53,6 +53,21 @@ $$ P(D\le 100)=0.3+0.5=0.8,\qquad P(D\ge 120)=0.2. $$
 > **要点**：分布は地図（関数）。**期待値・確率・分位点はそこから取り出すスカラー**。
 > 「どのスカラーを取り出すか」＝あなたの**目的・価値判断**。
 
+### 触って確かめる：操作を当てると「数」が出る
+
+下のツールで、同じ分布に**確率（面積）・平均・分位点**を当ててみてください。どれも分布から**1つの数**が出ます。
+
+<iframe id="d2nframe" src="../../interactive/dist_to_number.html" title="分布→数値" style="width:100%;height:600px;border:1px solid #dadce0;border-radius:10px"></iframe>
+
+<script>
+(function(){
+  var f=document.getElementById('d2nframe'); if(!f) return;
+  function fit(){ try{ var h=f.contentDocument.body.scrollHeight; if(h>200) f.style.height=(h+16)+'px'; }catch(e){} }
+  f.addEventListener('load', function(){ [200,800,1600].forEach(function(d){ setTimeout(fit,d); }); });
+  window.addEventListener('resize', function(){ clearTimeout(f._t); f._t=setTimeout(fit,250); });
+})();
+</script>
+
 ## 4. 手法の正体：分布を“数に潰す”3つの流儀
 
 「確定論的／ストキャスティック／シナリオベース」は別々の難しい理論ではありません。

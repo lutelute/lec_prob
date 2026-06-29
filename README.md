@@ -7,7 +7,7 @@
 [![pages](https://github.com/lutelute/lec_prob/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/lutelute/lec_prob/actions/workflows/deploy-pages.yml)
 
 **確率的最適化を、公式暗記でなく「不確実性を何で表し、何を大事にして決めるか」で学ぶ入門教材。**
-図と、**ブラウザでそのまま動く6つのツール**（インストール不要）で、読んで・触って身につけます。電力・エネルギー応用つき。
+図と、**ブラウザでそのまま動く8つのツール**（インストール不要）で、読んで・触って身につけます。電力・エネルギー応用つき。
 
 > **対象**：確率の基礎に不安はあるが、電力・制御・最適化に確率を応用したい人。
 > **ゴール**：同じ意思決定問題を6形式で比べ、**「なぜこの形式を選ぶか」を自分の言葉で説明できる**こと。
@@ -27,7 +27,7 @@
 >
 > これで「曖昧な状況 → 具体的な決定」に確率を使う感覚がつかめます。あとは必要なモジュールを[学習地図](roadmap/learning_map.md)から。
 >
-> **インストール不要**：6本のインタラクティブツールは[ブラウザでそのまま動きます](interactive/index.md)。
+> **インストール不要**：8本のインタラクティブツールは[ブラウザでそのまま動きます](interactive/index.md)。
 
 ---
 
@@ -191,7 +191,7 @@ python3 apps/stochastic_optimization_comparator/core.py
 
 この教材は **MkDocs（Material テーマ）** で静的サイト化され、**GitHub Pages** で公開されています。
 数式（MathJax）・Mermaid 図・SVG 図・全ノート/演習/ツール解説がブラウザで読め、
-**6本のインタラクティブツールはブラウザ内でそのまま動きます**（[▶ ツール一覧](interactive/index.md)）。
+**8本のインタラクティブツールはブラウザ内でそのまま動きます**（[▶ ツール一覧](interactive/index.md)）。
 `main` への push で [`.github/workflows/deploy-pages.yml`] が自動ビルド・デプロイします。
 
 ### ローカルでプレビュー
@@ -215,7 +215,7 @@ mkdocs build --strict
 > **依存のピン留め**：サイトのビルド依存は `requirements-docs.txt` で固定（MkDocs 2.0 の後方非互換リスクを避けるため）。
 > 学習者は、リポジトリ（GitHub 上で Markdown を直接閲覧）でも、Pages サイト（整形済み）でも、Obsidian（Vault として開く）でも、同じ教材を読めます。
 
-> **ツールについて**：[▶ ブラウザで動かす](interactive/index.md) の6本は**素のJS+Plotlyで実装**され、GitHub Pages 上でそのまま動きます（`node interactive/lib/stats.test.mjs` で数理を検証、CIで自動実行）。
+> **ツールについて**：触って学ぶツール8本（[ハブ](interactive/index.md)に6本＋ガイド/解説ノートに埋め込み2本）は**素のJS+Plotlyで実装**され、GitHub Pages 上でそのまま動きます（`node interactive/lib/stats.test.mjs` で数理を検証、CIで自動実行）。
 > より重い計算版（cvxpy等）は Streamlit 版（`streamlit run apps/.../app.py`）をローカルで。拡張の作法は [構成・拡張ガイド](ARCHITECTURE.md)。
 
 ---

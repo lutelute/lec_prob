@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>触って確かめる：分布 → 数値</title>
+<link rel="stylesheet" href="lib/tool.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="lib/stats.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>触って確かめる：分布は、操作を当てると「数」になる</h1>
+  <p class="sub">分布はスカラーではなく「地図」。<b>どの操作を当てるか</b>で、取り出せる数が変わります。需要 N(μ,σ) で試してください。</p>
+  <div class="panel">
+    <div class="controls">
+      <h2>分布の形</h2>
+      <div class="ctl"><label>平均 μ <span class="val" id="muval">100</span></label><input type="range" id="mu" min="70" max="130" step="1" value="100"></div>
+      <div class="ctl"><label>標準偏差 σ <span class="val" id="sdval">15</span></label><input type="range" id="sd" min="5" max="30" step="1" value="15"></div>
+      <h2>当てる操作</h2>
+      <div class="seg" id="op">
+        <button type="button" data-op="prob" class="on">確率（面積）</button>
+        <button type="button" data-op="mean">平均（重み付き和）</button>
+        <button type="button" data-op="quant">分位点</button>
+      </div>
+      <div id="opctl"></div>
+      <div class="metrics">
+        <div class="metric"><div class="k" id="outk">取り出した数</div><div class="v" id="outv">–</div></div>
+      </div>
+    </div>
+    <div class="plots"><div class="plot" id="plot"></div></div>
+  </div>
+  <div class="note" id="note"></div>
+</div>
+<script>
+const L=window.LP, $=id=>document.getElementById(id);
+let S={mu:100, sd:15, op:'prob', a:85, b:115, p:0.8};
+
+function opControls(){
+  const c=$('opctl');
+  if(S.op==='prob'){
+    c.innerHTML='<div class="ctl"><label>区間の下端 a <span class="val" id="aval"></span></label><input type="range" id="a" min="40" max="160" step="1"></div>'
+      +'<div class="ctl"><label>区間の上端 b <span class="val" id="bval"></span></label><input type="range" id="b" min="40" max="160" step="1"></div>';
+    $('a').value=S.a; $('b').value=S.b;
+    $('a').oninput=e=>{S.a=Math.min(+e.target.value,S.b); $('a').value=S.a; update();};
+    $('b').oninput=e=>{S.b=Math.max(+e.target.value,S.a); $('b').value=S.b; update();};
+  } else if(S.op==='quant'){
+    c.innerHTML='<div class="ctl"><label>下から何割 p <span class="val" id="pval"></span></label><input type="range" id="p" min="0.01" max="0.99" step="0.01"></div>';
+    $('p').value=S.p; $('p').oninput=e=>{S.p=+e.target.value; update();};
+  } else { c.innerHTML='<p style="color:#5f6368;font-size:.9rem">平均は分布全体の「重み付きの数え上げ」。離散なら Σx·p(x)、連続なら ∫x·f(x)dx。結果は μ。</p>'; }
+}
+
+function update(){
+  $('muval').textContent=S.mu; $('sdval').textContent=S.sd;
+  const xs=L.linspace(S.mu-4*S.sd, S.mu+4*S.sd, 240), pdf=xs.map(x=>L.normPdf(x,S.mu,S.sd));
+  const peak=L.normPdf(S.mu,S.mu,S.sd);
+  const traces=[{x:xs,y:pdf,type:'scatter',mode:'lines',line:{color:'#4285f4',width:2.5},name:'分布 f(x)',hoverinfo:'skip'}];
+  let outk='', outv='', note='';
+  if(S.op==='prob'){
+    if($('aval')) $('aval').textContent=S.a; if($('bval')) $('bval').textContent=S.b;
+    const tx=xs.filter(x=>x>=S.a&&x<=S.b), ty=tx.map(x=>L.normPdf(x,S.mu,S.sd));
+    traces.push({x:[S.a,...tx,S.b],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(52,168,83,0.35)',name:'面積=確率',hoverinfo:'skip'});
+    const P=L.normCdf(S.b,S.mu,S.sd)-L.normCdf(S.a,S.mu,S.sd);
+    outk=`確率 P(${S.a} ≤ X ≤ ${S.b})`; outv=P.toFixed(3);
+    note=`<b>確率＝面積</b>。区間 [${S.a}, ${S.b}] の下の面積が確率 ${P.toFixed(3)}。区間を狭めると→0（1点の確率は0）。密度の「高さ」ではなく「面積」が確率。`;
+  } else if(S.op==='mean'){
+    traces.push({x:[S.mu,S.mu],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#ea4335',width:2,dash:'dot'},name:'E[X]=μ',hoverinfo:'skip'});
+    const xf=xs.map((x,i)=>x*pdf[i]); const sc=peak/Math.max(...xf);
+    traces.push({x:xs,y:xf.map(v=>v*sc),type:'scatter',mode:'lines',line:{color:'#f9ab00',width:1.5,dash:'dot'},name:'x·f(x)（重み）',hoverinfo:'skip'});
+    outk='平均 E[X] = ∫ x·f(x) dx'; outv=S.mu.toFixed(1);
+    note=`<b>平均＝重み付きの数え上げ</b>。各値 x を「起こりやすさ f(x)」で重みづけて足す（橙＝x·f(x)）。離散の Σx·p(x) が連続で ∫x·f(x)dx に。結果は μ=${S.mu}。`;
+  } else {
+    if($('pval')) $('pval').textContent=S.p.toFixed(2);
+    const q=L.normPpf(S.p,S.mu,S.sd);
+    const tx=xs.filter(x=>x<=q), ty=tx.map(x=>L.normPdf(x,S.mu,S.sd));
+    traces.push({x:[xs[0],...tx,q],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(66,133,244,0.25)',name:`左の面積=${S.p.toFixed(2)}`,hoverinfo:'skip'});
+    traces.push({x:[q,q],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'分位点',hoverinfo:'skip'});
+    outk=`分位点 F⁻¹(${S.p.toFixed(2)})`; outv=q.toFixed(1);
+    note=`<b>分位点＝下から ${(S.p*100).toFixed(0)}% の値</b>。左の面積が ${S.p.toFixed(2)} になる x。チャンス制約や VaR・CVaR が使うのはこれ。`;
+  }
+  Plotly.react('plot',traces,{margin:{t:8,r:10,b:40,l:48},xaxis:{title:'値 x'},yaxis:{title:'密度 f(x)',rangemode:'tozero'},
+    showlegend:true,legend:{orientation:'h',y:1.12},height:340},{displayModeBar:false,responsive:true});
+  $('outk').textContent=outk; $('outv').textContent=outv;
+  $('note').innerHTML=note+' &nbsp;|&nbsp; <b>どの操作を当てるか＝あなたの目的</b>。分布は地図、操作がそこから取り出す「数」。';
+}
+
+['mu','sd'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=+e.target.value; update();}));
+document.querySelectorAll('#op button').forEach(b=>b.addEventListener('click',()=>{
+  S.op=b.dataset.op; document.querySelectorAll('#op button').forEach(x=>x.classList.toggle('on',x===b));
+  opControls(); update();
+}));
+opControls(); update();
+</script>
+</body>
+</html>
