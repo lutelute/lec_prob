@@ -22,6 +22,7 @@
         <button type="button" data-op="prob" class="on">確率（面積）</button>
         <button type="button" data-op="mean">平均（重み付き和）</button>
         <button type="button" data-op="quant">分位点</button>
+        <button type="button" data-op="scenario">シナリオで近似</button>
       </div>
       <div id="opctl"></div>
       <div class="metrics">
@@ -34,7 +35,7 @@
 </div>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
-let S={mu:100, sd:15, op:'prob', a:85, b:115, p:0.8};
+let S={mu:100, sd:15, op:'prob', a:85, b:115, p:0.8, N:50};
 
 function opControls(){
   const c=$('opctl');
@@ -47,6 +48,11 @@ function opControls(){
   } else if(S.op==='quant'){
     c.innerHTML='<div class="ctl"><label>下から何割 p <span class="val" id="pval"></span></label><input type="range" id="p" min="0.01" max="0.99" step="0.01"></div>';
     $('p').value=S.p; $('p').oninput=e=>{S.p=+e.target.value; update();};
+  } else if(S.op==='scenario'){
+    c.innerHTML='<div class="ctl"><label>標本数 N <span class="val" id="Nval"></span></label><input type="range" id="N" min="5" max="2000" step="5"></div>'
+      +'<button type="button" id="resample" class="seg" style="margin-top:6px;cursor:pointer;padding:8px 14px">🎲 引き直す</button>';
+    $('N').value=S.N; $('N').oninput=e=>{S.N=+e.target.value; update();};
+    $('resample').onclick=()=>{ S.seed=(S.seed||1)+1; update(); };
   } else { c.innerHTML='<p style="color:#5f6368;font-size:.9rem">平均は分布全体の「重み付きの数え上げ」。離散なら Σx·p(x)、連続なら ∫x·f(x)dx。結果は μ。</p>'; }
 }
 
@@ -69,7 +75,7 @@ function update(){
     traces.push({x:xs,y:xf.map(v=>v*sc),type:'scatter',mode:'lines',line:{color:'#f9ab00',width:1.5,dash:'dot'},name:'x·f(x)（重み）',hoverinfo:'skip'});
     outk='平均 E[X] = ∫ x·f(x) dx'; outv=S.mu.toFixed(1);
     note=`<b>平均＝重み付きの数え上げ</b>。各値 x を「起こりやすさ f(x)」で重みづけて足す（橙＝x·f(x)）。離散の Σx·p(x) が連続で ∫x·f(x)dx に。結果は μ=${S.mu}。`;
-  } else {
+  } else if(S.op==='quant'){
     if($('pval')) $('pval').textContent=S.p.toFixed(2);
     const q=L.normPpf(S.p,S.mu,S.sd);
     const tx=xs.filter(x=>x<=q), ty=tx.map(x=>L.normPdf(x,S.mu,S.sd));
@@ -77,6 +83,19 @@ function update(){
     traces.push({x:[q,q],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'分位点',hoverinfo:'skip'});
     outk=`分位点 F⁻¹(${S.p.toFixed(2)})`; outv=q.toFixed(1);
     note=`<b>分位点＝下から ${(S.p*100).toFixed(0)}% の値</b>。左の面積が ${S.p.toFixed(2)} になる x。チャンス制約や VaR・CVaR が使うのはこれ。`;
+  } else {
+    // シナリオで近似：N個の標本を引き、標本平均が μ（=真の期待値）に近づくのを見る
+    if($('Nval')) $('Nval').textContent=S.N;
+    const rng=L.mulberry32('d2n'+(S.seed||1)); const g=L.gaussianGen(rng);
+    let sum=0; const samp=[];
+    for(let i=0;i<S.N;i++){ const x=S.mu+S.sd*g(); samp.push(x); sum+=x; }
+    const mean=sum/S.N, se=S.sd/Math.sqrt(S.N);
+    traces.push({x:samp,type:'histogram',histnorm:'probability density',marker:{color:'rgba(52,168,83,0.35)',line:{color:'#34a853',width:0.5}},name:`標本 N=${S.N}`,hoverinfo:'skip',nbinsx:Math.min(40,Math.max(8,Math.round(Math.sqrt(S.N))))});
+    traces.push({x:[mean,mean],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#ea4335',width:2.5},name:'標本平均',hoverinfo:'skip'});
+    traces.push({x:[S.mu,S.mu],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'真の平均 μ',hoverinfo:'skip'});
+    outk=`標本平均 (N=${S.N})`; outv=mean.toFixed(2);
+    note=`<b>シナリオベース＝標本を ${S.N} 個引いて平均</b>。標本平均 ${mean.toFixed(2)} は真の平均 μ=${S.mu} に近い（誤差の目安 ±${se.toFixed(1)}＝σ/√N）。`
+      +`<b>N を増やすほど μ に収束</b>（大数の法則）。これが「積分（期待値）を計算可能にする」やり方＝モンテカルロ／SAA。🎲で引き直すと標本ごとのばらつきも見える。`;
   }
   Plotly.react('plot',traces,{margin:{t:8,r:10,b:40,l:48},xaxis:{title:'値 x'},yaxis:{title:'密度 f(x)',rangemode:'tozero'},
     showlegend:true,legend:{orientation:'h',y:1.12},height:340},{displayModeBar:false,responsive:true});
