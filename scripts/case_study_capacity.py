@@ -73,6 +73,22 @@ def main():
     print(f"# 平均で決める無駄 = {exp_loss(q_det) - exp_loss(q_opt):.2f} "
           f"({(exp_loss(q_det)/exp_loss(q_opt)-1)*100:.0f}% 余計)")
 
+    # --- PV を入れると（正味需要）：相関の効き（Module 3）---
+    pv = []
+    with open(os.path.join(HERE, "data", "pv_daily_factor.csv")) as f:
+        for row in csv.DictReader(f):
+            pv.append(float(row["pv_capacity_factor"]))
+    pv = np.array(pv)
+    Cpv = 40.0
+    net = d - Cpv * pv
+    rho = np.corrcoef(d, pv)[0, 1]
+    Nn = stats.norm(net.mean(), net.std(ddof=1))
+    print(f"\n# PV(設置容量{Cpv:.0f})を入れた正味需要 = 需要 - {Cpv:.0f}×PV利用率")
+    print(f"# 相関(需要,PV)={rho:.3f}  （負＝高需要日ほどPV弱い）")
+    print(f"# 正味需要: 平均{net.mean():.2f}（↓ {mu-net.mean():.1f}）, "
+          f"標準偏差{net.std(ddof=1):.2f}（↑ {net.std(ddof=1)-sd:.1f}）")
+    print(f"# 期待最小の確保量: 需要のみ {q_opt:.1f} → 正味需要 {Nn.ppf(crit):.1f}")
+
 
 if __name__ == "__main__":
     main()
