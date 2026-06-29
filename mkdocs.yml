@@ -74,6 +74,7 @@ exclude_docs: |
 
 nav:
   - ホーム: README.md
+  - 🧭 確率の使い方（実践ガイド）: notes/how_to_use_probability.md
   - ▶ ブラウザで動かす: interactive/index.md
   - ロードマップ:
       - 学習地図: roadmap/learning_map.md
