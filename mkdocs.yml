@@ -63,6 +63,7 @@ exclude_docs: |
   .venv/
   site/
   logs/
+  IMPROVEMENT_PROPOSAL.md
   notebooks/
   __pycache__/
   *.pyc
