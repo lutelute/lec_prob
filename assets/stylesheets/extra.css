@@ -1,0 +1,71 @@
+/* extra.css — ブランドの視覚的アイデンティティ（既定Materialからの脱却） */
+
+:root {
+  --md-primary-fg-color:        #3457d5;   /* ブランドの青 */
+  --md-primary-fg-color--light: #5b7af0;
+  --md-primary-fg-color--dark:  #1a3a8f;
+  --md-accent-fg-color:         #c2410c;   /* 温かいアクセント（リンクhover） */
+  --lp-event:   #4285f4;   /* 事象 */
+  --lp-spread:  #34a853;   /* ばらつき */
+  --lp-error:   #ea4335;   /* 誤差 */
+  --lp-value:   #f9ab00;   /* 価値判断 */
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #5b7af0;
+  --md-accent-fg-color:  #ffd54a;
+}
+
+/* タイポgrafi：日本語の詰めと見出しの締まり */
+.md-typeset { font-feature-settings: "palt" 1; }
+.md-typeset h1, .md-typeset h2 { letter-spacing: .01em; }
+.md-typeset h2 {
+  border-bottom: 2px solid var(--md-default-fg-color--lightest);
+  padding-bottom: .2em;
+}
+
+/* 「30秒まとめ」(abstract) を主役級に */
+.md-typeset .admonition.abstract,
+.md-typeset details.abstract {
+  border-left: .35rem solid var(--md-primary-fg-color);
+  border-radius: .3rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+/* 図(SVG/PNG)を上品に */
+.md-typeset img[src$=".svg"],
+.md-typeset img[src$=".png"] {
+  border-radius: 8px;
+}
+
+/* テーブル：ヘッダにブランド色、行ホバー */
+.md-typeset table:not([class]) {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.md-typeset table:not([class]) th {
+  background: var(--md-primary-fg-color);
+  color: #fff;
+  font-weight: 700;
+}
+.md-typeset table:not([class]) tr:hover td {
+  background: var(--md-primary-fg-color--light);
+  filter: opacity(.08);
+}
+
+/* ハブのツールカード：ホバーで持ち上がる */
+a[href^="#t"] { transition: transform .12s ease, box-shadow .12s ease; }
+a[href^="#t"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(52,87,213,.18);
+}
+
+/* iframe(埋め込みツール)を上品に */
+.md-typeset iframe { border-radius: 10px; }
+
+/* 引用を柔らかく */
+.md-typeset blockquote {
+  border-left: .25rem solid var(--md-primary-fg-color--light);
+  background: var(--md-default-fg-color--lightest);
+  border-radius: 0 .3rem .3rem 0;
+}
