@@ -81,6 +81,7 @@ exclude_docs: |
 nav:
   - ホーム: README.md
   - 🧭 確率の使い方: notes/how_to_use_probability.md
+  - 🔢 分布をどう数値で扱うか: notes/distributions_and_methods.md
   - ▶ ブラウザで動かす: interactive/index.md
   - ロードマップ:
       - 学習地図: roadmap/learning_map.md
