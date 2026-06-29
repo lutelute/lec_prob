@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://lutelute.github.io/lec_prob/sitemap.xml
