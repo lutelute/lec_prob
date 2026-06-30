@@ -1,126 +1,171 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>全体地図 — 不確実性から決定までの俯瞰アトラス</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全体地図 — 確率から決定までの俯瞰アトラス</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root{--ev:#4285f4;--rep:#5e35b1;--num:#00897b;--meth:#43a047;--opt:#fb8c00;--dec:#8e24aa}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif;color:#202124;background:#fff;padding:20px 16px 60px}
-  .wrap{max-width:1180px;margin:0 auto}
-  h1{font-size:1.5rem;margin:.2em 0}
-  .lead{color:#3c4043;line-height:1.7;margin:.4em 0 1em}
-  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px;font-size:.82rem}
-  .legend span{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:#f1f3f4}
-  .dot{width:11px;height:11px;border-radius:50%}
-  .atlas{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 16px;align-items:stretch}
-  .stage{flex:0 0 200px;min-width:200px;display:flex;flex-direction:column}
-  .stage>.head{font-weight:800;font-size:.95rem;padding:8px 10px;border-radius:10px 10px 0 0;color:#fff}
-  .zone{flex:1;border:1.5px solid #e0e0e0;border-top:0;border-radius:0 0 10px 10px;padding:10px;display:flex;flex-direction:column;gap:9px;background:#fafbfc}
-  .card{display:block;text-decoration:none;color:inherit;border:1px solid #dadce0;border-radius:9px;padding:9px 10px;background:#fff;transition:transform .12s,box-shadow .12s,border-color .12s}
-  .card:hover{transform:translateY(-2px);box-shadow:0 5px 16px rgba(0,0,0,.12);border-color:#9aa0a6}
-  .card .t{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem}
-  .card .s{color:#5f6368;font-size:.76rem;margin-top:3px;line-height:1.35}
-  .card.tool{background:#e8f0fe;border-color:#4285f4}
-  .card.tool .t::after{content:'▶ 触る';margin-left:auto;font-size:.7rem;color:#1a56c4;font-weight:700}
-  .arrow{align-self:center;color:#9aa0a6;font-size:1.4rem;flex:0 0 auto}
-  .nav{font-size:.8rem;color:#5f6368;line-height:2;margin:6px 0 14px}
-  .nav a{color:#1a56c4;text-decoration:none;margin-right:4px}
-  thumb,svg.th{flex:0 0 auto}
-  .foot{margin-top:22px;color:#5f6368;font-size:.85rem;line-height:1.7}
-  .foot a{color:#1a56c4}
-  @media(max-width:760px){ .atlas{flex-direction:column;overflow-x:visible} .stage{flex:1 1 auto;min-width:0} .arrow{transform:rotate(90deg);margin:-4px 0} }
+  :root{
+    --bg:#faf8f1; --panel:#ffffff; --panel-2:#f2efe6; --line:#dcd8cc;
+    --ink:#1a1a17; --ink-2:#52504a; --ink-3:#928f84; --rule:#dcd8cc; --accent:#1f9e8a;
+    --gothic:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--mono);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:38px 26px 64px;}
+  h1{font-family:var(--gothic);font-weight:700;font-size:21px;letter-spacing:.04em;margin:0;padding-bottom:11px;border-bottom:1px solid var(--ink);}
+  .lead{font-family:var(--gothic);color:var(--ink-2);font-size:13px;line-height:1.75;max-width:880px;margin:15px 0 20px;}
+  .lead b{color:var(--ink);font-weight:700;}
+  .stage{background:var(--panel);border:1px solid var(--ink);border-radius:3px;overflow:hidden;}
+  .maphost{position:relative;}
+  canvas{display:block;width:100%;height:auto;background:#fffdf6;cursor:crosshair;}
+  .axis{position:absolute;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;pointer-events:none;}
+  .axis.x{bottom:8px;right:14px;} .axis.x2{bottom:8px;left:14px;}
+  .axis.y{top:10px;left:12px;} .axis.y2{bottom:30px;left:12px;}
+  .bar{display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid var(--ink);background:var(--panel-2);flex-wrap:wrap;}
+  .legend{display:flex;gap:7px 14px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--ink-2);}
+  .legend b{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:400;letter-spacing:.02em;}
+  .legend .sw{width:11px;height:11px;border-radius:2px;border:1px solid rgba(0,0,0,.2);}
+  .legend b.off{opacity:.3;}
+  .hint{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-left:auto;}
+  button{font-family:var(--gothic);font-size:11.5px;border-radius:2px;padding:6px 11px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;transition:.12s;}
+  button:hover{background:var(--panel-2);} button.on{background:var(--ink);color:#fff;font-weight:700;}
+  details{margin-top:14px;background:var(--panel);border:1px solid var(--rule);border-radius:2px;}
+  summary{padding:12px 15px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--ink-2);} summary:hover{color:var(--ink);}
+  .det{padding:0 15px 15px;font-family:var(--gothic);font-size:12.5px;line-height:1.8;color:var(--ink-2);} .det a{color:var(--accent);}
+  @media print{@page{size:A3 landscape;margin:8mm;}html,body{background:#fff;}.stage{border-color:#000;}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🗺 全体地図 — 不確実性から「決定」までの俯瞰アトラス</h1>
-  <p class="lead">この教材の全体像を<b>1枚で俯瞰</b>。左から右へ <b>① 不確実性 → ② 確率で表す → ③ 数を取り出す → ④ 手法(潰し方) → ⑤ 最適化(何を) → ⑥ 決定</b> の一本道。
-  各カードは概念・モジュール・ツールで、<b>クリックでそのページへ</b>。<span style="background:#e8f0fe;padding:0 6px;border-radius:5px">青いカード＝触れるツール</span>。</p>
-  <div class="legend">
-    <span><i class="dot" style="background:var(--ev)"></i>① 不確実性の種類</span>
-    <span><i class="dot" style="background:var(--rep)"></i>② 確率で表す</span>
-    <span><i class="dot" style="background:var(--num)"></i>③ 数を取り出す</span>
-    <span><i class="dot" style="background:var(--meth)"></i>④ 手法（潰し方）</span>
-    <span><i class="dot" style="background:var(--opt)"></i>⑤ 最適化（何を）</span>
-    <span><i class="dot" style="background:var(--dec)"></i>⑥ 決定・応用</span>
+  <h1>全体地図 — 確率から「決定」までの俯瞰アトラス</h1>
+  <div class="lead">この教材の<b>全概念・モジュール・ツール</b>を、性質で<b>2次元に配置</b>した地図。<b>横＝基礎・不確実性 ←→ 最適化・決定／縦＝離散・事象 ←→ 連続・分布・リスク</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋を重ねられる。▶印は触れるツール。</div>
+
+  <div class="stage">
+    <div class="maphost">
+      <canvas id="cv" width="1160" height="720"></canvas>
+      <span class="axis x">最適化・決定 →</span>
+      <span class="axis x2">← 基礎・不確実性</span>
+      <span class="axis y">↑ 連続・分布・リスク</span>
+      <span class="axis y2">↓ 離散・事象</span>
+    </div>
+    <div class="bar">
+      <button id="pathBtn">⊹ 推奨順路</button>
+      <div class="legend" id="legend"></div>
+      <span class="hint">カード=概念/ツール · 枠=カテゴリ · ▶=触る · クリックで開く</span>
+    </div>
   </div>
-  <div class="atlas" id="atlas"></div>
-  <div class="nav" id="nav"></div>
-  <p class="foot">使い方：俯瞰してから、気になるカードへ。迷ったら <a href="../notes/how_to_use_probability/">🧭 確率の使い方</a> →
-  <a href="../notes/distributions_and_methods/">🔢 分布を数値で扱う</a> → <a href="comparator.html">▶ 6形式コンパレータ</a>。
-  体系的には <a href="../notes/00_why_probability/">Module 0</a> から、依存関係は <a href="../roadmap/learning_map/">学習地図</a>。</p>
+
+  <details>
+    <summary>この地図の見方 / 別バージョン</summary>
+    <div class="det">各概念に「基礎度・離散か連続か・計算か最適化か」などの<b>属性</b>を与え 2 次元に配置（似た性質＝近い位置）。重なり回避でカードを整列。各カードのミニ図は概念の<b>サムネ</b>（山＝分布、面積＝確率、散布＝モンテカルロ、バー＝6形式、分岐＝二段階、的＝決定）。点線枠はカテゴリのまとまり、背景の方眼は位置の目安。「⊹ 推奨順路」で <a href="../notes/how_to_use_probability/">使い方</a>→…→<a href="../notes/07_case_study/">ケース</a> の学習ルートを重ねられる。仕様書様式の<b>1枚版</b>は <a href="blueprint.html">📐 全体ブループリント</a>。</div>
+  </details>
 </div>
+
 <script>
-// ミニ可視化サムネイル（46x30）
-const TH={
-  event:'<rect x="4" y="8" width="14" height="14" rx="2" fill="none" stroke="#4285f4" stroke-width="2"/><path d="M26 9 l10 12 M36 9 l-10 12" stroke="#ea4335" stroke-width="2"/>',
-  bell:'<path d="M3 26 C14 26 14 6 23 6 C32 6 32 26 43 26" fill="none" stroke="#5e35b1" stroke-width="2"/>',
-  hist:'<rect x="5" y="16" width="6" height="10" fill="#5e35b1"/><rect x="13" y="9" width="6" height="17" fill="#5e35b1"/><rect x="21" y="6" width="6" height="20" fill="#5e35b1"/><rect x="29" y="12" width="6" height="14" fill="#5e35b1"/><rect x="37" y="19" width="6" height="7" fill="#5e35b1"/>',
-  area:'<path d="M3 26 C14 26 14 6 23 6 C32 6 32 26 43 26" fill="none" stroke="#00897b" stroke-width="1.5"/><path d="M16 26 C18 18 20 9 23 6 C26 9 28 18 30 26 Z" fill="rgba(0,137,123,.4)"/>',
-  mean:'<path d="M3 26 C14 26 14 6 23 6 C32 6 32 26 43 26" fill="none" stroke="#00897b" stroke-width="1.5"/><line x1="23" y1="6" x2="23" y2="26" stroke="#ea4335" stroke-width="2"/>',
-  quant:'<path d="M3 26 C14 26 14 6 23 6 C32 6 32 26 43 26" fill="none" stroke="#00897b" stroke-width="1.5"/><path d="M3 26 C14 26 14 6 23 6 C28 9 30 18 33 26 Z" fill="rgba(66,133,244,.3)"/><line x1="33" y1="6" x2="33" y2="26" stroke="#202124" stroke-width="1.5" stroke-dasharray="2 2"/>',
-  dots:'<circle cx="9" cy="20" r="2" fill="#43a047"/><circle cx="16" cy="11" r="2" fill="#43a047"/><circle cx="22" cy="22" r="2" fill="#43a047"/><circle cx="28" cy="9" r="2" fill="#43a047"/><circle cx="34" cy="17" r="2" fill="#43a047"/><circle cx="40" cy="13" r="2" fill="#43a047"/>',
-  methods:'<line x1="6" y1="23" x2="40" y2="23" stroke="#43a047" stroke-width="1.5"/><circle cx="23" cy="23" r="3" fill="#9aa0a6"/><circle cx="14" cy="15" r="2.5" fill="#43a047"/><circle cx="30" cy="11" r="2.5" fill="#43a047"/><circle cx="35" cy="19" r="2.5" fill="#43a047"/>',
-  bars:'<rect x="6" y="6" width="22" height="4" fill="#9aa0a6"/><rect x="6" y="13" width="32" height="4" fill="#fb8c00"/><rect x="6" y="20" width="14" height="4" fill="#ea4335"/>',
-  tree:'<circle cx="9" cy="15" r="3" fill="#fb8c00"/><line x1="12" y1="15" x2="26" y2="8" stroke="#fb8c00" stroke-width="1.5"/><line x1="12" y1="15" x2="26" y2="22" stroke="#fb8c00" stroke-width="1.5"/><circle cx="29" cy="8" r="3" fill="#fb8c00"/><circle cx="29" cy="22" r="3" fill="#fb8c00"/>',
-  target:'<circle cx="23" cy="16" r="10" fill="none" stroke="#8e24aa" stroke-width="2"/><circle cx="23" cy="16" r="4" fill="#8e24aa"/>',
-  decision:'<line x1="6" y1="16" x2="22" y2="16" stroke="#8e24aa" stroke-width="2"/><path d="M22 16 l12 -8 M22 16 l12 8" stroke="#8e24aa" stroke-width="2" fill="none"/><path d="M34 8 l0 -3 M34 24 l0 3" stroke="#8e24aa" stroke-width="2"/>'
+"use strict";
+function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function rng(s){let x=s>>>0;return ()=>{x=(Math.imul(x,1103515245)+12345)&0x7fffffff;return x/0x7fffffff;};}
+const CATS={
+  basis:{label:'基礎',color:'#7a776e'},
+  event:{label:'事象・ベイズ',color:'#2f6fae'},
+  dist:{label:'分布・期待値',color:'#6f54c4'},
+  data:{label:'データ',color:'#c2891b'},
+  compute:{label:'計算・シナリオ',color:'#1f9e8a'},
+  opt:{label:'最適化',color:'#cf4f5f'},
+  decide:{label:'決定・応用',color:'#4e9a4e'},
 };
-const th=t=>`<svg class="th" width="46" height="30" viewBox="0 0 46 30">${TH[t]||''}</svg>`;
-
-const STAGES=[
- {key:'ev',title:'① 不確実性',cards:[
-   {t:'事象',s:'起こる/起こらない（故障・停電）',th:'event',h:'../notes/01_events_and_probability/'},
-   {t:'ばらつき',s:'量が揺れる・減らせない（需要・天候）',th:'bell',h:'../notes/02_random_variables_and_distributions/'},
-   {t:'誤差',s:'知らない・情報で減る（測定・予報）',th:'hist',h:'../notes/04_from_data_to_distribution/'},
-   {t:'なぜ確率が要るか',s:'平均で計画する罠',th:'mean',h:'../notes/00_why_probability/'},
- ]},
- {key:'rep',title:'② 確率で表す',cards:[
-   {t:'分布 PMF/PDF/CDF',s:'密度≠確率・面積＝確率',th:'bell',h:'../notes/02_random_variables_and_distributions/'},
-   {t:'▶ PDF・CDF',s:'面積＝確率を動かす',th:'area',h:'pdf_cdf.html',tool:1},
-   {t:'ベイズ更新',s:'情報で確率を更新',th:'event',h:'../notes/01_events_and_probability/'},
-   {t:'▶ ベイズ',s:'基準率の誤謬',th:'event',h:'bayes.html',tool:1},
- ]},
- {key:'num',title:'③ 数を取り出す',cards:[
-   {t:'分布→数値',s:'地図に操作を当ててスカラー',th:'mean',h:'../notes/distributions_and_methods/'},
-   {t:'▶ 分布→数',s:'確率/平均/分位点/標本',th:'quant',h:'dist_to_number.html',tool:1},
-   {t:'期待値・分散・相関',s:'平均が同じでもリスクは違う',th:'mean',h:'../notes/03_expectation_variance_covariance/'},
- ]},
- {key:'meth',title:'④ 手法（潰し方）',cards:[
-   {t:'確定論/確率/シナリオ',s:'分布を“数に潰す”3流儀',th:'methods',h:'../notes/distributions_and_methods/'},
-   {t:'モンテカルロ/SAA',s:'標本で近似・1/√N',th:'dots',h:'../notes/05_scenarios_and_monte_carlo/'},
-   {t:'▶ モンテカルロ',s:'収束・希少事象',th:'dots',h:'montecarlo.html',tool:1},
- ]},
- {key:'opt',title:'⑤ 最適化（何を）',cards:[
-   {t:'6形式',s:'期待値/ロバスト/チャンス/CVaR/分布ロバスト',th:'bars',h:'../notes/06_optimization_under_uncertainty/'},
-   {t:'▶ 6形式コンパレータ',s:'同じ問題で x* が100〜137',th:'bars',h:'comparator.html',tool:1},
-   {t:'二段階（VSS/EVPI）',s:'いま決め→観測→直す',th:'tree',h:'../notes/06b_two_stage_stochastic_programming/'},
-   {t:'▶ 蓄電池運用',s:'SoC・予測の価値',th:'tree',h:'battery.html',tool:1},
- ]},
- {key:'dec',title:'⑥ 決定・応用',cards:[
-   {t:'実データ→決定',s:'730日データ→6形式（ケース）',th:'target',h:'../notes/07_case_study/'},
-   {t:'確率の使い方',s:'名付ける→表す→決める',th:'decision',h:'../notes/how_to_use_probability/'},
-   {t:'▶ 理解度チェック',s:'8問で確かめる',th:'target',h:'quiz.html',tool:1},
- ]},
+// n:名, h:リンク, c:カテゴリ, x,y:概念座標(0..1), mo:ミニ可視化, tool:触れるツール
+const M=[
+  {n:'なぜ確率',h:'../notes/00_why_probability/',c:'basis',x:0.07,y:0.50,mo:'meanline'},
+  {n:'確率の使い方',h:'../notes/how_to_use_probability/',c:'basis',x:0.17,y:0.34,mo:'target'},
+  {n:'事象と確率',h:'../notes/01_events_and_probability/',c:'event',x:0.12,y:0.17,mo:'event'},
+  {n:'ベイズ更新',h:'bayes.html',c:'event',x:0.23,y:0.10,mo:'bayes',tool:1},
+  {n:'確率変数と分布',h:'../notes/02_random_variables_and_distributions/',c:'dist',x:0.30,y:0.64,mo:'bell'},
+  {n:'PDF・CDF',h:'pdf_cdf.html',c:'dist',x:0.39,y:0.76,mo:'area',tool:1},
+  {n:'期待値・分散',h:'../notes/03_expectation_variance_covariance/',c:'dist',x:0.30,y:0.46,mo:'meanline'},
+  {n:'分布を数値で',h:'../notes/distributions_and_methods/',c:'dist',x:0.45,y:0.55,mo:'quant'},
+  {n:'分布→数',h:'dist_to_number.html',c:'dist',x:0.52,y:0.67,mo:'quant',tool:1},
+  {n:'データから分布',h:'../notes/04_from_data_to_distribution/',c:'data',x:0.47,y:0.86,mo:'hist'},
+  {n:'シナリオとMC',h:'../notes/05_scenarios_and_monte_carlo/',c:'compute',x:0.58,y:0.58,mo:'dots'},
+  {n:'モンテカルロ',h:'montecarlo.html',c:'compute',x:0.64,y:0.72,mo:'converge',tool:1},
+  {n:'不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/',c:'opt',x:0.76,y:0.52,mo:'bars'},
+  {n:'6形式コンパレータ',h:'comparator.html',c:'opt',x:0.85,y:0.60,mo:'bars',tool:1},
+  {n:'二段階(VSS/EVPI)',h:'../notes/06b_two_stage_stochastic_programming/',c:'opt',x:0.78,y:0.73,mo:'tree'},
+  {n:'蓄電池運用',h:'battery.html',c:'opt',x:0.88,y:0.75,mo:'tree',tool:1},
+  {n:'ケーススタディ',h:'../notes/07_case_study/',c:'decide',x:0.90,y:0.40,mo:'hist'},
+  {n:'理解度チェック',h:'quiz.html',c:'decide',x:0.93,y:0.22,mo:'target',tool:1},
 ];
-const COLOR={ev:'var(--ev)',rep:'var(--rep)',num:'var(--num)',meth:'var(--meth)',opt:'var(--opt)',dec:'var(--dec)'};
+const SPINE=['確率の使い方','事象と確率','確率変数と分布','分布を数値で','シナリオとMC','不確実性下の最適化','ケーススタディ'];
 
-const atlas=document.getElementById('atlas'); const allLinks=[];
-STAGES.forEach((st,i)=>{
-  const col=document.createElement('div'); col.className='stage';
-  const head=document.createElement('div'); head.className='head'; head.textContent=st.title; head.style.background=COLOR[st.key];
-  const zone=document.createElement('div'); zone.className='zone';
-  st.cards.forEach(c=>{
-    const a=document.createElement('a'); a.className='card'+(c.tool?' tool':''); a.href=c.h; a.target='_top';
-    a.innerHTML=`<div class="t">${th(c.th)}<span>${c.t}</span></div><div class="s">${c.s}</div>`;
-    zone.appendChild(a); allLinks.push(`<a href="${c.h}" target="_top">${c.t}</a>`);
-  });
-  col.appendChild(head); col.appendChild(zone); atlas.appendChild(col);
-  if(i<STAGES.length-1){ const ar=document.createElement('div'); ar.className='arrow'; ar.textContent='→'; atlas.appendChild(ar); }
-});
-document.getElementById('nav').innerHTML='全ノード：'+allLinks.join(' ・ ');
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),CW=cv.width,CH=cv.height;
+const PAD=62, CWH=49, CHH=33;
+function toPx(m){return{x:PAD+m.x*(CW-2*PAD), y:CH-PAD-m.y*(CH-2*PAD)};}
+M.forEach(m=>{const p=toPx(m);m.px=p.x;m.py=p.y;});
+function relax(){const gx=18,gy=24;for(let it=0;it<320;it++){let moved=false;
+  for(let i=0;i<M.length;i++)for(let j=i+1;j<M.length;j++){const a=M[i],b=M[j];const dx=b.px-a.px,dy=b.py-a.py;const ox=(CWH+gx)-Math.abs(dx),oy=(CHH+gy)-Math.abs(dy);
+    if(ox>0&&oy>0){moved=true;if(ox<oy){const s=(dx<0?-1:1)*ox/2;a.px-=s;b.px+=s;}else{const s=(dy<0?-1:1)*oy/2;a.py-=s;b.py+=s;}}}
+  for(const m of M){m.px=Math.max(PAD-2,Math.min(CW-PAD+2,m.px));m.py=Math.max(PAD+6,Math.min(CH-PAD,m.py));}
+  if(!moved)break;}}
+relax();
+
+function hull(pts){if(pts.length<3)return pts.slice();const p=pts.slice().sort((a,b)=>a.x-b.x||a.y-b.y);const cr=(o,a,b)=>(a.x-o.x)*(b.y-o.y)-(a.y-o.y)*(b.x-o.x);const lo=[];for(const q of p){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],q)<=0)lo.pop();lo.push(q);}const up=[];for(let i=p.length-1;i>=0;i--){const q=p[i];while(up.length>=2&&cr(up[up.length-2],up[up.length-1],q)<=0)up.pop();up.push(q);}lo.pop();up.pop();return lo.concat(up);}
+function expand(poly,m){const cx=poly.reduce((s,p)=>s+p.x,0)/poly.length,cy=poly.reduce((s,p)=>s+p.y,0)/poly.length;return poly.map(p=>{const dx=p.x-cx,dy=p.y-cy,d=Math.hypot(dx,dy)||1;return{x:p.x+dx/d*m,y:p.y+dy/d*m};});}
+function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function clipCard(x,y,w,h,fn){ctx.save();rr(x,y,w,h,2);ctx.clip();fn();ctx.restore();}
+
+const INK='#3a3a34', MUT='#9a978d';
+function bellPath(x,y,w,h){ctx.beginPath();for(let i=0;i<=28;i++){const t=i/28,px=x+t*w,z=(t-0.5)*5,py=y+h-(h*0.9)*Math.exp(-z*z/2);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}}
+const MOT={
+  bell(x,y,w,h,c){bellPath(x,y,w,h);ctx.strokeStyle=c;ctx.lineWidth=1.6;ctx.stroke();},
+  area(x,y,w,h,c){bellPath(x,y,w,h);ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();const a=0.34,b=0.66;ctx.beginPath();ctx.moveTo(x+a*w,y+h);for(let i=0;i<=18;i++){const t=a+(b-a)*i/18,px=x+t*w,z=(t-0.5)*5,py=y+h-(h*0.9)*Math.exp(-z*z/2);ctx.lineTo(px,py);}ctx.lineTo(x+b*w,y+h);ctx.closePath();const[r,g,bl]=hex2rgb(c);ctx.fillStyle=`rgba(${r},${g},${bl},0.34)`;ctx.fill();},
+  meanline(x,y,w,h,c){bellPath(x,y,w,h);ctx.strokeStyle=c;ctx.lineWidth=1.3;ctx.stroke();ctx.strokeStyle='#cf4f5f';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x+w/2,y+h*0.12);ctx.lineTo(x+w/2,y+h);ctx.stroke();},
+  quant(x,y,w,h,c){bellPath(x,y,w,h);ctx.strokeStyle=c;ctx.lineWidth=1.3;ctx.stroke();const q=0.66;ctx.beginPath();ctx.moveTo(x,y+h);for(let i=0;i<=18;i++){const t=q*i/18,px=x+t*w,z=(t-0.5)*5,py=y+h-(h*0.9)*Math.exp(-z*z/2);ctx.lineTo(px,py);}ctx.lineTo(x+q*w,y+h);ctx.closePath();const[r,g,bl]=hex2rgb(c);ctx.fillStyle=`rgba(${r},${g},${bl},0.22)`;ctx.fill();ctx.strokeStyle=INK;ctx.lineWidth=1.1;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(x+q*w,y+h*0.14);ctx.lineTo(x+q*w,y+h);ctx.stroke();ctx.setLineDash([]);},
+  hist(x,y,w,h,c){const n=8,g=rng(7);const[r,gg,bl]=hex2rgb(c);ctx.fillStyle=`rgba(${r},${gg},${bl},0.55)`;for(let i=0;i<n;i++){const t=(i+0.5)/n,z=(t-0.5)*5,bh=(h*0.88)*Math.exp(-z*z/2)*(0.78+0.42*g()),bw=w/n*0.74,bx=x+i*w/n+(w/n-bw)/2;ctx.fillRect(bx,y+h-bh,bw,bh);}},
+  dots(x,y,w,h,c){const g=rng(13);ctx.fillStyle=c;for(let i=0;i<16;i++){ctx.beginPath();ctx.arc(x+4+g()*(w-8),y+4+g()*(h-8),1.7,0,7);ctx.fill();}},
+  converge(x,y,w,h,c){const g=rng(5);ctx.strokeStyle=MUT;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(x+3,y+h*0.45);ctx.lineTo(x+w-3,y+h*0.45);ctx.stroke();ctx.fillStyle=c;for(let i=0;i<22;i++){const t=i/22,px=x+4+t*(w-8),sp=(1-t)*h*0.42,py=y+h*0.45+(g()-0.5)*2*sp;ctx.beginPath();ctx.arc(px,py,1.4,0,7);ctx.fill();}},
+  bars(x,y,w,h,c){const vals=[0.32,0.58,1.0,0.64,0.84,0.7],n=vals.length,bh=h/n*0.6,[r,g,bl]=hex2rgb(c);for(let i=0;i<n;i++){const by=y+i*h/n+(h/n-bh)/2;ctx.fillStyle=i===2?c:`rgba(${r},${g},${bl},0.5)`;ctx.fillRect(x+3,by,(w-6)*vals[i],bh);}},
+  tree(x,y,w,h,c){ctx.strokeStyle=c;ctx.lineWidth=1.3;ctx.fillStyle=c;const x0=x+w*0.18,y0=y+h*0.5;ctx.beginPath();ctx.arc(x0,y0,2.6,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(x0+2,y0);ctx.lineTo(x+w*0.72,y+h*0.24);ctx.moveTo(x0+2,y0);ctx.lineTo(x+w*0.72,y+h*0.76);ctx.stroke();[[x+w*0.76,y+h*0.24],[x+w*0.76,y+h*0.76]].forEach(p=>{ctx.beginPath();ctx.arc(p[0],p[1],2.6,0,7);ctx.fill();});},
+  event(x,y,w,h,c){ctx.strokeStyle=c;ctx.lineWidth=1.6;rr(x+w*0.12,y+h*0.30,w*0.3,h*0.4,2);ctx.stroke();ctx.strokeStyle='#cf4f5f';ctx.beginPath();ctx.moveTo(x+w*0.6,y+h*0.32);ctx.lineTo(x+w*0.86,y+h*0.72);ctx.moveTo(x+w*0.86,y+h*0.32);ctx.lineTo(x+w*0.6,y+h*0.72);ctx.stroke();},
+  bayes(x,y,w,h,c){ctx.fillStyle='rgba(60,60,52,0.12)';ctx.fillRect(x+4,y+5,w-8,h-10);const[r,g,bl]=hex2rgb(c);ctx.fillStyle=`rgba(${r},${g},${bl},0.85)`;ctx.fillRect(x+4,y+5,(w-8)*0.2,h-10);ctx.strokeStyle=c;ctx.lineWidth=1;ctx.strokeRect(x+4,y+5,w-8,h-10);},
+  target(x,y,w,h,c){const cx=x+w/2,cy=y+h/2,R=Math.min(w,h)*0.36;ctx.strokeStyle=c;ctx.lineWidth=1.4;for(let r=1;r<=2;r++){ctx.beginPath();ctx.arc(cx,cy,R*r/2,0,7);ctx.stroke();}ctx.fillStyle=c;ctx.beginPath();ctx.arc(cx,cy,2.4,0,7);ctx.fill();},
+};
+
+let hover=-1,off={},showPath=false;
+function drawGrid(){const step=29;ctx.lineWidth=1;
+  for(let x=PAD%step;x<CW;x+=step){const mj=Math.round((x-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,CH);ctx.stroke();}
+  for(let y=PAD%step;y<CH;y+=step){const mj=Math.round((y-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(CW,y+.5);ctx.stroke();}}
+function drawHulls(){for(const k in CATS){if(off[k])continue;const pts=M.filter(m=>m.c===k).map(m=>({x:m.px,y:m.py}));if(!pts.length)continue;const[r,g,b]=hex2rgb(CATS[k].color);
+  let poly;if(pts.length>=3)poly=expand(hull(pts),40);else{const cx=pts.reduce((s,p)=>s+p.x,0)/pts.length,cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;poly=[];for(let a=0;a<14;a++)poly.push({x:cx+Math.cos(a/14*6.283)*(CWH+30),y:cy+Math.sin(a/14*6.283)*(CHH+26)});}
+  ctx.beginPath();poly.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle=`rgba(${r},${g},${b},0.06)`;ctx.fill();ctx.strokeStyle=`rgba(${r},${g},${b},0.45)`;ctx.setLineDash([5,4]);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+  let tx=poly[0].x,ty=poly[0].y;for(const p of poly)if(p.y<ty){ty=p.y;tx=p.x;}ctx.fillStyle=`rgba(${r},${g},${b},0.95)`;ctx.font='600 11px '+getCSS('--mono');ctx.textAlign='center';ctx.fillText(CATS[k].label,tx,ty-6);}}
+function drawPath(){const pts=SPINE.map(n=>M.find(m=>m.n===n)).filter(m=>m&&!off[m.c]);if(pts.length<2)return;
+  ctx.strokeStyle='rgba(26,26,23,0.55)';ctx.lineWidth=1.8;ctx.setLineDash([2,5]);ctx.beginPath();pts.forEach((m,i)=>i?ctx.lineTo(m.px,m.py):ctx.moveTo(m.px,m.py));ctx.stroke();ctx.setLineDash([]);
+  pts.forEach((m,i)=>{const bx=m.px-CWH+8,by=m.py-CHH+8;ctx.beginPath();ctx.arc(bx,by,8,0,7);ctx.fillStyle='#1a1a17';ctx.fill();ctx.fillStyle='#fff';ctx.font='700 10px '+getCSS('--mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,bx,by+.5);ctx.textBaseline='alphabetic';});}
+function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,y=m.py-CHH,w=CWH*2,h=CHH*2;
+  ctx.save();ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=hl?7:3;ctx.shadowOffsetY=1.5;rr(x,y,w,h,3);ctx.fillStyle='#fffefb';ctx.fill();ctx.restore();
+  rr(x,y,w,h,3);ctx.lineWidth=hl?2:1;ctx.strokeStyle=hl?'#1a1a17':'rgba(26,26,23,0.32)';ctx.stroke();
+  ctx.fillStyle=CATS[m.c].color;rr(x,y,w,3.2,2);ctx.fill();
+  const vx=x+5,vy=y+9,vw=w-10,vh=h-25; clipCard(vx,vy,vw,vh,()=>MOT[m.mo](vx,vy,vw,vh,CATS[m.c].color));
+  if(m.tool){ctx.fillStyle=CATS[m.c].color;ctx.beginPath();ctx.moveTo(x+w-10,y+6);ctx.lineTo(x+w-4,y+9.5);ctx.lineTo(x+w-10,y+13);ctx.closePath();ctx.fill();}
+  ctx.fillStyle=hl?'#1a1a17':'rgba(26,26,23,0.9)';ctx.font=(hl?'700 ':'600 ')+'9.5px '+getCSS('--gothic');ctx.textAlign='center';ctx.textBaseline='middle';
+  let nm=m.n;if(nm.length>9)nm=nm.slice(0,8)+'…';ctx.fillText(nm,m.px,y+h-8);ctx.textBaseline='alphabetic';}
+function draw(){ctx.clearRect(0,0,CW,CH);drawGrid();drawHulls();if(showPath)drawPath();
+  for(let i=0;i<M.length;i++)if(i!==hover)drawCard(M[i],i);if(hover>=0)drawCard(M[hover],hover);
+  if(hover>=0){const m=M[hover];ctx.fillStyle='#1a1a17';ctx.font='700 11px '+getCSS('--gothic');ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(m.n,16,CH-15);const tw=ctx.measureText(m.n).width;ctx.fillStyle=getCSS('--ink-3');ctx.font='10px '+getCSS('--mono');ctx.fillText('  ▸ '+CATS[m.c].label+(m.tool?' / 触れるツール':'')+' / クリックで開く',16+tw+6,CH-15);}}
+function renderLegend(){const el=document.getElementById('legend');el.innerHTML=Object.keys(CATS).map(k=>'<b data-k="'+k+'" class="'+(off[k]?'off':'')+'"><span class="sw" style="background:'+CATS[k].color+'"></span>'+CATS[k].label+'</b>').join('');el.querySelectorAll('b').forEach(b=>b.onclick=()=>{off[b.dataset.k]=!off[b.dataset.k];renderLegend();draw();});}
+function pick(mx,my){for(let i=M.length-1;i>=0;i--){const m=M[i];if(off[m.c])continue;if(Math.abs(mx-m.px)<=CWH&&Math.abs(my-m.py)<=CHH)return i;}return -1;}
+function evt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*CW/r.width,y:(e.clientY-r.top)*CH/r.height};}
+cv.addEventListener('mousemove',e=>{const p=evt(e),h=pick(p.x,p.y);cv.style.cursor=h>=0?'pointer':'crosshair';if(h!==hover){hover=h;draw();}});
+cv.addEventListener('mouseleave',()=>{if(hover!==-1){hover=-1;draw();}});
+cv.addEventListener('click',e=>{const p=evt(e),h=pick(p.x,p.y);if(h>=0)location.href=M[h].h;});
+document.getElementById('pathBtn').onclick=function(){showPath=!showPath;this.classList.toggle('on',showPath);draw();};
+renderLegend();draw();
 </script>
 </body>
 </html>
