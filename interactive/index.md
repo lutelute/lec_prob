@@ -7,6 +7,9 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 **インストール不要・その場で動く**ツール群です。各ツールの「**▶ ここで動かす**」ボタンを押すと読み込まれ、
 **スライダーを動かすと図と数値が即座に変わります**。すべてブラウザ内（JavaScript + Plotly.js）で完結します。
 
+!!! tip "まず全体像を俯瞰したいなら"
+    🗺 **[全体地図 — 不確実性から「決定」までの一本道アトラス](map.html){target=_blank}** で、概念・モジュール・ツールの位置関係を1枚で見渡せます。
+
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0">
   <a href="#t1" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #4285f4"><b>① PDF・CDF・区間確率</b><br><span style="color:#5f6368;font-size:.85em">密度≠確率・面積＝CDF差（M2）</span></a>
   <a href="#t2" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #34a853"><b>② ベイズ更新</b><br><span style="color:#5f6368;font-size:.85em">基準率の誤謬（M1）</span></a>
