@@ -37,6 +37,12 @@
   details{margin-top:14px;background:var(--panel);border:1px solid var(--rule);border-radius:2px;}
   summary{padding:12px 15px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--ink-2);} summary:hover{color:var(--ink);}
   .det{padding:0 15px 15px;font-family:var(--gothic);font-size:12.5px;line-height:1.8;color:var(--ink-2);} .det a{color:var(--accent);}
+  .maplist{display:none}
+  .mlcat{font-family:var(--gothic);font-weight:700;font-size:.86rem;margin:14px 0 4px;padding-left:8px;border-left:4px solid #ccc}
+  .mlitem{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin:6px 0;text-decoration:none;color:var(--ink);font-family:var(--gothic);font-size:.92rem;background:#fff}
+  .mlitem .tg{font-size:.66rem;font-weight:700;color:#fff;border-radius:4px;padding:1px 5px}
+  .mlitem .vk{margin-left:auto;color:#34a853;font-weight:700}
+  @media(max-width:680px){ .maphost,.bar .legend{display:none} .maplist{display:block} }
   @media print{@page{size:A3 landscape;margin:8mm;}html,body{background:#fff;}.stage{border-color:#000;}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -61,6 +67,8 @@
       <span class="hint" id="hint">カード=概念/ツール · ▶=触る · ✓=訪問済 · クリックで開く</span>
     </div>
   </div>
+
+  <div class="maplist" id="maplist"></div>
 
   <details>
     <summary>この地図の見方 / 別バージョン</summary>
@@ -162,7 +170,15 @@ function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,
 function draw(){ctx.clearRect(0,0,CW,CH);drawGrid();drawHulls();if(showPath)drawPath();
   for(let i=0;i<M.length;i++)if(i!==hover)drawCard(M[i],i);if(hover>=0)drawCard(M[hover],hover);
   if(hover>=0){const m=M[hover];ctx.fillStyle='#1a1a17';ctx.font='700 11px '+getCSS('--gothic');ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(m.n,16,CH-15);const tw=ctx.measureText(m.n).width;ctx.fillStyle=getCSS('--ink-3');ctx.font='10px '+getCSS('--mono');ctx.fillText('  ▸ '+CATS[m.c].label+(m.tool?' / 触れるツール':'')+' / クリックで開く',16+tw+6,CH-15);}}
-function renderLegend(){const el=document.getElementById('legend');el.innerHTML=Object.keys(CATS).map(k=>'<b data-k="'+k+'" class="'+(off[k]?'off':'')+'"><span class="sw" style="background:'+CATS[k].color+'"></span>'+CATS[k].label+'</b>').join('');el.querySelectorAll('b').forEach(b=>b.onclick=()=>{off[b.dataset.k]=!off[b.dataset.k];renderLegend();draw();});}
+function renderList(){const el=document.getElementById('maplist');if(!el)return;let html='';
+  for(const k in CATS){if(off[k])continue;const items=M.filter(m=>m.c===k&&(!query||m.n.toLowerCase().indexOf(query)>=0));if(!items.length)continue;
+    html+='<div class="mlcat" style="border-color:'+CATS[k].color+'">'+CATS[k].label+'</div>';
+    items.forEach(m=>{html+='<a class="mlitem" href="'+m.h+'" data-n="'+m.n+'" target="_top">'+m.n+
+      (m.tool?'<span class="tg" style="background:'+CATS[m.c].color+'">▶ 触る</span>':'')+
+      (visited.has(m.n)?'<span class="vk">✓</span>':'')+'</a>';});}
+  el.innerHTML=html||'<p style="color:var(--ink-3)">該当なし</p>';
+  el.querySelectorAll('.mlitem').forEach(a=>a.addEventListener('click',()=>markVisited({n:a.dataset.n})));}
+function renderLegend(){const el=document.getElementById('legend');el.innerHTML=Object.keys(CATS).map(k=>'<b data-k="'+k+'" class="'+(off[k]?'off':'')+'"><span class="sw" style="background:'+CATS[k].color+'"></span>'+CATS[k].label+'</b>').join('');el.querySelectorAll('b').forEach(b=>b.onclick=()=>{off[b.dataset.k]=!off[b.dataset.k];renderLegend();draw();renderList();});}
 function pick(mx,my){for(let i=M.length-1;i>=0;i--){const m=M[i];if(off[m.c])continue;if(Math.abs(mx-m.px)<=CWH&&Math.abs(my-m.py)<=CHH)return i;}return -1;}
 function evt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*CW/r.width,y:(e.clientY-r.top)*CH/r.height};}
 cv.addEventListener('mousemove',e=>{const p=evt(e),h=pick(p.x,p.y);cv.style.cursor=h>=0?'pointer':'crosshair';if(h!==hover){hover=h;draw();}});
@@ -170,14 +186,14 @@ cv.addEventListener('mouseleave',()=>{if(hover!==-1){hover=-1;draw();}});
 cv.addEventListener('click',e=>{const p=evt(e),h=pick(p.x,p.y);if(h>=0){markVisited(M[h]);location.href=M[h].h;}});
 document.getElementById('pathBtn').onclick=function(){showPath=!showPath;this.classList.toggle('on',showPath);draw();};
 // 検索
-document.getElementById('search').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();draw();});
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();draw();renderList();});
 // 訪問済み（進捗）：localStorage に記録、✓表示。進捗をヒントに
 let visited=new Set(); try{visited=new Set(JSON.parse(localStorage.getItem('lp_visited')||'[]'));}catch(e){}
 let query='';
 function markVisited(m){visited.add(m.n);try{localStorage.setItem('lp_visited',JSON.stringify([...visited]));}catch(e){}}
 function updateProgress(){const h=document.getElementById('hint');if(h)h.textContent=`✓ ${visited.size}/${M.length} 訪問済 · ▶=触る · クリックで開く`+(visited.size?' · ':' ')+(visited.size?'右クリックで進捗リセット':'');}
 cv.addEventListener('contextmenu',e=>{e.preventDefault();if(visited.size&&confirm('訪問済みの記録をリセットしますか？')){visited.clear();localStorage.removeItem('lp_visited');updateProgress();draw();}});
-updateProgress();renderLegend();draw();
+updateProgress();renderLegend();draw();renderList();
 </script>
 </body>
 </html>
