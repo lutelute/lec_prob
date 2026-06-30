@@ -27,6 +27,9 @@
   .act button.alt{background:#5f6368}
   .summ{font-size:.85rem;color:#3c4043;background:#f1f5ff;border-left:.3rem solid #4285f4;border-radius:6px;padding:8px 10px;margin:8px 0}
   .err{color:#c5221f;font-size:.85rem;margin:6px 0}
+  #tableWrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.res{min-width:430px}
+  .rec{font-size:.92rem;background:#e6f4ea;border-left:.3rem solid #34a853;border-radius:6px;padding:9px 11px;margin:8px 0;font-weight:600;color:#137333}
 </style>
 </head>
 <body>
@@ -54,6 +57,7 @@
       <div id="paramIn" style="display:none">
         <div class="num"><label>平均 μ<input type="number" id="mu" value="100"></label><label>標準偏差 σ<input type="number" id="sd" value="15"></label></div>
       </div>
+      <div class="num"><label>量の呼び名<input type="text" id="qty" value="需要" placeholder="需要/在庫…"></label><label>単位<input type="text" id="unit" value="" placeholder="MW/個…"></label></div>
       <h2>② コスト（1単位あたり）</h2>
       <div class="num"><label>不足の損 c_s<input type="number" id="cs" value="10"></label><label>余剰の損 c_o<input type="number" id="co" value="1"></label></div>
       <h2>③ リスク設定</h2>
@@ -63,6 +67,7 @@
     </div>
     <div class="plots" style="display:block">
       <div class="summ" id="summ">需要を入れて「計算する」を押してください。</div>
+      <div class="rec" id="rec" style="display:none"></div>
       <div id="tableWrap"></div>
       <div class="act" id="exports" style="display:none">
         <button id="csv">CSV書き出し</button>
@@ -118,13 +123,17 @@ function compute(){
   ];
   forms.forEach(o=>{o.p=pshort(d,o.x); o.c=ecost(d,o.x,cs,co);});
   const best=forms.reduce((a,b)=>b.c<a.c?b:a);
-  lastRows=forms; lastMeta={src,mu,s,cs,co,eps,alpha,k,best:best.f};
-  $('summ').innerHTML=`<b>${src}</b>：平均 ${mu.toFixed(1)} / SD ${s.toFixed(1)}。不足損 ${cs} ≫ 余剰損 ${co}。`+
-    `期待コスト最小は <b>${best.f}（確保 ${best.x.toFixed(1)}）</b>。ただし「最悪を避けたい/不足を抑えたい」なら下表で選ぶ。`;
-  let html='<table class="res"><tr><th>形式</th><th>推奨確保量</th><th>供給不足の確率</th><th>期待コスト</th></tr>';
+  const u=($('unit').value||'').trim(), qty=($('qty').value||'').trim()||'需要';
+  const us=u?(' '+u):'';
+  lastRows=forms; lastMeta={src,mu,s,cs,co,eps,alpha,k,best:best.f,unit:u,qty};
+  $('summ').innerHTML=`<b>${src}</b>：${qty}の平均 ${mu.toFixed(1)}${us} / SD ${s.toFixed(1)}${us}。不足損 ${cs} ${cs>co?'≫':cs<co?'≪':'='} 余剰損 ${co}。`;
+  $('rec').innerHTML=`おすすめ：費用を平均的に小さくするなら <b>${best.f}＝${best.x.toFixed(1)}${us}</b> を確保（供給不足 ${(best.p*100).toFixed(0)}%）。`+
+    `不足を絶対に避けたいなら下表で確保量の多い形式（CVaR・ロバスト）を選ぶ。`;
+  let html='<table class="res"><tr><th>形式</th><th>推奨確保量</th><th>'+qty+'不足の確率</th><th>期待コスト</th></tr>';
   forms.forEach(o=>{html+=`<tr class="${o.f===best.f?'best':''}"><td class="f">${o.f}<div class="mini">${o.note}</div></td>`+
-    `<td>${o.x.toFixed(1)}</td><td>${(o.p*100).toFixed(1)}%</td><td>${o.c.toFixed(1)}</td></tr>`;});
+    `<td>${o.x.toFixed(1)}${us}</td><td>${(o.p*100).toFixed(1)}%</td><td>${o.c.toFixed(1)}</td></tr>`;});
   html+='</table>';
+  $('rec').style.display='block';
   $('tableWrap').innerHTML=html; $('exports').style.display='flex';
   // plot: 分布(ヒスト) + 各形式の確保量を縦線
   const xs=L.linspace(Math.min(...ds)-5,Math.max(...ds)+10,80);
@@ -135,6 +144,9 @@ function compute(){
   Plotly.react('plot',traces,{margin:{t:6,r:8,b:34,l:42},height:280,xaxis:{title:'需要 / 確保量'},yaxis:{title:'密度',rangemode:'tozero'},showlegend:true,legend:{orientation:'h',font:{size:9},y:1.15}},{displayModeBar:false,responsive:true});
 }
 $('calc').onclick=compute;
+// 数値入力で Enter → 計算、データ欄は Ctrl/Cmd+Enter
+document.querySelectorAll('#cs,#co,#eps,#alpha,#k,#mu,#sd,#qty,#unit').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')compute();}));
+$('data').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))compute();});
 
 $('csv').onclick=()=>{
   if(!lastRows) return;
