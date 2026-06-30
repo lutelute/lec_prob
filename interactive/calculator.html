@@ -45,6 +45,13 @@
   <div class="ins">自分のデータ・コストを入れれば、実際の決定に使える。</div></div>
   <div class="panel">
     <div class="controls">
+      <h2>用途プリセット（任意）</h2>
+      <div class="seg2" id="preset" style="flex-wrap:wrap">
+        <button type="button" data-p="power">電力予備力</button>
+        <button type="button" data-p="stock">在庫</button>
+        <button type="button" data-p="seat">座席/予約</button>
+        <button type="button" data-p="order">日前発注</button>
+      </div>
       <h2>① 需要の入力</h2>
       <div class="seg2" id="mode">
         <button data-m="data" class="on">データを貼る</button>
@@ -144,6 +151,13 @@ function compute(){
   Plotly.react('plot',traces,{margin:{t:6,r:8,b:34,l:42},height:280,xaxis:{title:'需要 / 確保量'},yaxis:{title:'密度',rangemode:'tozero'},showlegend:true,legend:{orientation:'h',font:{size:9},y:1.15}},{displayModeBar:false,responsive:true});
 }
 $('calc').onclick=compute;
+// 用途プリセット：呼び名・単位・コストを一括設定
+const PRESETS={power:{qty:'ピーク需要',unit:'MW',cs:10,co:1},stock:{qty:'需要',unit:'個',cs:8,co:2},seat:{qty:'来場者',unit:'席',cs:5,co:1},order:{qty:'需要',unit:'',cs:10,co:1}};
+document.querySelectorAll('#preset button').forEach(b=>b.addEventListener('click',()=>{
+  const p=PRESETS[b.dataset.p]; $('qty').value=p.qty; $('unit').value=p.unit; $('cs').value=p.cs; $('co').value=p.co;
+  document.querySelectorAll('#preset button').forEach(x=>x.classList.toggle('on',x===b));
+  if(lastRows||mode==='param'||parseData().length>=3) compute();
+}));
 // 数値入力で Enter → 計算、データ欄は Ctrl/Cmd+Enter
 document.querySelectorAll('#cs,#co,#eps,#alpha,#k,#mu,#sd,#qty,#unit').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')compute();}));
 $('data').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey))compute();});
