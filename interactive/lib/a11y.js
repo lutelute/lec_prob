@@ -44,7 +44,17 @@
         p.setAttribute('aria-label', 'インタラクティブな図。数値は近くの指標・表に文字で表示されます。');
       }
     });
-    // 触れるボタン群に最低限の名前（テキストが無い場合のフォールバックはしない＝既存テキストを尊重）
+    // 全画面で開いたとき（iframe埋め込みでない）だけ、戻り導線フッターを出す
+    try {
+      if (window.self === window.top && !document.querySelector('.lp-toolnav')) {
+        var host = document.querySelector('.wrap') || document.body;
+        var nav = document.createElement('nav');
+        nav.className = 'lp-toolnav';
+        nav.setAttribute('aria-label', '戻る');
+        nav.innerHTML = '← <a href="course.html">🎓 学習コース</a> · <a href="map.html">🗺 全体地図</a> · <a href="../">🏠 ホーム</a>';
+        host.appendChild(nav);
+      }
+    } catch (e) {}
   }
   if (document.readyState !== 'loading') run();
   else document.addEventListener('DOMContentLoaded', run);
