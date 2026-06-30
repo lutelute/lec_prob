@@ -55,8 +55,9 @@
     </div>
     <div class="bar">
       <button id="pathBtn">⊹ 推奨順路</button>
+      <input id="search" placeholder="🔍 検索…" aria-label="ノードを検索" style="font-family:var(--mono);font-size:11px;padding:5px 9px;border:1px solid var(--ink);border-radius:2px;width:120px">
       <div class="legend" id="legend"></div>
-      <span class="hint">カード=概念/ツール · 枠=カテゴリ · ▶=触る · クリックで開く</span>
+      <span class="hint" id="hint">カード=概念/ツール · ▶=触る · ✓=訪問済 · クリックで開く</span>
     </div>
   </div>
 
@@ -148,13 +149,15 @@ function drawPath(){const pts=SPINE.map(n=>M.find(m=>m.n===n)).filter(m=>m&&!off
   ctx.strokeStyle='rgba(26,26,23,0.55)';ctx.lineWidth=1.8;ctx.setLineDash([2,5]);ctx.beginPath();pts.forEach((m,i)=>i?ctx.lineTo(m.px,m.py):ctx.moveTo(m.px,m.py));ctx.stroke();ctx.setLineDash([]);
   pts.forEach((m,i)=>{const bx=m.px-CWH+8,by=m.py-CHH+8;ctx.beginPath();ctx.arc(bx,by,8,0,7);ctx.fillStyle='#1a1a17';ctx.fill();ctx.fillStyle='#fff';ctx.font='700 10px '+getCSS('--mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,bx,by+.5);ctx.textBaseline='alphabetic';});}
 function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,y=m.py-CHH,w=CWH*2,h=CHH*2;
-  ctx.save();ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=hl?7:3;ctx.shadowOffsetY=1.5;rr(x,y,w,h,3);ctx.fillStyle='#fffefb';ctx.fill();ctx.restore();
-  rr(x,y,w,h,3);ctx.lineWidth=hl?2:1;ctx.strokeStyle=hl?'#1a1a17':'rgba(26,26,23,0.32)';ctx.stroke();
+  const match=!query||m.n.toLowerCase().indexOf(query)>=0; ctx.save(); if(!match)ctx.globalAlpha=0.18;
+  ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=hl?7:3;ctx.shadowOffsetY=1.5;rr(x,y,w,h,3);ctx.fillStyle='#fffefb';ctx.fill();ctx.shadowColor='transparent';
+  rr(x,y,w,h,3);ctx.lineWidth=hl?2:1;ctx.strokeStyle=hl?'#1a1a17':(query&&match?'#1f9e8a':'rgba(26,26,23,0.32)');ctx.stroke();
   ctx.fillStyle=CATS[m.c].color;rr(x,y,w,3.2,2);ctx.fill();
   const vx=x+5,vy=y+9,vw=w-10,vh=h-25; clipCard(vx,vy,vw,vh,()=>MOT[m.mo](vx,vy,vw,vh,CATS[m.c].color));
   if(m.tool){ctx.fillStyle=CATS[m.c].color;ctx.beginPath();ctx.moveTo(x+w-10,y+6);ctx.lineTo(x+w-4,y+9.5);ctx.lineTo(x+w-10,y+13);ctx.closePath();ctx.fill();}
+  if(visited.has(m.n)){ctx.fillStyle='#34a853';ctx.beginPath();ctx.arc(x+9,y+9,6,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+6,y+9);ctx.lineTo(x+8,y+11.4);ctx.lineTo(x+12.2,y+6.4);ctx.stroke();}
   ctx.fillStyle=hl?'#1a1a17':'rgba(26,26,23,0.9)';ctx.font=(hl?'700 ':'600 ')+'9.5px '+getCSS('--gothic');ctx.textAlign='center';ctx.textBaseline='middle';
-  let nm=m.n;if(nm.length>9)nm=nm.slice(0,8)+'…';ctx.fillText(nm,m.px,y+h-8);ctx.textBaseline='alphabetic';}
+  let nm=m.n;if(nm.length>9)nm=nm.slice(0,8)+'…';ctx.fillText(nm,m.px,y+h-8);ctx.textBaseline='alphabetic';ctx.restore();}
 function draw(){ctx.clearRect(0,0,CW,CH);drawGrid();drawHulls();if(showPath)drawPath();
   for(let i=0;i<M.length;i++)if(i!==hover)drawCard(M[i],i);if(hover>=0)drawCard(M[hover],hover);
   if(hover>=0){const m=M[hover];ctx.fillStyle='#1a1a17';ctx.font='700 11px '+getCSS('--gothic');ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(m.n,16,CH-15);const tw=ctx.measureText(m.n).width;ctx.fillStyle=getCSS('--ink-3');ctx.font='10px '+getCSS('--mono');ctx.fillText('  ▸ '+CATS[m.c].label+(m.tool?' / 触れるツール':'')+' / クリックで開く',16+tw+6,CH-15);}}
@@ -163,9 +166,17 @@ function pick(mx,my){for(let i=M.length-1;i>=0;i--){const m=M[i];if(off[m.c])con
 function evt(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*CW/r.width,y:(e.clientY-r.top)*CH/r.height};}
 cv.addEventListener('mousemove',e=>{const p=evt(e),h=pick(p.x,p.y);cv.style.cursor=h>=0?'pointer':'crosshair';if(h!==hover){hover=h;draw();}});
 cv.addEventListener('mouseleave',()=>{if(hover!==-1){hover=-1;draw();}});
-cv.addEventListener('click',e=>{const p=evt(e),h=pick(p.x,p.y);if(h>=0)location.href=M[h].h;});
+cv.addEventListener('click',e=>{const p=evt(e),h=pick(p.x,p.y);if(h>=0){markVisited(M[h]);location.href=M[h].h;}});
 document.getElementById('pathBtn').onclick=function(){showPath=!showPath;this.classList.toggle('on',showPath);draw();};
-renderLegend();draw();
+// 検索
+document.getElementById('search').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();draw();});
+// 訪問済み（進捗）：localStorage に記録、✓表示。進捗をヒントに
+let visited=new Set(); try{visited=new Set(JSON.parse(localStorage.getItem('lp_visited')||'[]'));}catch(e){}
+let query='';
+function markVisited(m){visited.add(m.n);try{localStorage.setItem('lp_visited',JSON.stringify([...visited]));}catch(e){}}
+function updateProgress(){const h=document.getElementById('hint');if(h)h.textContent=`✓ ${visited.size}/${M.length} 訪問済 · ▶=触る · クリックで開く`+(visited.size?' · ':' ')+(visited.size?'右クリックで進捗リセット':'');}
+cv.addEventListener('contextmenu',e=>{e.preventDefault();if(visited.size&&confirm('訪問済みの記録をリセットしますか？')){visited.clear();localStorage.removeItem('lp_visited');updateProgress();draw();}});
+updateProgress();renderLegend();draw();
 </script>
 </body>
 </html>
