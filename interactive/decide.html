@@ -37,6 +37,10 @@
     <div class="plots"><div class="plot" id="plot"></div></div>
   </div>
   <div class="note" id="note"></div>
+  <details open style="margin-top:8px">
+    <summary>なぜこの量が最適か（限界分析で導く）</summary>
+    <div id="marg" style="font-size:.9rem;line-height:1.7;padding:6px 2px"></div>
+  </details>
 </div>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
@@ -68,6 +72,18 @@ function update(){
     : q>=124 ? '<b>不足5%以下</b>：信頼度を優先して多めに確保（チャンス制約）。余剰コストは増えるが供給支障はめったに起きない。'
     : '<b>コスト最小</b>：不足が余剰より重いぶん、平均より多めが最適（0.8分位点）。';
   $('note').innerHTML=stance+' &nbsp;|&nbsp; 同じ需要・同じコストでも、<b>何を大事にするかで確保量が変わる</b>。これが「確率を使って決める」ということ。';
+
+  // 限界分析：q をあと1単位増やすと？
+  const gain=CS*pShort, loss=CO*(1-pShort), net=gain-loss;
+  const verdict = Math.abs(net)<3 ? '<b>ほぼ釣り合い＝ここが最適</b>。これ以上動かしても得しない。'
+    : net>0 ? `差は <b>+${net.toFixed(0)}</b> → <b>もっと増やすべき</b>（不足が痛いので）。`
+            : `差は <b>${net.toFixed(0)}</b> → <b>減らすべき</b>（余剰が無駄）。`;
+  $('marg').innerHTML=
+    `確保量を <b>q=${q} からあと1単位増やす</b>と——<br>`+
+    `・需要が q を超えていれば（確率 ${(pShort*100).toFixed(0)}%）、不足を1減らせる：<b>得 ${CS}×${pShort.toFixed(2)} = ${gain.toFixed(0)}</b><br>`+
+    `・需要が q 以下なら（確率 ${((1-pShort)*100).toFixed(0)}%）、余剰が1増える：<b>損 ${CO}×${(1-pShort).toFixed(2)} = ${loss.toFixed(0)}</b><br>`+
+    `期待的な差し引き ＝ 得−損 ＝ <b>${net.toFixed(0)}</b>。${verdict}<br>`+
+    `<span style="color:#5f6368">釣り合う点は 得＝損、つまり P(D&gt;q)=c_o/(c_s+c_o)。これが「臨界比の分位点」の正体。</span>`;
   document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on', +b.dataset.q===q));
 }
 $('q').addEventListener('input',e=>{q=+e.target.value; update();});
