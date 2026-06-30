@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>決定計算機 — あなたのデータ → 6形式の推奨決定</title>
+<link rel="stylesheet" href="lib/tool.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="lib/stats.js"></script>
+<style>
+  .seg2{display:flex;gap:0;margin:2px 0 10px}
+  .seg2 button{flex:1;border:1px solid #4285f4;background:#fff;color:#4285f4;padding:8px;cursor:pointer;font-weight:600}
+  .seg2 button:first-child{border-radius:8px 0 0 8px} .seg2 button:last-child{border-radius:0 8px 8px 0;border-left:0}
+  .seg2 button.on{background:#4285f4;color:#fff}
+  textarea{width:100%;min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:.85rem;border:1px solid #dadce0;border-radius:8px;padding:8px;resize:vertical}
+  .num{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+  .num label{flex:1;min-width:90px;font-size:.85rem;color:#3c4043}
+  .num input{width:100%;padding:6px 8px;border:1px solid #dadce0;border-radius:6px;font-size:.95rem}
+  table.res{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:6px}
+  table.res th,table.res td{border:1px solid #e0e0e0;padding:7px 9px;text-align:right}
+  table.res th{background:#4285f4;color:#fff;font-weight:600;text-align:center;font-size:.82rem}
+  table.res td.f{text-align:left;font-weight:700}
+  table.res tr.best td{background:#e6f4ea}
+  table.res td .mini{color:#5f6368;font-size:.78rem;font-weight:400}
+  .act{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .act button{border:0;background:#34a853;color:#fff;font-weight:700;padding:9px 16px;border-radius:8px;cursor:pointer}
+  .act button.alt{background:#5f6368}
+  .summ{font-size:.85rem;color:#3c4043;background:#f1f5ff;border-left:.3rem solid #4285f4;border-radius:6px;padding:8px 10px;margin:8px 0}
+  .err{color:#c5221f;font-size:.85rem;margin:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>決定計算機：あなたのデータ → 6形式の推奨決定</h1>
+  <p class="sub">「どれだけ確保するか（在庫・予備力・発注…）」を、<b>あなた自身の数字</b>で決める道具。需要データを貼るか平均・SDを入れ、コストを設定 → 6形式の推奨量・供給不足確率・期待コストを表で出し、<b>CSV/印刷で持ち出せます</b>。計算は手元のブラウザ内（データは送信されません）。</p>
+  <div class="panel">
+    <div class="controls">
+      <h2>① 需要の入力</h2>
+      <div class="seg2" id="mode">
+        <button data-m="data" class="on">データを貼る</button>
+        <button data-m="param">平均・SDで指定</button>
+      </div>
+      <div id="dataIn">
+        <textarea id="data" placeholder="需要を貼り付け（カンマ/改行/空白区切り）&#10;例: 98, 112, 87, 105, 120, 93, ..."></textarea>
+        <div style="font-size:.78rem;color:#5f6368;margin-top:2px"><a href="#" id="sample">サンプルデータを入れる</a></div>
+      </div>
+      <div id="paramIn" style="display:none">
+        <div class="num"><label>平均 μ<input type="number" id="mu" value="100"></label><label>標準偏差 σ<input type="number" id="sd" value="15"></label></div>
+      </div>
+      <h2>② コスト（1単位あたり）</h2>
+      <div class="num"><label>不足の損 c_s<input type="number" id="cs" value="10"></label><label>余剰の損 c_o<input type="number" id="co" value="1"></label></div>
+      <h2>③ リスク設定</h2>
+      <div class="num"><label>許容不足率 ε<input type="number" id="eps" value="0.05" step="0.01"></label><label>CVaR α<input type="number" id="alpha" value="0.95" step="0.01"></label><label>ロバスト幅 k<input type="number" id="k" value="2" step="0.5"></label></div>
+      <div class="act"><button id="calc">計算する</button></div>
+      <div class="err" id="err"></div>
+    </div>
+    <div class="plots" style="display:block">
+      <div class="summ" id="summ">需要を入れて「計算する」を押してください。</div>
+      <div id="tableWrap"></div>
+      <div class="act" id="exports" style="display:none">
+        <button id="csv">CSV書き出し</button>
+        <button class="alt" id="print">印刷</button>
+      </div>
+      <div class="plot" id="plot" style="margin-top:8px"></div>
+    </div>
+  </div>
+  <div class="note">各形式：①決定論=平均 ②期待値=newsvendor臨界比の分位点 ③ロバスト=±kσ箱の最悪 ④チャンス制約=1−ε分位点 ⑤CVaR=裾を抑える分位点 ⑥分布ロバスト=平均と分散だけ仮定（Scarf）。期待コスト・供給不足確率は<b>入力した分布（データならその標本）で実評価</b>。</div>
+</div>
+<script>
+const L=window.LP, $=id=>document.getElementById(id);
+let mode='data', lastRows=null, lastMeta=null;
+
+const SAMPLE='98,112,87,105,120,93,101,116,79,108,95,124,90,103,111,85,99,118,107,92,100,114,83,109,96,121,88,104,113,97,102,119,86,106,94,122,91,110,100,115,84,107,98,123,89,105,95,117,108,93';
+$('sample').onclick=e=>{e.preventDefault();$('data').value=SAMPLE;};
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.m; document.querySelectorAll('#mode button').forEach(x=>x.classList.toggle('on',x===b));
+  $('dataIn').style.display=mode==='data'?'block':'none'; $('paramIn').style.display=mode==='param'?'block':'none';
+});
+
+function parseData(){return $('data').value.split(/[\s,;]+/).map(s=>parseFloat(s)).filter(v=>Number.isFinite(v));}
+function mean(a){return a.reduce((s,x)=>s+x,0)/a.length;}
+function sd(a,m){return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1));}
+function quant(sorted,p){p=Math.max(0,Math.min(1,p));const i=Math.min(sorted.length-1,Math.max(0,Math.ceil(p*sorted.length)-1));return sorted[i];}
+function pshort(d,x){return d.filter(v=>v>x).length/d.length;}
+function ecost(d,x,cs,co){return d.reduce((s,v)=>s+(v>x?cs*(v-x):co*(x-v)),0)/d.length;}
+
+function compute(){
+  $('err').textContent='';
+  const cs=+$('cs').value, co=+$('co').value, eps=+$('eps').value, alpha=+$('alpha').value, k=+$('k').value;
+  if(!(cs>0)||!(co>0)){ $('err').textContent='コストは正の数で入力してください。'; return; }
+  let d, mu, s, src;
+  if(mode==='data'){
+    d=parseData();
+    if(d.length<3){ $('err').textContent='データは数値を3つ以上入れてください。'; return; }
+    mu=mean(d); s=sd(d,mu); src=`データ ${d.length}点`;
+  }else{
+    mu=+$('mu').value; s=+$('sd').value;
+    if(!(s>0)){ $('err').textContent='標準偏差は正の数で。'; return; }
+    const g=L.gaussianGen(L.mulberry32('calc')); d=[]; for(let i=0;i<5000;i++) d.push(mu+s*g()); src=`正規 N(${mu},${s}²) を5000標本で評価`;
+  }
+  const ds=d.slice().sort((a,b)=>a-b);
+  const r=cs/(cs+co);
+  const scarf=mu+s*0.5*(Math.sqrt(r/(1-r))-Math.sqrt((1-r)/r));
+  const forms=[
+    {f:'①決定論',x:mu,note:'平均だけ'},
+    {f:'②期待値',x:quant(ds,r),note:'平均的な損を最小'},
+    {f:'③ロバスト',x:(cs*(mu+k*s)+co*(mu-k*s))/(cs+co),note:`±${k}σ箱の最悪`},
+    {f:'④チャンス制約',x:quant(ds,1-eps),note:`不足≤${(eps*100).toFixed(0)}%`},
+    {f:'⑤CVaR',x:quant(ds,Math.min(0.999,1-(1-alpha)*co/cs)),note:'裾(大損)を抑える'},
+    {f:'⑥分布ロバスト',x:scarf,note:'平均と分散だけ仮定'},
+  ];
+  forms.forEach(o=>{o.p=pshort(d,o.x); o.c=ecost(d,o.x,cs,co);});
+  const best=forms.reduce((a,b)=>b.c<a.c?b:a);
+  lastRows=forms; lastMeta={src,mu,s,cs,co,eps,alpha,k,best:best.f};
+  $('summ').innerHTML=`<b>${src}</b>：平均 ${mu.toFixed(1)} / SD ${s.toFixed(1)}。不足損 ${cs} ≫ 余剰損 ${co}。`+
+    `期待コスト最小は <b>${best.f}（確保 ${best.x.toFixed(1)}）</b>。ただし「最悪を避けたい/不足を抑えたい」なら下表で選ぶ。`;
+  let html='<table class="res"><tr><th>形式</th><th>推奨確保量</th><th>供給不足の確率</th><th>期待コスト</th></tr>';
+  forms.forEach(o=>{html+=`<tr class="${o.f===best.f?'best':''}"><td class="f">${o.f}<div class="mini">${o.note}</div></td>`+
+    `<td>${o.x.toFixed(1)}</td><td>${(o.p*100).toFixed(1)}%</td><td>${o.c.toFixed(1)}</td></tr>`;});
+  html+='</table>';
+  $('tableWrap').innerHTML=html; $('exports').style.display='flex';
+  // plot: 分布(ヒスト) + 各形式の確保量を縦線
+  const xs=L.linspace(Math.min(...ds)-5,Math.max(...ds)+10,80);
+  const cols={'①決定論':'#9aa0a6','②期待値':'#4285f4','③ロバスト':'#ea4335','④チャンス制約':'#34a853','⑤CVaR':'#f9ab00','⑥分布ロバスト':'#a142f4'};
+  const traces=[{x:d,type:'histogram',histnorm:'probability density',marker:{color:'rgba(66,133,244,.25)'},name:'需要',nbinsx:24,hoverinfo:'skip'}];
+  const hmax=0.04;
+  forms.forEach(o=>traces.push({x:[o.x,o.x],y:[0,hmax],type:'scatter',mode:'lines',line:{color:cols[o.f],width:2},name:o.f,hoverinfo:'name'}));
+  Plotly.react('plot',traces,{margin:{t:6,r:8,b:34,l:42},height:280,xaxis:{title:'需要 / 確保量'},yaxis:{title:'密度',rangemode:'tozero'},showlegend:true,legend:{orientation:'h',font:{size:9},y:1.15}},{displayModeBar:false,responsive:true});
+}
+$('calc').onclick=compute;
+
+$('csv').onclick=()=>{
+  if(!lastRows) return;
+  let csv='形式,推奨確保量,供給不足の確率,期待コスト,備考\n';
+  lastRows.forEach(o=>csv+=`${o.f},${o.x.toFixed(2)},${(o.p*100).toFixed(2)}%,${o.c.toFixed(2)},${o.note}\n`);
+  csv+=`\n入力,${lastMeta.src},平均${lastMeta.mu.toFixed(2)},SD${lastMeta.s.toFixed(2)},cs=${lastMeta.cs} co=${lastMeta.co} eps=${lastMeta.eps} alpha=${lastMeta.alpha} k=${lastMeta.k}\n`;
+  const blob=new Blob(['﻿'+csv],{type:'text/csv'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='decision.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+$('print').onclick=()=>window.print();
+</script>
+</body>
+</html>
