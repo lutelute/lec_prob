@@ -52,3 +52,5 @@ a{color:var(--blue)}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
 input[type=range]:focus-visible{outline-offset:4px}
 button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* 動きに敏感な人向け：アニメーション抑制 */
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
