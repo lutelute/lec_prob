@@ -11,6 +11,8 @@
 
 ![分布に操作（確率・平均・分位点・シナリオ）を当てると「数」になる — 触って学ぶツールのデモ](assets/demo.gif)
 
+🎓 **[学習コース（順番に触る・進捗つき）](https://lutelute.github.io/lec_prob/interactive/course.html)** — 読む→触る→自分の問題で使う→確かめる、の一本道（約40分）。迷ったらここから。
+
 全体を1枚で俯瞰：🗺 **[全体地図（2D俯瞰アトラス）](https://lutelute.github.io/lec_prob/interactive/map.html)** ／ 📐 **[全体ブループリント（仕様書版・印刷可）](https://lutelute.github.io/lec_prob/interactive/blueprint.html)** — 全概念・モジュール・8ツールを2次元に配置（ミニ可視化＋推奨順路）。クリックで各ページへ。
 
 > **対象**：確率の基礎に不安はあるが、電力・制御・最適化に確率を応用したい人。
