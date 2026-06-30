@@ -1,9 +1,12 @@
 /* tool.css — ブラウザ内インタラクティブツール共通スタイル */
 :root{
-  --blue:#4285f4; --green:#34a853; --red:#ea4335; --amber:#f9ab00; --purple:#a142f4;
+  --blue:#3457d5;          /* ブランド色（サイト・コース・地図と統一） */
+  --viz:#4285f4;           /* データ可視化用の青（プロット） */
+  --green:#34a853; --red:#ea4335; --amber:#f9ab00; --purple:#a142f4;
   --ink:#202124; --muted:#5f6368; --line:#dadce0; --bg:#ffffff; --soft:#f8f9fa;
 }
 *{box-sizing:border-box}
+input[type=range]{accent-color:var(--blue)}
 html{overflow-x:hidden;max-width:100%}
 .plot,.plots>div{max-width:100%;overflow:hidden}
 body{

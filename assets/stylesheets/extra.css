@@ -69,3 +69,13 @@ a[href^="#t"]:hover {
   background: var(--md-default-fg-color--lightest);
   border-radius: 0 .3rem .3rem 0;
 }
+
+/* 全ページ共通の俯瞰ナビ（モジュール↔地図/コースの統一導線） */
+.lp-strip{
+  max-width: 61rem; margin: 8px auto 0; padding: 10px 16px;
+  display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center;
+  font-size: .8rem; color: var(--md-default-fg-color--light);
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+.lp-strip a{ color: var(--md-primary-fg-color); text-decoration: none; font-weight: 600; }
+.lp-strip a:hover{ text-decoration: underline; }
