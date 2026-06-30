@@ -1,0 +1,244 @@
+<!DOCTYPE html><html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>確率的最適化 — 全体ブループリント</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#111; --ink-2:#444; --ink-3:#888; --paper:#f7f6f2; --line:#d8d5cc;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,monospace; --jp:'Noto Sans JP','JetBrains Mono',sans-serif;
+    --ev:#1e40af; --evbg:#e8f1ff; --evbd:#7aa7e8;
+    --sp:#1f6b2e; --spbg:#ecf7ec; --spbd:#6fbf6f;
+    --er:#9a3a10; --erbg:#fff2ed; --erbd:#e07a4a;
+    --me:#333;   --mebg:#efefef; --mebd:#9a9a9a;
+    --op:#8a5a10; --opbg:#fff4de; --opbd:#d8a04d;
+    --to:#5b2a94; --tobg:#f1e8fa; --tobd:#a07bd3; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink)}
+  body{font-family:var(--mono);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:40px 28px 64px}
+  a{color:inherit}
+  header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--ink);padding-bottom:10px;margin-bottom:24px;flex-wrap:wrap;gap:10px}
+  header h1{margin:0;font-family:var(--jp);font-weight:700;font-size:18px;letter-spacing:.06em}
+  header .sub{font-size:11px;color:var(--ink-3);margin-top:4px;letter-spacing:.06em}
+  header .meta{font-size:11px;color:var(--ink-3);text-align:right;line-height:1.7}
+  header .meta b{color:var(--ink);font-weight:500}
+  h2.section{font-size:11px;font-weight:500;letter-spacing:.24em;color:var(--ink-3);margin:30px 0 12px;display:flex;align-items:center;gap:12px}
+  h2.section::after{content:"";flex:1;height:1px;background:var(--line)}
+  h2.section .n{border:1px solid var(--ink-3);padding:1px 6px;font-size:10px;letter-spacing:.1em}
+  .jp{font-family:var(--jp)}
+  .mute{color:var(--ink-3)} .b{font-weight:700}
+
+  /* pipeline */
+  .pipe{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:6px}
+  .pbox{flex:0 0 158px;border:1px solid var(--ink);background:#fff;padding:9px 11px}
+  .pbox .h{font-size:10px;letter-spacing:.16em;color:var(--ink-3);border-bottom:1px dashed var(--line);padding-bottom:5px;margin-bottom:6px}
+  .pbox .l{font-family:var(--jp);font-size:12px;line-height:1.7}
+  .parr{flex:0 0 26px;display:flex;align-items:center;justify-content:center;color:var(--ink-3)}
+
+  /* 3-up / 4-up card rows */
+  .cards{display:grid;gap:12px;margin-top:6px}
+  .c3{grid-template-columns:repeat(3,1fr)} .c4{grid-template-columns:repeat(4,1fr)}
+  .card{border:1px solid var(--ink);background:#fff;padding:11px 13px;font-size:12px;line-height:1.55;display:flex;flex-direction:column;gap:6px}
+  .card .ch{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px dashed var(--line);padding-bottom:6px}
+  .card .nm{font-weight:700;font-size:13px} .card .kd{font-size:9px;letter-spacing:.16em;color:var(--ink-3)}
+  .card .one{font-family:var(--jp);color:var(--ink)} .card .use{font-family:var(--jp);color:var(--ink-2);font-size:11.5px}
+  .card .where{font-size:10px;color:var(--ink-3);border-top:1px dashed var(--line);padding-top:6px}
+  .card .where a{color:var(--ev);text-decoration:none;font-weight:500}
+  .tags{display:flex;flex-wrap:wrap;gap:4px}
+  .tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:2px 6px;border:1px solid var(--ink);border-radius:2px}
+  .t-ev{background:var(--evbg);border-color:var(--evbd);color:var(--ev)}
+  .t-sp{background:var(--spbg);border-color:var(--spbd);color:var(--sp)}
+  .t-er{background:var(--erbg);border-color:var(--erbd);color:var(--er)}
+  .t-me{background:var(--mebg);border-color:var(--mebd);color:var(--me)}
+  .t-op{background:var(--opbg);border-color:var(--opbd);color:var(--op)}
+  .t-to{background:var(--tobg);border-color:var(--tobd);color:var(--to)}
+
+  /* matrix table */
+  table.mx{border-collapse:collapse;width:100%;font-size:12px;margin-top:6px;background:#fff}
+  table.mx th,table.mx td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+  table.mx th{font-size:10px;letter-spacing:.1em;color:var(--ink-3);font-weight:500;background:#faf9f5}
+  table.mx td.jp{font-family:var(--jp)} table.mx .num{font-weight:700}
+  table.mx tr:hover{background:#faf9f5}
+
+  /* notes + legend */
+  .notes{display:grid;grid-template-columns:repeat(2,1fr);gap:7px 36px;font-size:12px;color:var(--ink-2);margin-top:8px}
+  .notes .row{display:flex;gap:10px;border-top:1px dashed var(--line);padding-top:6px}
+  .notes .k{color:var(--ink-3);min-width:96px;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  .notes .v{flex:1;font-family:var(--jp)}
+  .legend{margin-top:30px;border-top:1px solid var(--ink);padding-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;font-size:11px;color:var(--ink-2);line-height:1.8}
+  .legend h4{margin:0 0 4px;font-size:9px;letter-spacing:.24em;color:var(--ink-3);font-weight:500}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px}
+  footer{margin-top:28px;font-size:10px;color:var(--ink-3);display:flex;justify-content:space-between;letter-spacing:.08em;border-top:1px solid var(--line);padding-top:10px}
+  .lead{font-family:var(--jp);font-size:12.5px;color:var(--ink-2);margin:2px 0 10px;line-height:1.7}
+
+  @media(max-width:760px){ .c3,.c4{grid-template-columns:1fr 1fr} .legend,.notes{grid-template-columns:1fr} }
+  @media print{ @page{size:A4;margin:12mm} html,body{background:#fff} body{font-size:10px} .wrap{padding:0;max-width:none}
+    .card,.pbox,table.mx{break-inside:avoid} h2.section{break-after:avoid} a{text-decoration:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>確率的最適化 — 全体ブループリント</h1>
+      <div class="sub">uncertainty · representation · method · decision</div>
+    </div>
+    <div class="meta">
+      <b>触って学ぶ入門</b><br>
+      8 interactive tools · 7 modules<br>
+      <a href="../" style="color:var(--ev)">lutelute.github.io/lec_prob</a>
+    </div>
+  </header>
+
+  <p class="lead">確率は「曖昧」を「具体的な決定」に変える言語。この1枚は全体の<b>設計図</b>——左から右へ、不確実性が決定に変わるまでの一本道と、各段で使う概念・ツールを俯瞰する。各カードはクリックで本文へ。</p>
+
+  <!-- 01 PIPELINE -->
+  <h2 class="section"><span class="n">01</span>PIPELINE &nbsp;·&nbsp; 不確実性 → 決定</h2>
+  <div class="pipe">
+    <div class="pbox"><div class="h">① UNCERTAINTY</div><div class="l">何が不確実か<br><span class="mute">事象 / ばらつき / 誤差</span></div></div>
+    <div class="parr">▶</div>
+    <div class="pbox"><div class="h">② REPRESENT</div><div class="l">確率で表す<br><span class="mute">P(A) / 分布 / 集合</span></div></div>
+    <div class="parr">▶</div>
+    <div class="pbox"><div class="h">③ EXTRACT</div><div class="l">数を取り出す<br><span class="mute">面積 / 平均 / 分位点</span></div></div>
+    <div class="parr">▶</div>
+    <div class="pbox"><div class="h">④ METHOD</div><div class="l">分布を数に潰す<br><span class="mute">確定論 / 確率 / シナリオ</span></div></div>
+    <div class="parr">▶</div>
+    <div class="pbox"><div class="h">⑤ OPTIMIZE</div><div class="l">何を最適化<br><span class="mute">期待値 / 最悪 / 確率 / 裾</span></div></div>
+    <div class="parr">▶</div>
+    <div class="pbox"><div class="h">⑥ DECIDE</div><div class="l">決定<br><span class="mute">＋ 受け入れるリスク</span></div></div>
+  </div>
+
+  <!-- 02 UNCERTAINTY -->
+  <h2 class="section"><span class="n">02</span>UNCERTAINTY &nbsp;·&nbsp; 不確実性の3つの顔</h2>
+  <p class="lead mute">「確率」は一種類ではない。顔が違えば表し方も道具も違う。混ぜない。</p>
+  <div class="cards c3">
+    <div class="card">
+      <div class="ch"><span class="nm">事象</span><span class="kd">EVENT · 離散</span></div>
+      <div class="one">起こる / 起こらない</div>
+      <div class="use">故障・停電・N−1。数え上げで P(A) が出る。</div>
+      <div class="tags"><span class="tag t-ev">離散</span><span class="tag t-ev">P(A)</span><span class="tag t-ev">信頼性</span></div>
+      <div class="where">→ <a href="../notes/01_events_and_probability/">Module 1</a> · <a href="bayes.html">▶ ベイズ</a></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="nm">ばらつき</span><span class="kd">SPREAD · 偶然性</span></div>
+      <div class="one">量が揺れる・減らせない</div>
+      <div class="use">需要・PV・天候。何度も起きて分布になる（aleatory）。</div>
+      <div class="tags"><span class="tag t-sp">連続</span><span class="tag t-sp">確率分布</span><span class="tag t-sp">aleatory</span></div>
+      <div class="where">→ <a href="../notes/02_random_variables_and_distributions/">Module 2</a> · <a href="pdf_cdf.html">▶ PDF/CDF</a></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="nm">誤差</span><span class="kd">ERROR · 認識</span></div>
+      <div class="one">知らない・情報で減る</div>
+      <div class="use">測定・推定・予報の外れ（epistemic）。データで減る。</div>
+      <div class="tags"><span class="tag t-er">区間</span><span class="tag t-er">ベイズ</span><span class="tag t-er">epistemic</span></div>
+      <div class="where">→ <a href="../notes/04_from_data_to_distribution/">Module 4</a></div>
+    </div>
+  </div>
+
+  <!-- 03 EXTRACT -->
+  <h2 class="section"><span class="n">03</span>EXTRACT &nbsp;·&nbsp; 分布 → 数（操作でスカラーを取り出す）</h2>
+  <p class="lead mute">分布はスカラーでなく「地図」。操作（和 / 積分）を当てて初めて数になる。期待値＝重み付きの数え上げ。</p>
+  <table class="mx">
+    <tr><th>欲しいもの</th><th>操作（離散）</th><th>操作（連続）</th><th>出る数</th></tr>
+    <tr><td class="jp">ある範囲の確率</td><td>Σ p(x)</td><td>∫ f(x) dx（面積）</td><td>0〜1</td></tr>
+    <tr><td class="jp">代表値（平均）</td><td>Σ x·p(x)</td><td>∫ x·f(x) dx</td><td class="jp">スカラー</td></tr>
+    <tr><td class="jp">ばらつき</td><td>Σ(x−μ)²p(x)</td><td>∫(x−μ)²f(x)dx</td><td class="jp">スカラー</td></tr>
+    <tr><td class="jp">下から p 割（分位点）</td><td colspan="2">F⁻¹(p)</td><td class="jp">スカラー</td></tr>
+  </table>
+  <p class="lead">触って確かめる → <a href="dist_to_number.html" style="color:var(--ev);font-weight:700">▶ 分布→数</a> ／ 解説 <a href="../notes/distributions_and_methods/" style="color:var(--ev)">分布を数値でどう扱うか</a></p>
+
+  <!-- 04 METHOD -->
+  <h2 class="section"><span class="n">04</span>METHOD &nbsp;·&nbsp; 分布を“数に潰す”3流儀</h2>
+  <p class="lead mute">同じ容量問題（不足 c_s=10 ≫ 余剰 c_o=1、需要 D={80:.3, 100:.5, 120:.2}）。扱い方で決定が変わる。</p>
+  <div class="cards c3">
+    <div class="card">
+      <div class="ch"><span class="nm">確定論的</span><span class="kd">DETERMINISTIC</span></div>
+      <div class="use jp">先に平均(98)に潰し、ふつうの問題を解く。</div>
+      <div class="tags"><span class="tag t-me">q*=98</span><span class="tag t-er">実コスト 59.4</span><span class="tag t-er">罠</span></div>
+      <div class="where jp">ばらつきを捨てる → 平均で決めると2.7倍損</div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="nm">ストキャスティック</span><span class="kd">STOCHASTIC</span></div>
+      <div class="use jp">分布のまま E[コスト] を計算して最小化。</div>
+      <div class="tags"><span class="tag t-sp">q*=120</span><span class="tag t-sp">実コスト 22.0</span></div>
+      <div class="where jp">正確・分布が要る → <a href="../notes/06_optimization_under_uncertainty/">Module 6</a></div>
+    </div>
+    <div class="card">
+      <div class="ch"><span class="nm">シナリオベース</span><span class="kd">SCENARIO · MC/SAA</span></div>
+      <div class="use jp">標本 N 個で E を平均近似。積分が解けなくても可。</div>
+      <div class="tags"><span class="tag t-sp">N大→120</span><span class="tag t-me">1/√N</span></div>
+      <div class="where jp">大数の法則 → <a href="montecarlo.html">▶ モンテカルロ</a> · <a href="dist_to_number.html">▶ 標本収束</a></div>
+    </div>
+  </div>
+
+  <!-- 05 OPTIMIZE -->
+  <h2 class="section"><span class="n">05</span>OPTIMIZE &nbsp;·&nbsp; 6形式（何を最適化するか）</h2>
+  <p class="lead mute">同じ問題（需要 N(100,15), c_s/c_o）。「何を大事にするか」で最適決定 x* が 100〜137 と動く。</p>
+  <table class="mx">
+    <tr><th>形式</th><th>大事にするもの</th><th>不確実性の表現</th><th>どこに出る</th><th>x*</th></tr>
+    <tr><td class="jp b">① 決定論</td><td class="jp">（無視）</td><td class="jp">1点（平均）</td><td>—</td><td class="num">100</td></tr>
+    <tr><td class="jp b">② 期待値</td><td class="jp">平均的な損</td><td class="jp">分布</td><td>E[·]</td><td class="num">120</td></tr>
+    <tr><td class="jp b">③ ロバスト</td><td class="jp">最悪ケース</td><td class="jp">不確実性集合</td><td>max_ξ</td><td class="num">137</td></tr>
+    <tr><td class="jp b">④ チャンス制約</td><td class="jp">失敗確率 ≤ ε</td><td class="jp">分布（分位点）</td><td class="jp">制約</td><td class="num">120</td></tr>
+    <tr><td class="jp b">⑤ CVaR</td><td class="jp">裾（大損）の平均</td><td class="jp">分布 / シナリオ</td><td class="jp">目的/制約</td><td class="num">129</td></tr>
+    <tr><td class="jp b">⑥ 分布ロバスト</td><td class="jp">分布の不確かさ</td><td class="jp">分布の族</td><td>max_P</td><td class="num">121</td></tr>
+  </table>
+  <p class="lead">並べて動かす → <a href="comparator.html" style="color:var(--ev);font-weight:700">▶ 6形式コンパレータ</a> ／ 二段階(VSS·EVPI) <a href="../notes/06b_two_stage_stochastic_programming/" style="color:var(--ev)">Module 6b</a> · <a href="battery.html">▶ 蓄電池</a></p>
+
+  <!-- 06 NOTES -->
+  <h2 class="section"><span class="n">06</span>KEY FACTS</h2>
+  <div class="notes">
+    <div class="row"><span class="k">密度≠確率</span><span class="v">確率は区間の面積。1点の確率は0、密度は1超可</span></div>
+    <div class="row"><span class="k">平均の罠</span><span class="v">非対称コストでは平均は最適でない（Module 0）</span></div>
+    <div class="row"><span class="k">臨界比</span><span class="v">newsvendor 最適 = c_s/(c_s+c_o) 分位点</span></div>
+    <div class="row"><span class="k">1/√N</span><span class="v">モンテカルロ誤差 = σ/√N。希少事象は遅い</span></div>
+    <div class="row"><span class="k">基準率の誤謬</span><span class="v">稀な事象では陽性≠本物（ベイズ）</span></div>
+    <div class="row"><span class="k">VSS · EVPI</span><span class="v">確率化の価値 / 完全情報の価値（Module 6b）</span></div>
+  </div>
+
+  <!-- LEGEND -->
+  <section class="legend">
+    <div><h4>不確実性の種類</h4>
+      <span class="sw" style="background:var(--evbd)"></span>事象（離散）<br>
+      <span class="sw" style="background:var(--spbd)"></span>ばらつき（偶然性）<br>
+      <span class="sw" style="background:var(--erbd)"></span>誤差（認識）</div>
+    <div><h4>カードの種類</h4>
+      <span class="tag t-to" style="font-size:8px">TOOL</span> ▶ 触れるツール<br>
+      その他 = 概念 / モジュール<br>
+      <span class="mute">クリックで本文へ</span></div>
+    <div><h4>INDEX</h4>
+      ① 不確実性 ② 表す ③ 取り出す<br>④ 手法 ⑤ 最適化 ⑥ 決定<br>
+      <a href="map.html" style="color:var(--ev)">→ カード版の地図</a></div>
+  </section>
+
+  <!-- 07 GLOSSARY -->
+  <h2 class="section"><span class="n">07</span>MODULES &amp; TOOLS</h2>
+  <div class="cards c4">
+    <div class="card"><div class="ch"><span class="nm">M0</span><span class="kd">WHY</span></div><div class="one jp">なぜ確率が要るか</div><div class="use">平均で計画する罠</div><div class="where"><a href="../notes/00_why_probability/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">M1</span><span class="kd">EVENTS</span></div><div class="one jp">事象と確率</div><div class="use">条件付き・ベイズ</div><div class="where"><a href="../notes/01_events_and_probability/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">M2</span><span class="kd">DIST</span></div><div class="one jp">確率変数と分布</div><div class="use">PMF/PDF/CDF</div><div class="where"><a href="../notes/02_random_variables_and_distributions/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">M3</span><span class="kd">MOMENTS</span></div><div class="one jp">期待値・分散・相関</div><div class="use">平均が同じでもリスク違う</div><div class="where"><a href="../notes/03_expectation_variance_covariance/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">M4</span><span class="kd">DATA</span></div><div class="one jp">データから分布へ</div><div class="use">標本≠真の分布</div><div class="where"><a href="../notes/04_from_data_to_distribution/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">M5</span><span class="kd">MONTE CARLO</span></div><div class="one jp">シナリオとMC</div><div class="use">1/√N・SAA</div><div class="where"><a href="../notes/05_scenarios_and_monte_carlo/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">M6 / 6b</span><span class="kd">OPTIMIZE</span></div><div class="one jp">不確実性下の最適化</div><div class="use">6形式・二段階</div><div class="where"><a href="../notes/06_optimization_under_uncertainty/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">M7</span><span class="kd">CASE</span></div><div class="one jp">実データ→決定</div><div class="use">730日データ・PV相関</div><div class="where"><a href="../notes/07_case_study/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">分布→数</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">操作で数を取り出す</div><div class="where"><a href="dist_to_number.html">▶ 触る</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">PDF/CDF</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">面積＝確率</div><div class="where"><a href="pdf_cdf.html">▶ 触る</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">モンテカルロ</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">収束・希少事象</div><div class="where"><a href="montecarlo.html">▶ 触る</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">6形式</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">x* が100〜137</div><div class="where"><a href="comparator.html">▶ 触る</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">蓄電池</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">SoC・予測の価値</div><div class="where"><a href="battery.html">▶ 触る</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">ベイズ</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">基準率の誤謬</div><div class="where"><a href="bayes.html">▶ 触る</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">理解度チェック</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">8問で確かめる</div><div class="where"><a href="quiz.html">▶ 触る</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">使い方ガイド</span><span class="kd">GUIDE</span></div><div class="one jp">名付ける→表す→決める</div><div class="use">3ステップ</div><div class="where"><a href="../notes/how_to_use_probability/">開く →</a></div></div>
+  </div>
+
+  <footer>
+    <div>確率的最適化 · 全体ブループリント</div>
+    <div>FIG. 01 · uncertainty → decision</div>
+  </footer>
+
+</div>
+</body></html>
