@@ -5,73 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>蓄電池運用・アービトラージ（インタラクティブ）</title>
 <link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="lib/stats.js"></script>
 </head>
 <body>
 <div class="wrap">
   <h1>蓄電池運用ビジュアライザ — アービトラージと SoC</h1>
-  <div class="try"><b class="h">👉 やってみよう</b>
-  <ol>
-    <li><b>日内変動の振幅を上げる</b> → 価格差が広がり、利益が増える。</li>
-    <li><b>往復効率 η を下げる</b> → 充放電ロスで利益が減る。</li>
-    <li><b>価格予測誤差 σ を上げる</b> → 「予測の価値（EVPI）」が下に現れる。</li>
-  </ol>
-  <div class="ins">蓄電池は「安く充電・高く放電」の時間シフトで稼ぐ。予測が当たるほど得。</div></div>
-  <div class="sub">安いとき充電・高いとき放電。蓄電池は「エネルギーの時間シフト」で価値を生む。価格・諸元・閾値を動かして SoC 軌道と利益を体感する。
+  <div class="sub">安いとき充電・高いとき放電。5ステップで「予測の価値」まで追う。
     <a href="../notes/06b_two_stage_stochastic_programming/">Module 6b のノート →</a></div>
 
-  <div class="panel">
-    <div class="controls">
-      <h2>蓄電池の諸元</h2>
-      <div class="ctl"><label>容量 [MWh]<span class="val" id="capval">10</span></label><input type="range" id="cap" min="2" max="20" step="1" value="10"></div>
-      <div class="ctl"><label>最大出力 [MW]<span class="val" id="pmaxval">3.0</span></label><input type="range" id="pmax" min="1" max="8" step="0.5" value="3"></div>
-      <div class="ctl"><label>往復効率 η<span class="val" id="effval">0.90</span></label><input type="range" id="eff" min="0.6" max="1" step="0.01" value="0.9"></div>
-      <h2>価格プロファイル</h2>
-      <div class="ctl"><label>ベース価格<span class="val" id="baseval">20</span></label><input type="range" id="base" min="5" max="40" step="1" value="20"></div>
-      <div class="ctl"><label>日内変動の振幅<span class="val" id="dayval">12</span></label><input type="range" id="day" min="0" max="25" step="1" value="12"></div>
-      <div class="ctl"><label>夕方ピークの高さ<span class="val" id="eveval">8</span></label><input type="range" id="eve" min="0" max="20" step="1" value="8"></div>
-      <h2>ディスパッチ閾値（百分位）</h2>
-      <div class="ctl"><label>充電：価格がこの%以下<span class="val" id="cpctval">35</span></label><input type="range" id="cpct" min="10" max="60" step="5" value="35"></div>
-      <div class="ctl"><label>放電：価格がこの%以上<span class="val" id="dpctval">65</span></label><input type="range" id="dpct" min="40" max="90" step="5" value="65"></div>
-      <h2>価格の不確実性（予測の価値）</h2>
-      <div class="ctl"><label>価格予測誤差 σ<span class="val" id="sigmaval">0</span></label><input type="range" id="sigma" min="0" max="15" step="1" value="0"></div>
-    </div>
-
-    <div>
-      <div class="metrics">
-        <div class="metric"><div class="k">アービトラージ利益</div><div class="v" id="profit">–</div></div>
-        <div class="metric"><div class="k">平均充電価格</div><div class="v" id="cprice">–</div></div>
-        <div class="metric"><div class="k">平均放電価格</div><div class="v ok" id="dprice">–</div></div>
+  <div class="stage">
+    <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
+    <div class="stagebody">
+      <div class="stagevis">
+        <div id="plot" class="plot" style="height:320px"></div>
+        <div class="metrics" id="metrics" style="margin-top:10px"></div>
+        <div class="metrics" id="fcMetrics" style="margin-top:0;display:none"></div>
       </div>
-      <div id="plot" style="width:100%;height:430px"></div>
+      <div class="stageexplain" id="explain" aria-live="polite"></div>
+    </div>
+    <div class="stagebar">
+      <div class="navbtns">
+        <button class="navb" id="prevBtn">◀ 前へ</button>
+        <button class="navb primary" id="nextBtn">次へ ▶</button>
+        <button class="navb" id="autoBtn">⏵ 自動</button>
+        <button class="navb" id="resetBtn">↻ 最初から</button>
+      </div>
+      <div class="ctlrow">
+        <div class="ctl"><label>容量 [MWh]<span class="val" id="capval">10</span></label><input type="range" id="cap" min="2" max="20" step="1" value="10"></div>
+        <div class="ctl"><label>最大出力 [MW]<span class="val" id="pmaxval">3.0</span></label><input type="range" id="pmax" min="1" max="8" step="0.5" value="3"></div>
+        <div class="ctl"><label>往復効率 η<span class="val" id="effval">0.90</span></label><input type="range" id="eff" min="0.6" max="1" step="0.01" value="0.9"></div>
+        <div class="ctl"><label>ベース価格<span class="val" id="baseval">20</span></label><input type="range" id="base" min="5" max="40" step="1" value="20"></div>
+        <div class="ctl"><label>日内変動の振幅<span class="val" id="dayval">12</span></label><input type="range" id="day" min="0" max="25" step="1" value="12"></div>
+        <div class="ctl"><label>夕方ピークの高さ<span class="val" id="eveval">8</span></label><input type="range" id="eve" min="0" max="20" step="1" value="8"></div>
+        <div class="ctl"><label>充電閾値%<span class="val" id="cpctval">35</span></label><input type="range" id="cpct" min="10" max="60" step="5" value="35"></div>
+        <div class="ctl"><label>放電閾値%<span class="val" id="dpctval">65</span></label><input type="range" id="dpct" min="40" max="90" step="5" value="65"></div>
+        <div class="ctl"><label>価格予測誤差 σ<span class="val" id="sigmaval">0</span></label><input type="range" id="sigma" min="0" max="15" step="1" value="0"></div>
+      </div>
     </div>
   </div>
 
-  <div class="note" id="note"></div>
-
-  <div id="forecast" style="display:none">
-    <h2 style="font-size:1rem;margin-top:16px">価格が不確実なとき：予測の価値（教材6bのEVPI直感）</h2>
-    <div class="metrics">
-      <div class="metric"><div class="k">固定計画（予測=平均で立てて実価格に適用）</div><div class="v" id="detProfit">–</div></div>
-      <div class="metric"><div class="k">完全予測（実価格でディスパッチし直す）</div><div class="v ok" id="wsProfit">–</div></div>
-      <div class="metric"><div class="k">予測誤差のコスト＝予測の価値</div><div class="v" id="gapProfit">–</div></div>
-    </div>
-    <div class="note" id="fcNote"></div>
-  </div>
-
-  <details>
-    <summary>🎯 観察点 / よくある誤解</summary>
-    <ul>
-      <li>充電は価格の谷、放電は山。平均充電価格 &lt; 平均放電価格 で利益が出る。</li>
-      <li>往復効率 η を下げると利益が減る（充放電ロス）。容量を増やしても価格差・出力で頭打ち。</li>
-      <li>閾値を狭める（充電%↓・放電%↑）と取引回数は減るが1回あたりの利幅は大きい。</li>
-      <li>これは<b>近視眼的な閾値コントローラ</b>：価格が閾値を超えた時点で放電するため、後にもっと高い夕方ピークが来ても先に放電し切ることがある。先読みする最適LPなら高値に温存できる。<b>単純ルールの限界＝最適化の価値</b>。最適LP・不確実性下の運用は Module 6b へ。</li>
+  <details open style="margin-top:14px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">⚠ よくある誤解</summary>
+    <ul style="margin:8px 0 4px;padding-left:1.2em;font-size:.9rem;line-height:1.8">
+      <li>❌「電池は100%効率で充放電できる」 → ✅ 往復効率ηは通常0.9前後。ηを下げると往復ロスで利益が減る。</li>
+      <li>❌「単純な閾値ルールで十分」 → ✅ 近視眼的な閾値コントローラは、後にもっと高い夕方ピークが来ても先に放電し切ることがある。先読みする最適LPなら高値に温存できる。</li>
+      <li>❌「価格予測が外れても運用への影響はない」 → ✅ 予測誤差のコスト＝予測の価値（EVPI直感）。固定計画は完全予測に及ばない。</li>
     </ul>
   </details>
   <div class="foot">SoC遷移：SoC(t+1)=SoC(t)+√η·充電−放電/√η。利益=Σ 価格·(放電−充電)。閉始SoC=0、残量は未売却。Plotly.js で描画。</div>
 </div>
 
+<script src="lib/steps.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 const C={price:'#ea4335',charge:'#4285f4',discharge:'#34a853',soc:'#f9ab00'};
@@ -89,8 +75,9 @@ function priceProfile(){
 }
 function percentile(arr,q){ const s=[...arr].sort((a,b)=>a-b); const i=(s.length-1)*q/100; const lo=Math.floor(i),hi=Math.ceil(i); return s[lo]+(s[hi]-s[lo])*(i-lo); }
 
-function dispatch(price){
-  const rt=Math.sqrt(S.eff); const cth=percentile(price,S.cpct), dth=percentile(price,S.dpct);
+function dispatch(price,eff){
+  const e=eff!==undefined?eff:S.eff;
+  const rt=Math.sqrt(e); const cth=percentile(price,S.cpct), dth=percentile(price,S.dpct);
   let soc=0; const c=new Array(T).fill(0), d=new Array(T).fill(0), socArr=[0];
   for(let t=0;t<T;t++){
     if(price[t]<=cth && soc<S.cap-1e-9){ const ch=Math.min(S.pmax,(S.cap-soc)/rt); c[t]=ch; soc+=rt*ch; }
@@ -99,63 +86,136 @@ function dispatch(price){
   }
   return {c,d,soc:socArr,cth,dth};
 }
+function profitOf(price,c,d){ return price.reduce((a,p,t)=>a+p*(d[t]-c[t]),0); }
+function profitAtEff(eff){ const price=priceProfile(); const {c,d}=dispatch(price,eff); return profitOf(price,c,d); }
 
-// 予測価値：固定計画（平均価格で立て実価格に適用）vs 完全予測（実価格で立て直す）
 function forecastValue(meanPrice){
-  const n=40, g=L.gaussianGen(L.mulberry32('bat'+S.sigma)); // σで決まる再現シナリオ
-  const plan=dispatch(meanPrice); // 予測=平均で立てた固定スケジュール
+  const n=40, g=L.gaussianGen(L.mulberry32('bat'+S.sigma));
+  const plan=dispatch(meanPrice);
   let det=0, ws=0;
   for(let s=0;s<n;s++){
     const real=meanPrice.map(v=>Math.max(0, v+S.sigma*g()));
-    det += real.reduce((a,p,t)=>a+p*(plan.d[t]-plan.c[t]),0);      // 固定計画を実価格で評価
-    const adapt=dispatch(real);                                     // 実価格で立て直す
+    det += real.reduce((a,p,t)=>a+p*(plan.d[t]-plan.c[t]),0);
+    const adapt=dispatch(real);
     ws  += real.reduce((a,p,t)=>a+p*(adapt.d[t]-adapt.c[t]),0);
   }
   return {det:det/n, ws:ws/n, gap:(ws-det)/n};
 }
 
-function update(){
-  for(const k of ['cap','pmax','eff','base','day','eve','cpct','dpct','sigma']){
-    const el=$(k+'val'); if(el) el.textContent=(k==='eff')?S[k].toFixed(2):(k==='pmax')?S[k].toFixed(1):S[k];
-  }
+const STEPS=[
+  {key:'prob',    t:'問題',           c:'var(--blue)'},
+  {key:'trap',    t:'直感のワナ',      c:'var(--red)'},
+  {key:'formula', t:'仕組み',         c:'var(--purple)'},
+  {key:'vary',    t:'σを動かす',      c:'var(--amber)'},
+  {key:'result',  t:'予測の価値',     c:'var(--green)'},
+];
+
+function computeAll(){
   const price=priceProfile(), {c,d,soc,cth,dth}=dispatch(price);
-  const hours=Array.from({length:T},(_,i)=>i);
   const sumC=c.reduce((a,b)=>a+b,0), sumD=d.reduce((a,b)=>a+b,0);
-  const profit=price.reduce((a,p,t)=>a+p*(d[t]-c[t]),0);
+  const profit=profitOf(price,c,d);
   const avgC=sumC>1e-9? price.reduce((a,p,t)=>a+p*c[t],0)/sumC : 0;
   const avgD=sumD>1e-9? price.reduce((a,p,t)=>a+p*d[t],0)/sumD : 0;
-  $('profit').textContent=profit.toFixed(1); $('cprice').textContent=avgC.toFixed(1); $('dprice').textContent=avgD.toFixed(1);
+  return {price,c,d,soc,cth,dth,profit,avgC,avgD};
+}
 
+function renderMetrics(V){
+  $('metrics').innerHTML=
+    `<div class="metric"><div class="k">アービトラージ利益</div><div class="v">${V.profit.toFixed(1)}</div></div>`+
+    `<div class="metric"><div class="k">平均充電価格</div><div class="v">${V.avgC.toFixed(1)}</div></div>`+
+    `<div class="metric"><div class="k">平均放電価格</div><div class="v ok">${V.avgD.toFixed(1)}</div></div>`;
+  const showFc = S.sigma>0 && (wiz.key()==='vary'||wiz.key()==='result');
+  $('fcMetrics').style.display = showFc?'flex':'none';
+  if(showFc){
+    const fv=forecastValue(V.price);
+    $('fcMetrics').innerHTML=
+      `<div class="metric"><div class="k">固定計画（予測=平均で立てる）</div><div class="v">${fv.det.toFixed(1)}</div></div>`+
+      `<div class="metric"><div class="k">完全予測（実価格で立て直す）</div><div class="v ok">${fv.ws.toFixed(1)}</div></div>`+
+      `<div class="metric"><div class="k">予測誤差のコスト＝予測の価値</div><div class="v">${fv.gap.toFixed(1)}</div></div>`;
+  }
+}
+
+function renderExplain(key,V){
+  let h=`<span class="lbl">STEP ${wiz.stepIdx()+1} / ${STEPS.length}</span>`;
+  if(key==='prob'){
+    h+=`<h3>① 問題：安く充電・高く放電で稼ぐ</h3>
+    <p>蓄電池は「エネルギーの時間シフト」で価値を生む。安い時間に充電し、高い時間に放電する。現在のアービトラージ利益は <b>${V.profit.toFixed(1)}</b>（平均充電 ${V.avgC.toFixed(1)} → 平均放電 ${V.avgD.toFixed(1)}）。</p>
+    <p><b>電池の効率が完璧でなかったら、利益はどうなるでしょうか？次へ進む前に予想してみてください。</b></p>`;
+  }else if(key==='trap'){
+    const p09=profitAtEff(0.9), p06=profitAtEff(0.6);
+    h+=`<h3>② 直感のワナ：電池は100%効率ではない</h3>
+    <p>往復効率 η=0.90 では利益 <b>${p09.toFixed(1)}</b>。η=0.60（悪い電池）まで下げると利益は <b>${p06.toFixed(1)}</b> まで下がる。</p>
+    <p>充放電のたびにエネルギーの一部が失われる（往復ロス）。ηが低いほど、同じ価格差でも稼げる利益は目減りする。</p>`;
+  }else if(key==='formula'){
+    h+=`<h3>③ 仕組み：閾値ディスパッチ</h3>
+    <p>価格が下位 ${S.cpct}%ile（<b>${V.cth.toFixed(1)}</b>）以下なら充電、上位 ${100-S.dpct}%（<b>${V.dth.toFixed(1)}</b>）以上なら放電。SoC遷移：SoC(t+1)=SoC(t)+√η·充電−放電/√η。</p>
+    <p>これは<b>近視眼的なルール</b>：価格が閾値を超えた瞬間に放電するため、後でもっと高い夕方ピークが来ても先に売り切ってしまうことがある。先読みする最適LPなら高値に温存できる（Module 6bへ）。</p>`;
+  }else if(key==='vary'){
+    h+=`<h3>④ 価格予測誤差 σ を動かす</h3>
+    <p>σ を自動で動かしています。σ=0（予測誤差なし）では固定計画と完全予測は一致しますが、σ が上がるほど両者の差＝「予測の価値」が開きます。</p>
+    <p>今 σ=${S.sigma}。スライダーに触れると自動は止まります。</p>`;
+  }else{
+    const fv=forecastValue(V.price);
+    h+=`<h3>⑤ 結果：予測誤差のコスト＝予測の価値</h3>
+    <p>σ=${S.sigma} の予測誤差があると、平均価格で立てた<b>固定計画（${fv.det.toFixed(0)}）</b>は<b>完全予測（${fv.ws.toFixed(0)}）</b>に<b>${fv.gap.toFixed(0)}</b>及ばない。</p>
+    <div class="eq"><b>要点</b><br>・往復効率ηが低いほど利益は目減りする<br>・単純な閾値ルールは近視眼的——先読みする最適化には劣る<br>・予測誤差のコスト＝予測の価値（教材6bのWS−EEVギャップ＝EVPIの直感）。実運用は再最適化(recourse)するので両者の中間になる</div>`;
+  }
+  $('explain').innerHTML=h;
+}
+
+function draw(V){
+  const hours=Array.from({length:T},(_,i)=>i);
   Plotly.react('plot',[
-    {x:hours,y:price,mode:'lines',line:{color:C.price,width:2.5},name:'価格',yaxis:'y'},
-    {x:hours,y:c,type:'bar',marker:{color:C.charge},opacity:0.6,name:'充電',yaxis:'y2'},
-    {x:hours,y:d.map(v=>-v),type:'bar',marker:{color:C.discharge},opacity:0.6,name:'放電',yaxis:'y2'},
-    {x:Array.from({length:T+1},(_,i)=>i),y:soc,mode:'lines',line:{color:C.soc,width:2,dash:'dot'},name:'SoC [MWh]',yaxis:'y2'}
+    {x:hours,y:V.price,mode:'lines',line:{color:C.price,width:2.5},name:'価格',yaxis:'y'},
+    {x:hours,y:V.c,type:'bar',marker:{color:C.charge},opacity:0.6,name:'充電',yaxis:'y2'},
+    {x:hours,y:V.d.map(v=>-v),type:'bar',marker:{color:C.discharge},opacity:0.6,name:'放電',yaxis:'y2'},
+    {x:Array.from({length:T+1},(_,i)=>i),y:V.soc,mode:'lines',line:{color:C.soc,width:2,dash:'dot'},name:'SoC [MWh]',yaxis:'y2'}
   ],{margin:{t:30,r:48,b:40,l:45},barmode:'relative',
-     title:{text:`閾値ディスパッチ（利益 ${profit.toFixed(1)}）：安い時間に充電・高い時間に放電`,font:{size:12}},
+     title:{text:`閾値ディスパッチ（利益 ${V.profit.toFixed(1)}）：安い時間に充電・高い時間に放電`,font:{size:12}},
      xaxis:{title:'時刻 [h]',dtick:3},
      yaxis:{title:'価格'},yaxis2:{title:'充放電[MW]/SoC[MWh]',overlaying:'y',side:'right'},
      legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
-
-  $('note').innerHTML=`充電閾値=${cth.toFixed(1)}（${S.cpct}%ile）以下で充電、放電閾値=${dth.toFixed(1)}（${S.dpct}%ile）以上で放電。`+
-    `平均充電 ${avgC.toFixed(1)} ${avgC<avgD?'<':'≥'} 平均放電 ${avgD.toFixed(1)}。`+
-    (avgC<avgD?' 安く買って高く売る＝アービトラージ成立。':' 利幅なし（閾値や価格差を見直す）。')+
-    ` η を下げると往復ロスで利益が減る。`;
-
-  // 予測の価値（σ>0 のとき）
-  if(S.sigma>0){
-    const fv=forecastValue(price);
-    $('forecast').style.display='block';
-    $('detProfit').textContent=fv.det.toFixed(1);
-    $('wsProfit').textContent=fv.ws.toFixed(1);
-    $('gapProfit').textContent=fv.gap.toFixed(1);
-    $('fcNote').innerHTML=`σ=${S.sigma} の予測誤差があると、平均価格で立てた<b>固定計画（${fv.det.toFixed(0)}）</b>は`+
-      `<b>完全予測（${fv.ws.toFixed(0)}）</b>に <b>${fv.gap.toFixed(0)}</b> 及ばない。これが「予測誤差のコスト＝予測の価値」`+
-      `（教材6bの WS−EEV ギャップ＝EVPI の直感）。実運用は実時間で再最適化(recourse)するので両者の中間。`;
-  } else { $('forecast').style.display='none'; }
 }
-['cap','pmax','eff','base','day','eve','cpct','dpct','sigma'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
-update();
+
+function renderAll(key){
+  for(const k of ['cap','pmax','eff','base','day','eve','cpct','dpct','sigma']){
+    const el=$(k+'val'); if(el) el.textContent=(k==='eff')?S[k].toFixed(2):(k==='pmax')?S[k].toFixed(1):S[k];
+  }
+  const V=computeAll();
+  renderMetrics(V); renderExplain(key,V); draw(V);
+}
+
+let autoDir=1;
+function applyStoryDefaults(key){
+  if(key==='prob'){ S.eff=0.9; $('eff').value=0.9; S.sigma=0; $('sigma').value=0; }
+  else if(key==='trap'){ S.eff=0.6; $('eff').value=0.6; }
+  else if(key==='formula'){ S.eff=0.9; $('eff').value=0.9; }
+  else if(key==='vary'){ S.eff=0.9; $('eff').value=0.9; if(S.sigma===0){ S.sigma=1; $('sigma').value=1; } }
+  else if(key==='result'){ S.sigma=8; $('sigma').value=8; }
+}
+
+const wiz=LPSteps.create({
+  steps:STEPS,
+  autoKey:'vary',
+  onEnter:(key)=>applyStoryDefaults(key),
+  onRender:(key)=>renderAll(key),
+  onAutoTick:()=>{
+    let v=S.sigma+autoDir*0.12;
+    if(v>=15){ v=15; autoDir=-1; } else if(v<=0){ v=0; autoDir=1; }
+    S.sigma=v; $('sigma').value=v;
+    renderAll('vary');
+  }
+});
+
+['cap','pmax','eff','base','day','eve','cpct','dpct','sigma'].forEach(id=>$(id).addEventListener('input',e=>{ wiz.stopAuto(); S[id]=parseFloat(e.target.value); renderAll(wiz.key()); }));
+$('resetBtn').addEventListener('click',()=>{
+  wiz.stopAuto();
+  S={cap:10,pmax:3,eff:0.9,base:20,day:12,eve:8,cpct:35,dpct:65,sigma:0};
+  ['cap','pmax','eff','base','day','eve','cpct','dpct','sigma'].forEach(k=>$(k).value=S[k]);
+  wiz.goStep(0);
+});
+
+wiz.goStep(0);
 </script>
   <script src="lib/a11y.js"></script>
 </body>
