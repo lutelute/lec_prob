@@ -47,6 +47,9 @@
         <div class="metric"><div class="k">感度 P(警報|F)（混同注意）</div><div class="v" id="sensmetric">–</div></div>
       </div>
       <div class="note" id="warnNote" style="display:none"></div>
+      <details open style="margin:8px 0"><summary style="cursor:pointer;font-weight:700;font-size:.92rem">計算の内訳（ベイズの式に数値を入れる）</summary>
+        <div id="derive" style="font-size:.9rem;line-height:1.9;padding:6px 2px"></div>
+      </details>
       <div class="plots">
         <div id="barPlot" class="plot"></div>
         <div id="curvePlot" class="plot"></div>
@@ -88,6 +91,14 @@ function update(){
   $('fprval').textContent=f.toFixed(3); $('nseqval').textContent=nseq;
   const pp=postPos(p,s,f), pn=postNeg(p,s,f);
   $('postpos').textContent=fmtpct(pp); $('postneg').textContent=fmtpct(pn); $('sensmetric').textContent=fmtpct(s);
+
+  // ベイズの式に数値を入れる（対話的導出）
+  const num=s*p, denomH=f*(1-p), denom=num+denomH;
+  $('derive').innerHTML=
+    `<b>P(病気｜陽性)</b> ＝ 感度×事前 ÷ ( 感度×事前 ＋ 誤陽性×(1−事前) )<br>`+
+    `＝ (${s.toFixed(2)} × ${p.toFixed(3)}) ÷ ( ${s.toFixed(2)}×${p.toFixed(3)} ＋ ${f.toFixed(3)}×${(1-p).toFixed(3)} )<br>`+
+    `＝ ${num.toFixed(4)} ÷ ( ${num.toFixed(4)} ＋ ${denomH.toFixed(4)} ) ＝ ${num.toFixed(4)} ÷ ${denom.toFixed(4)} ＝ <b>${fmtpct(pp)}</b><br>`+
+    `<span style="color:#5f6368">分母の第2項 ${denomH.toFixed(4)}（健康なのに陽性）が第1項 ${num.toFixed(4)}（本物）に匹敵するほど、事後は下がる。事前 ${p.toFixed(3)} が小さいほど第1項が痩せ、事後が跳ね上がらない＝これが基準率の効果。</span>`;
 
   // 内訳
   const nf=n*p, nnf=n*(1-p);
