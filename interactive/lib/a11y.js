@@ -44,6 +44,9 @@
         p.setAttribute('aria-label', 'インタラクティブな図。数値は近くの指標・表に文字で表示されます。');
       }
     });
+    // メインコンテンツにランドマーク（スクリーンリーダが本文へ直接移動できる）
+    var wrap = document.querySelector('.wrap');
+    if (wrap && !wrap.getAttribute('role')) wrap.setAttribute('role', 'main');
     // 全画面で開いたとき（iframe埋め込みでない）だけ、戻り導線フッターを出す
     try {
       if (window.self === window.top && !document.querySelector('.lp-toolnav')) {
