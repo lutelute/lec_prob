@@ -5,46 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ベイズ更新・基準率の誤謬（インタラクティブ）</title>
 <link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<style>
-  .stage{background:var(--bg);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px}
-  .stepper{display:flex;background:var(--soft);border-bottom:1px solid var(--line)}
-  .stp{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;
-    border-right:1px solid var(--line);border-top:0;border-left:0;border-bottom:0;background:transparent;
-    font-family:inherit;transition:.15s}
-  .stp:last-child{border-right:none}
-  .stp .n{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:11px;background:#fff;color:var(--muted);border:1px solid var(--line)}
-  .stp .t{font-size:11px;color:var(--muted)}
-  .stp.done .n{background:#e6f4ea;color:var(--green);border-color:var(--green)}
-  .stp.active{background:var(--bg)}
-  .stp.active .n{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:700}
-  .stp.active .t{color:var(--ink);font-weight:700}
-  .stagebody{display:grid;grid-template-columns:1fr 1fr}
-  .stagevis{padding:14px;border-right:1px solid var(--line)}
-  .stageexplain{padding:16px}
-  .stageexplain .lbl{display:inline-block;font-size:.72rem;letter-spacing:.05em;color:var(--muted);
-    border:1px solid var(--line);border-radius:5px;padding:2px 7px;margin-bottom:8px}
-  .stageexplain h3{font-size:1.02rem;margin:.2rem 0 .5rem}
-  .stageexplain p{font-size:.9rem;line-height:1.75;margin:.5rem 0}
-  .stageexplain .eq{font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:8px;
-    padding:9px 11px;margin:8px 0;line-height:1.8}
-  .stagebar{display:flex;align-items:flex-start;gap:14px;padding:10px 14px;border-top:1px solid var(--line);
-    background:var(--soft);flex-wrap:wrap}
-  .stagebar .navbtns{display:flex;gap:6px;flex-wrap:wrap}
-  .stagebar button.navb{border:1px solid var(--line);background:#fff;color:var(--ink);font-size:.85rem;
-    padding:6px 12px;border-radius:7px;cursor:pointer}
-  .stagebar button.navb.primary{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:700}
-  .stagebar button.navb:disabled{opacity:.4;cursor:default}
-  .stagebar .ctlrow{display:flex;gap:16px;flex-wrap:wrap;flex:1;align-items:flex-start}
-  .stagebar .ctl{min-width:130px;margin:0}
-  .stagebar .seg{margin-top:2px}
-  @media(max-width:760px){
-    .stagebody{grid-template-columns:1fr}
-    .stagevis{border-right:none;border-bottom:1px solid var(--line)}
-    .stp .t{display:none}
-  }
-</style>
 </head>
 <body>
 <div class="wrap">
@@ -97,6 +59,7 @@
   <div class="foot">ベイズ：P(F|警報)=P(警報|F)P(F)/[P(警報|F)P(F)+P(警報|¬F)P(¬F)]。逐次はオッズ×尤度比^k。Plotly.js で描画。</div>
 </div>
 
+<script src="lib/steps.js"></script>
 <script>
 const C={tp:'#34a853',fp:'#ea4335',fn:'#fbbc04',tn:'#cccccc',blue:'#4285f4',red:'#ea4335',purple:'#a142f4'};
 const $=id=>document.getElementById(id);
@@ -125,29 +88,16 @@ const STEPS=[
   {key:'vary',    t:'事前確率を動かす', c:'var(--amber)'},
   {key:'seq',     t:'警報を重ねる', c:'var(--green)'},
 ];
-const VARY_IDX=3;
-let stepIdx=0;
-
-function renderStepper(){
-  const el=$('stepper');
-  el.innerHTML=STEPS.map((s,i)=>{
-    const cls='stp'+(i===stepIdx?' active':(i<stepIdx?' done':''));
-    return `<button type="button" class="${cls}" data-i="${i}" role="tab" aria-selected="${i===stepIdx}" style="--c:${s.c}">`+
-      `<span class="n">${i<stepIdx?'✓':(i+1)}</span><span class="t">${s.t}</span></button>`;
-  }).join('');
-  el.querySelectorAll('.stp').forEach(b=>b.addEventListener('click',()=>goStep(+b.dataset.i)));
-}
 
 function renderMetrics(V){
   $('metrics').innerHTML=
-    `<div class="metric"><div class="k">事後 P(F | 警報あり)</div><div class="v" id="postpos">${fmtpct(V.pp)}</div></div>`+
-    `<div class="metric"><div class="k">事後 P(F | 警報なし)</div><div class="v" id="postneg">${fmtpct(V.pn)}</div></div>`+
+    `<div class="metric"><div class="k">事後 P(F | 警報あり)</div><div class="v">${fmtpct(V.pp)}</div></div>`+
+    `<div class="metric"><div class="k">事後 P(F | 警報なし)</div><div class="v">${fmtpct(V.pn)}</div></div>`+
     `<div class="metric"><div class="k">感度 P(警報|F)（混同注意）</div><div class="v">${fmtpct(V.s)}</div></div>`;
 }
 
-function renderExplain(V){
-  const key=STEPS[stepIdx].key;
-  let h=`<span class="lbl">STEP ${stepIdx+1} / ${STEPS.length}</span>`;
+function renderExplain(key,V){
+  let h=`<span class="lbl">STEP ${wiz.stepIdx()+1} / ${STEPS.length}</span>`;
   if(key==='prob'){
     h+=`<h3>① 問題：警報は本当に本物か？</h3>
     <p>保護リレーの警報を考える。感度（故障のとき正しく鳴る確率）は<b>${fmtpct(V.s)}</b>ととても優秀。事前確率（そもそも故障している確率＝基準率）は<b>${V.p.toFixed(3)}</b>と稀。誤警報率（正常なのに鳴る確率）は<b>${fmtpct(V.f)}</b>。</p>
@@ -176,8 +126,7 @@ function renderExplain(V){
   $('explain').innerHTML=h;
 }
 
-function draw(V){
-  const key=STEPS[stepIdx].key;
+function draw(key,V){
   if(key==='vary'){
     const bs=[],ys=[]; for(let b=0.001;b<=0.5;b+=0.002){bs.push(b);ys.push(postPos(b,V.s,V.f));}
     Plotly.react('plot',[
@@ -206,32 +155,17 @@ function draw(V){
   }
 }
 
-function renderAll(){
+function renderAll(key){
   const V=computeAll();
   $('priorval').textContent=V.p.toFixed(3); $('sensval').textContent=V.s.toFixed(2);
   $('fprval').textContent=V.f.toFixed(3); $('nseqval').textContent=V.nseq;
-  renderStepper(); renderMetrics(V); renderExplain(V); draw(V);
-  $('prevBtn').disabled=(stepIdx===0);
-  $('nextBtn').disabled=(stepIdx===STEPS.length-1);
+  renderMetrics(V); renderExplain(key,V); draw(key,V);
 }
 
-let auto=false, autoDir=1;
-function stopAuto(){ auto=false; $('autoBtn').textContent='⏵ 自動'; }
-function autoTick(){
-  if(!auto) return;
-  let v=S.prior+autoDir*0.003;
-  if(v>=0.3){ v=0.3; autoDir=-1; } else if(v<=0.002){ v=0.002; autoDir=1; }
-  S.prior=v; $('prior').value=v;
-  renderAll();
-  requestAnimationFrame(autoTick);
-}
-function startAuto(){ if(auto) return; auto=true; $('autoBtn').textContent='⏸ 停止'; requestAnimationFrame(autoTick); }
+let autoDir=1;
 
-function goStep(i){
-  i=Math.max(0,Math.min(STEPS.length-1,i));
-  stepIdx=i;
-  const key=STEPS[i].key;
-  if(key!=='vary') stopAuto();
+// ステップに入った瞬間の既定値（物語として見せたい値）。ツール固有の責務。
+function applyStoryDefaults(key){
   if(key==='prob'||key==='trap'||key==='formula'){
     S.prior=0.01; S.sens=0.99; S.fpr=0.05; S.n=1000;
     $('prior').value=S.prior; $('sens').value=S.sens; $('fpr').value=S.fpr;
@@ -239,32 +173,36 @@ function goStep(i){
   }else if(key==='seq'){
     if(S.nseq<2){ S.nseq=2; $('nseq').value=2; }
   }
-  renderAll();
-  if(key==='vary') startAuto();
 }
 
-['prior','sens','fpr'].forEach(id=>$(id).addEventListener('input',e=>{ stopAuto(); S[id]=parseFloat(e.target.value); renderAll(); }));
-$('nseq').addEventListener('input',e=>{ S.nseq=parseInt(e.target.value); renderAll(); });
+const wiz=LPSteps.create({
+  steps:STEPS,
+  autoKey:'vary',
+  onEnter:(key)=>applyStoryDefaults(key),
+  onRender:(key)=>renderAll(key),
+  onAutoTick:()=>{
+    let v=S.prior+autoDir*0.003;
+    if(v>=0.3){ v=0.3; autoDir=-1; } else if(v<=0.002){ v=0.002; autoDir=1; }
+    S.prior=v; $('prior').value=v;
+    renderAll('vary');
+  }
+});
+
+['prior','sens','fpr'].forEach(id=>$(id).addEventListener('input',e=>{ wiz.stopAuto(); S[id]=parseFloat(e.target.value); renderAll(wiz.key()); }));
+$('nseq').addEventListener('input',e=>{ S.nseq=parseInt(e.target.value); renderAll(wiz.key()); });
 document.querySelectorAll('#ncases button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('#ncases button').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on'); S.n=parseInt(b.dataset.n); renderAll();
+  b.classList.add('on'); S.n=parseInt(b.dataset.n); renderAll(wiz.key());
 }));
-$('prevBtn').addEventListener('click',()=>goStep(stepIdx-1));
-$('nextBtn').addEventListener('click',()=>goStep(stepIdx+1));
-$('autoBtn').addEventListener('click',()=>{
-  if(auto){ stopAuto(); }
-  else if(stepIdx!==VARY_IDX){ goStep(VARY_IDX); }
-  else{ startAuto(); }
-});
 $('resetBtn').addEventListener('click',()=>{
-  stopAuto();
+  wiz.stopAuto();
   S={prior:0.01,sens:0.99,fpr:0.05,n:1000,nseq:2};
   $('prior').value=S.prior; $('sens').value=S.sens; $('fpr').value=S.fpr; $('nseq').value=S.nseq;
   document.querySelectorAll('#ncases button').forEach(b=>b.classList.toggle('on', b.dataset.n==='1000'));
-  goStep(0);
+  wiz.goStep(0);
 });
 
-goStep(0);
+wiz.goStep(0);
 </script>
   <script src="lib/a11y.js"></script>
 </body>
