@@ -79,7 +79,18 @@ const Q=[
   w:['逆。EVPI が大きい＝不確実性が決定に強く効き、先に分かれば大きく得する状況。',null,'EVPI は SP と WS の差で、確率モデルを使って初めて測れる量。要らないのではなく前提。'],
   e:'EVPI = 確率計画(SP) − 完全情報(WS)。大きいほど「いま知らないこと」のコストが高い。（Module 6b）'},
 ];
-let i=0, score=0, answered=false, curCorrect=0;
+// 各問が対応するモジュール（間違えた問だけを名指しで復習提案するため）
+const MOD=[
+ {t:'Module 2 確率変数と分布',h:'../notes/02_random_variables_and_distributions/'},
+ {t:'Module 1 事象と確率',h:'../notes/01_events_and_probability/'},
+ {t:'Module 6 不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/'},
+ {t:'Module 0 なぜ確率（平均の罠）',h:'../notes/00_why_probability/'},
+ {t:'Module 5 シナリオとMC',h:'../notes/05_scenarios_and_monte_carlo/'},
+ {t:'Module 0 なぜ確率（偶然/認識）',h:'../notes/00_why_probability/'},
+ {t:'Module 6 不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/'},
+ {t:'Module 6b 二段階（VSS/EVPI）',h:'../notes/06b_two_stage_stochastic_programming/'},
+];
+let i=0, score=0, answered=false, curCorrect=0, wrong=[];
 function render(){
   const x=Q[i];
   $('qtext').textContent=`Q${i+1}. ${x.q}`;
@@ -104,7 +115,7 @@ function choose(k,btn){
   opts.forEach((b,j)=>{ b.disabled=true; if(j===curCorrect)b.classList.add('correct'); });
   let msg;
   if(k===curCorrect){ score++; msg='◎ 正解！ '+x.e; }
-  else{ btn.classList.add('wrong'); const origK=+btn.dataset.orig;
+  else{ btn.classList.add('wrong'); wrong.push(i); const origK=+btn.dataset.orig;
     const why=(x.w&&x.w[origK])?`<b>その選択が誤りな理由</b>：${x.w[origK]}<br>`:'';
     msg=`✗ おしい。${why}<b>正しくは</b>：${x.e}`; }
   $('exp').innerHTML=msg;
@@ -121,10 +132,20 @@ $('next').onclick=()=>{
     const adv = score>=7 ? 'みごと。「不確実性をどう表し、何を大事にして決めるか」が身についています。'
       : score>=4 ? 'いい線です。間違えた問の Module を復習すると一段深まります。'
       : 'ここからが本番。<a href="../notes/how_to_use_probability/" target="_top">🧭 確率の使い方</a> と各ノートの「30秒まとめ」から戻りましょう。';
-    $('advice').innerHTML=adv;
+    // 間違えた問のモジュールだけを名指しで復習提案（重複はまとめる）
+    let review='';
+    if(wrong.length){
+      const seen={}, links=[];
+      wrong.forEach(qi=>{const m=MOD[qi]; if(m&&!seen[m.h]){seen[m.h]=1;links.push(`<a href="${m.h}" target="_top">${m.t}</a>`);}});
+      review=`<div style="margin-top:14px;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-align:left">`+
+        `<b>あなたの復習ポイント（間違えた問だけ）</b><br>`+links.map(l=>'・'+l).join('<br>')+`</div>`;
+    } else {
+      review=`<div style="margin-top:10px;color:#137333">全問正解！復習は不要です 🎉</div>`;
+    }
+    $('advice').innerHTML=adv+review;
   }
 };
-$('again').onclick=()=>{ i=0; score=0; $('result').style.display='none'; $('card').style.display='block'; render(); };
+$('again').onclick=()=>{ i=0; score=0; wrong=[]; $('result').style.display='none'; $('card').style.display='block'; render(); };
 render();
 </script>
   <script src="lib/a11y.js"></script>
