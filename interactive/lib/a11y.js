@@ -17,8 +17,8 @@
         }
       }
     });
-    // 出力（指標・注釈）：値の変化を読み上げ
-    document.querySelectorAll('.metrics, #note, .note, .summ, #outv, #tableWrap').forEach(function (el) {
+    // 出力（指標・注釈・推奨・感度・導出）：値の変化を読み上げ
+    document.querySelectorAll('.metrics, #note, .note, .summ, .rec, #sens, #marg, #outv, #tableWrap').forEach(function (el) {
       if (!el.getAttribute('aria-live')) el.setAttribute('aria-live', 'polite');
     });
     // セグメント切替：role=button + aria-pressed（class 'on' を監視して同期）
