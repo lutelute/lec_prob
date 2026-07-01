@@ -53,7 +53,7 @@
 <body>
 <div class="wrap">
   <h1>全体地図 — 確率から「決定」までの俯瞰アトラス</h1>
-  <div class="lead">この教材の<b>全概念・モジュール・ツール</b>を、性質で<b>2次元に配置</b>した地図。<b>横＝基礎・不確実性 ←→ 最適化・決定／縦＝離散・事象 ←→ 連続・分布・リスク</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋、「🔗 前提関係」で<b>何が何の前提か（依存グラフ）</b>を重ねられる。▶印は触れるツール。</div>
+  <div class="lead">この教材の<b>全概念・モジュール・ツール</b>を、性質で<b>2次元に配置</b>した地図。<b>横＝基礎・不確実性 ←→ 最適化・決定／縦＝離散・事象 ←→ 連続・分布・リスク</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋、「🔗 前提関係」で<b>何が何の前提か（依存グラフ）</b>を重ねられる（この状態でカードにホバーすると<b>前提チェーンだけ強調</b>）。▶印は触れるツール。</div>
 
   <div class="stage">
     <div class="maphost">
@@ -166,7 +166,9 @@ const MOT={
   target(x,y,w,h,c){const cx=x+w/2,cy=y+h/2,R=Math.min(w,h)*0.36;ctx.strokeStyle=c;ctx.lineWidth=1.4;for(let r=1;r<=2;r++){ctx.beginPath();ctx.arc(cx,cy,R*r/2,0,7);ctx.stroke();}ctx.fillStyle=c;ctx.beginPath();ctx.arc(cx,cy,2.4,0,7);ctx.fill();},
 };
 
-let hover=-1,off={},showPath=false,showEdges=false;
+let hover=-1,off={},showPath=false,showEdges=false,chain=null;
+function parentsOf(name){return EDGES.filter(e=>e[1]===name).map(e=>e[0]);}
+function buildChain(name){const seen=new Set([name]);const stack=parentsOf(name).slice();while(stack.length){const p=stack.pop();if(seen.has(p))continue;seen.add(p);parentsOf(p).forEach(x=>stack.push(x));}return seen;}
 function drawGrid(){const step=29;ctx.lineWidth=1;
   for(let x=PAD%step;x<CW;x+=step){const mj=Math.round((x-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,CH);ctx.stroke();}
   for(let y=PAD%step;y<CH;y+=step){const mj=Math.round((y-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(CW,y+.5);ctx.stroke();}}
@@ -179,16 +181,17 @@ function drawPath(){const pts=SPINE.map(n=>M.find(m=>m.n===n)).filter(m=>m&&!off
   pts.forEach((m,i)=>{const bx=m.px-CWH+8,by=m.py-CHH+8;ctx.beginPath();ctx.arc(bx,by,8,0,7);ctx.fillStyle='#1a1a17';ctx.fill();ctx.fillStyle='#fff';ctx.font='700 10px '+getCSS('--mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,bx,by+.5);ctx.textBaseline='alphabetic';});}
 function drawEdges(){ctx.save();
   for(const [a,b] of EDGES){const A=M.find(m=>m.n===a),B=M.find(m=>m.n===b);if(!A||!B||off[A.c]||off[B.c])continue;
-    const dim=query&&A.n.toLowerCase().indexOf(query)<0&&B.n.toLowerCase().indexOf(query)<0;
+    const inChain=chain&&chain.has(A.n)&&chain.has(B.n);
+    const dim=(query&&A.n.toLowerCase().indexOf(query)<0&&B.n.toLowerCase().indexOf(query)<0)||(chain&&!inChain);
     const dx=B.px-A.px,dy=B.py-A.py,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
     const sx=A.px+ux*CWH*0.85,sy=A.py+uy*CHH*0.85,ex=B.px-ux*CWH*0.95,ey=B.py-uy*CHH*0.95;
-    ctx.strokeStyle=dim?'rgba(31,158,138,0.10)':'rgba(31,158,138,0.42)';ctx.lineWidth=1.2;
+    ctx.strokeStyle=inChain?'rgba(31,158,138,0.95)':dim?'rgba(31,158,138,0.08)':'rgba(31,158,138,0.42)';ctx.lineWidth=inChain?2.4:1.2;
     ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();
-    const ah=6,ang=Math.atan2(ey-sy,ex-sx);ctx.fillStyle=dim?'rgba(31,158,138,0.14)':'rgba(31,158,138,0.6)';
+    const ah=inChain?8:6,ang=Math.atan2(ey-sy,ex-sx);ctx.fillStyle=inChain?'rgba(31,158,138,1)':dim?'rgba(31,158,138,0.12)':'rgba(31,158,138,0.6)';
     ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-ah*Math.cos(ang-0.42),ey-ah*Math.sin(ang-0.42));ctx.lineTo(ex-ah*Math.cos(ang+0.42),ey-ah*Math.sin(ang+0.42));ctx.closePath();ctx.fill();}
   ctx.restore();}
 function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,y=m.py-CHH,w=CWH*2,h=CHH*2;
-  const match=!query||m.n.toLowerCase().indexOf(query)>=0; ctx.save(); if(!match)ctx.globalAlpha=0.18;
+  const match=!query||m.n.toLowerCase().indexOf(query)>=0; ctx.save(); let _al=1; if(!match)_al=0.18; if(chain&&!chain.has(m.n))_al=Math.min(_al,0.2); if(_al<1)ctx.globalAlpha=_al;
   ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=hl?7:3;ctx.shadowOffsetY=1.5;rr(x,y,w,h,3);ctx.fillStyle='#fffefb';ctx.fill();ctx.shadowColor='transparent';
   rr(x,y,w,h,3);ctx.lineWidth=hl?2:1;ctx.strokeStyle=hl?'#1a1a17':(query&&match?'#1f9e8a':'rgba(26,26,23,0.32)');ctx.stroke();
   ctx.fillStyle=CATS[m.c].color;rr(x,y,w,3.2,2);ctx.fill();
@@ -197,9 +200,9 @@ function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,
   if(visited.has(m.n)){ctx.fillStyle='#34a853';ctx.beginPath();ctx.arc(x+9,y+9,6,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+6,y+9);ctx.lineTo(x+8,y+11.4);ctx.lineTo(x+12.2,y+6.4);ctx.stroke();}
   ctx.fillStyle=hl?'#1a1a17':'rgba(26,26,23,0.9)';ctx.font=(hl?'700 ':'600 ')+'9.5px '+getCSS('--gothic');ctx.textAlign='center';ctx.textBaseline='middle';
   let nm=m.n;if(nm.length>9)nm=nm.slice(0,8)+'…';ctx.fillText(nm,m.px,y+h-8);ctx.textBaseline='alphabetic';ctx.restore();}
-function draw(){ctx.clearRect(0,0,CW,CH);drawGrid();drawHulls();if(showEdges)drawEdges();if(showPath)drawPath();
+function draw(){ctx.clearRect(0,0,CW,CH);chain=(showEdges&&hover>=0)?buildChain(M[hover].n):null;drawGrid();drawHulls();if(showEdges)drawEdges();if(showPath)drawPath();
   for(let i=0;i<M.length;i++)if(i!==hover)drawCard(M[i],i);if(hover>=0)drawCard(M[hover],hover);
-  if(hover>=0){const m=M[hover];ctx.fillStyle='#1a1a17';ctx.font='700 11px '+getCSS('--gothic');ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(m.n,16,CH-15);const tw=ctx.measureText(m.n).width;ctx.fillStyle=getCSS('--ink-3');ctx.font='10px '+getCSS('--mono');ctx.fillText('  ▸ '+CATS[m.c].label+(m.tool?' / 触れるツール':'')+' / クリックで開く',16+tw+6,CH-15);}}
+  if(hover>=0){const m=M[hover];ctx.fillStyle='#1a1a17';ctx.font='700 11px '+getCSS('--gothic');ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(m.n,16,CH-15);const tw=ctx.measureText(m.n).width;ctx.fillStyle=getCSS('--ink-3');ctx.font='10px '+getCSS('--mono');const pr=parentsOf(m.n);ctx.fillText('  ▸ '+CATS[m.c].label+(m.tool?' / 触れるツール':'')+(showEdges&&pr.length?' / ◂前提: '+pr.join('・'):' / クリックで開く'),16+tw+6,CH-15);}}
 function renderList(){const el=document.getElementById('maplist');if(!el)return;let html='';
   for(const k in CATS){if(off[k])continue;const items=M.filter(m=>m.c===k&&(!query||m.n.toLowerCase().indexOf(query)>=0));if(!items.length)continue;
     html+='<div class="mlcat" style="border-color:'+CATS[k].color+'">'+CATS[k].label+'</div>';
