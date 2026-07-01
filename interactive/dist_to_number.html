@@ -5,117 +5,186 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>触って確かめる：分布 → 数値</title>
 <link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="lib/stats.js"></script>
 </head>
 <body>
 <div class="wrap">
   <h1>触って確かめる：分布は、操作を当てると「数」になる</h1>
-  <p class="sub">分布はスカラーではなく「地図」。<b>どの操作を当てるか</b>で、取り出せる数が変わります。需要 N(μ,σ) で試してください。</p>
-  <div class="try"><b class="h">👉 やってみよう</b>
-  <ol>
-    <li>「確率（面積）」で区間を動かす → 分布から<b>1つの数</b>が出る。</li>
-    <li>「平均」「分位点」に切替 → <b>同じ分布から別の数</b>が出る。</li>
-    <li>「シナリオで近似」で N を増やす → 標本平均が μ に<b>収束</b>。</li>
-  </ol>
-  <div class="ins">分布は地図。どの操作を当てるかで取り出せる数が変わる。</div></div>
-  <div class="panel">
-    <div class="controls">
-      <h2>分布の形</h2>
-      <div class="ctl"><label>平均 μ <span class="val" id="muval">100</span></label><input type="range" id="mu" min="70" max="130" step="1" value="100"></div>
-      <div class="ctl"><label>標準偏差 σ <span class="val" id="sdval">15</span></label><input type="range" id="sd" min="5" max="30" step="1" value="15"></div>
-      <h2>当てる操作</h2>
-      <div class="seg" id="op">
-        <button type="button" data-op="prob" class="on">確率（面積）</button>
-        <button type="button" data-op="mean">平均（重み付き和）</button>
-        <button type="button" data-op="quant">分位点</button>
-        <button type="button" data-op="scenario">シナリオで近似</button>
+  <div class="sub">分布はスカラーではなく「地図」。どの操作を当てるかで、取り出せる数が変わる。5ステップで4つの操作を巡る。</div>
+
+  <div class="stage">
+    <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
+    <div class="stagebody">
+      <div class="stagevis">
+        <div id="plot" class="plot" style="height:320px"></div>
+        <div class="metrics" id="metrics" style="margin-top:10px"></div>
       </div>
-      <div id="opctl"></div>
-      <div class="metrics">
-        <div class="metric"><div class="k" id="outk">取り出した数</div><div class="v" id="outv">–</div></div>
+      <div class="stageexplain" id="explain" aria-live="polite"></div>
+    </div>
+    <div class="stagebar">
+      <div class="navbtns">
+        <button class="navb" id="prevBtn">◀ 前へ</button>
+        <button class="navb primary" id="nextBtn">次へ ▶</button>
+        <button class="navb" id="autoBtn">⏵ 自動</button>
+        <button class="navb" id="resetBtn">↻ 最初から</button>
+      </div>
+      <div class="ctlrow">
+        <div class="ctl"><label>平均 μ<span class="val" id="muval">100</span></label><input type="range" id="mu" min="70" max="130" step="1" value="100"></div>
+        <div class="ctl"><label>標準偏差 σ<span class="val" id="sdval">15</span></label><input type="range" id="sd" min="5" max="30" step="1" value="15"></div>
+        <div id="opctl" style="display:flex;gap:16px;flex-wrap:wrap"></div>
       </div>
     </div>
-    <div class="plots"><div class="plot" id="plot"></div></div>
   </div>
-  <div class="note" id="note"></div>
+
+  <details open style="margin-top:14px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">⚠ よくある誤解</summary>
+    <ul style="margin:8px 0 4px;padding-left:1.2em;font-size:.9rem;line-height:1.8">
+      <li>❌「分布から取り出せる数は1つ（平均）だけ」 → ✅ 確率・平均・分位点など、当てる操作次第で違う数が出る。</li>
+      <li>❌「積分は計算できないと確率は求まらない」 → ✅ シナリオ（標本）で近似できる。Nを増やすほど真の値に収束する。</li>
+      <li>❌「区間を狭めても密度は変わる」 → ✅ 区間確率は0に近づくが、密度の形自体は変わらない。</li>
+    </ul>
+  </details>
 </div>
+<script src="lib/steps.js"></script>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
-let S={mu:100, sd:15, op:'prob', a:85, b:115, p:0.8, N:50};
+let S={mu:100, sd:15, op:'prob', a:85, b:115, p:0.8, N:50, seed:1};
 
-function opControls(){
+const STEPS=[
+  {key:'prob',     t:'確率（面積）',   c:'var(--blue)'},
+  {key:'mean',     t:'平均',          c:'var(--red)'},
+  {key:'quant',    t:'分位点',        c:'var(--purple)'},
+  {key:'vary',     t:'シナリオで近似', c:'var(--amber)'},
+  {key:'result',   t:'結果',          c:'var(--green)'},
+];
+const KEY2OP={prob:'prob',mean:'mean',quant:'quant',vary:'scenario',result:'scenario'};
+
+function opControls(op){
   const c=$('opctl');
-  if(S.op==='prob'){
-    c.innerHTML='<div class="ctl"><label>区間の下端 a <span class="val" id="aval"></span></label><input type="range" id="a" min="40" max="160" step="1"></div>'
-      +'<div class="ctl"><label>区間の上端 b <span class="val" id="bval"></span></label><input type="range" id="b" min="40" max="160" step="1"></div>';
+  if(op==='prob'){
+    c.innerHTML='<div class="ctl"><label>区間の下端 a<span class="val" id="aval"></span></label><input type="range" id="a" min="40" max="160" step="1"></div>'
+      +'<div class="ctl"><label>区間の上端 b<span class="val" id="bval"></span></label><input type="range" id="b" min="40" max="160" step="1"></div>';
     $('a').value=S.a; $('b').value=S.b;
-    $('a').oninput=e=>{S.a=Math.min(+e.target.value,S.b); $('a').value=S.a; update();};
-    $('b').oninput=e=>{S.b=Math.max(+e.target.value,S.a); $('b').value=S.b; update();};
-  } else if(S.op==='quant'){
-    c.innerHTML='<div class="ctl"><label>下から何割 p <span class="val" id="pval"></span></label><input type="range" id="p" min="0.01" max="0.99" step="0.01"></div>';
-    $('p').value=S.p; $('p').oninput=e=>{S.p=+e.target.value; update();};
-  } else if(S.op==='scenario'){
-    c.innerHTML='<div class="ctl"><label>標本数 N <span class="val" id="Nval"></span></label><input type="range" id="N" min="5" max="2000" step="5"></div>'
-      +'<button type="button" id="resample" class="seg" style="margin-top:6px;cursor:pointer;padding:8px 14px">🎲 引き直す</button>';
-    $('N').value=S.N; $('N').oninput=e=>{S.N=+e.target.value; update();};
-    $('resample').onclick=()=>{ S.seed=(S.seed||1)+1; update(); };
-  } else { c.innerHTML='<p style="color:#5f6368;font-size:.9rem">平均は分布全体の「重み付きの数え上げ」。離散なら Σx·p(x)、連続なら ∫x·f(x)dx。結果は μ。</p>'; }
+    $('a').oninput=e=>{wiz.stopAuto();S.a=Math.min(+e.target.value,S.b); $('a').value=S.a; renderAll(wiz.key());};
+    $('b').oninput=e=>{wiz.stopAuto();S.b=Math.max(+e.target.value,S.a); $('b').value=S.b; renderAll(wiz.key());};
+  } else if(op==='quant'){
+    c.innerHTML='<div class="ctl"><label>下から何割 p<span class="val" id="pval"></span></label><input type="range" id="p" min="0.01" max="0.99" step="0.01"></div>';
+    $('p').value=S.p; $('p').oninput=e=>{wiz.stopAuto();S.p=+e.target.value; renderAll(wiz.key());};
+  } else if(op==='scenario'){
+    c.innerHTML='<div class="ctl"><label>標本数 N<span class="val" id="Nval"></span></label><input type="range" id="N" min="5" max="2000" step="5"></div>'
+      +'<button type="button" class="navb" id="resample" style="margin-top:20px">🎲 引き直す</button>';
+    $('N').value=S.N; $('N').oninput=e=>{wiz.stopAuto();S.N=+e.target.value; renderAll(wiz.key());};
+    $('resample').onclick=()=>{ wiz.stopAuto(); S.seed=(S.seed||1)+1; renderAll(wiz.key()); };
+  } else { c.innerHTML=''; }
 }
 
-function update(){
-  $('muval').textContent=S.mu; $('sdval').textContent=S.sd;
+function computeAndDraw(op){
   const xs=L.linspace(S.mu-4*S.sd, S.mu+4*S.sd, 240), pdf=xs.map(x=>L.normPdf(x,S.mu,S.sd));
   const peak=L.normPdf(S.mu,S.mu,S.sd);
   const traces=[{x:xs,y:pdf,type:'scatter',mode:'lines',line:{color:'#4285f4',width:2.5},name:'分布 f(x)',hoverinfo:'skip'}];
-  let outk='', outv='', note='';
-  if(S.op==='prob'){
+  let outk='', outv='';
+  if(op==='prob'){
     if($('aval')) $('aval').textContent=S.a; if($('bval')) $('bval').textContent=S.b;
     const tx=xs.filter(x=>x>=S.a&&x<=S.b), ty=tx.map(x=>L.normPdf(x,S.mu,S.sd));
     traces.push({x:[S.a,...tx,S.b],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(52,168,83,0.35)',name:'面積=確率',hoverinfo:'skip'});
     const P=L.normCdf(S.b,S.mu,S.sd)-L.normCdf(S.a,S.mu,S.sd);
     outk=`確率 P(${S.a} ≤ X ≤ ${S.b})`; outv=P.toFixed(3);
-    note=`<b>確率＝面積</b>。区間 [${S.a}, ${S.b}] の下の面積が確率 ${P.toFixed(3)}。区間を狭めると→0（1点の確率は0）。密度の「高さ」ではなく「面積」が確率。`;
-  } else if(S.op==='mean'){
+  } else if(op==='mean'){
     traces.push({x:[S.mu,S.mu],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#ea4335',width:2,dash:'dot'},name:'E[X]=μ',hoverinfo:'skip'});
     const xf=xs.map((x,i)=>x*pdf[i]); const sc=peak/Math.max(...xf);
     traces.push({x:xs,y:xf.map(v=>v*sc),type:'scatter',mode:'lines',line:{color:'#f9ab00',width:1.5,dash:'dot'},name:'x·f(x)（重み）',hoverinfo:'skip'});
     outk='平均 E[X] = ∫ x·f(x) dx'; outv=S.mu.toFixed(1);
-    note=`<b>平均＝重み付きの数え上げ</b>。各値 x を「起こりやすさ f(x)」で重みづけて足す（橙＝x·f(x)）。離散の Σx·p(x) が連続で ∫x·f(x)dx に。結果は μ=${S.mu}。`;
-  } else if(S.op==='quant'){
+  } else if(op==='quant'){
     if($('pval')) $('pval').textContent=S.p.toFixed(2);
     const q=L.normPpf(S.p,S.mu,S.sd);
     const tx=xs.filter(x=>x<=q), ty=tx.map(x=>L.normPdf(x,S.mu,S.sd));
     traces.push({x:[xs[0],...tx,q],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(66,133,244,0.25)',name:`左の面積=${S.p.toFixed(2)}`,hoverinfo:'skip'});
     traces.push({x:[q,q],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'分位点',hoverinfo:'skip'});
     outk=`分位点 F⁻¹(${S.p.toFixed(2)})`; outv=q.toFixed(1);
-    note=`<b>分位点＝下から ${(S.p*100).toFixed(0)}% の値</b>。左の面積が ${S.p.toFixed(2)} になる x。チャンス制約や VaR・CVaR が使うのはこれ。`;
   } else {
-    // シナリオで近似：N個の標本を引き、標本平均が μ（=真の期待値）に近づくのを見る
     if($('Nval')) $('Nval').textContent=S.N;
     const rng=L.mulberry32('d2n'+(S.seed||1)); const g=L.gaussianGen(rng);
     let sum=0; const samp=[];
     for(let i=0;i<S.N;i++){ const x=S.mu+S.sd*g(); samp.push(x); sum+=x; }
-    const mean=sum/S.N, se=S.sd/Math.sqrt(S.N);
+    const meanV=sum/S.N;
     traces.push({x:samp,type:'histogram',histnorm:'probability density',marker:{color:'rgba(52,168,83,0.35)',line:{color:'#34a853',width:0.5}},name:`標本 N=${S.N}`,hoverinfo:'skip',nbinsx:Math.min(40,Math.max(8,Math.round(Math.sqrt(S.N))))});
-    traces.push({x:[mean,mean],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#ea4335',width:2.5},name:'標本平均',hoverinfo:'skip'});
+    traces.push({x:[meanV,meanV],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#ea4335',width:2.5},name:'標本平均',hoverinfo:'skip'});
     traces.push({x:[S.mu,S.mu],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'真の平均 μ',hoverinfo:'skip'});
-    outk=`標本平均 (N=${S.N})`; outv=mean.toFixed(2);
-    note=`<b>シナリオベース＝標本を ${S.N} 個引いて平均</b>。標本平均 ${mean.toFixed(2)} は真の平均 μ=${S.mu} に近い（誤差の目安 ±${se.toFixed(1)}＝σ/√N）。`
-      +`<b>N を増やすほど μ に収束</b>（大数の法則）。これが「積分（期待値）を計算可能にする」やり方＝モンテカルロ／SAA。🎲で引き直すと標本ごとのばらつきも見える。`;
+    outk=`標本平均 (N=${S.N})`; outv=meanV.toFixed(2);
   }
   Plotly.react('plot',traces,{margin:{t:8,r:10,b:40,l:48},xaxis:{title:'値 x'},yaxis:{title:'密度 f(x)',rangemode:'tozero'},
-    showlegend:true,legend:{orientation:'h',y:1.12},height:340},{displayModeBar:false,responsive:true});
-  $('outk').textContent=outk; $('outv').textContent=outv;
-  $('note').innerHTML=note+' &nbsp;|&nbsp; <b>どの操作を当てるか＝あなたの目的</b>。分布は地図、操作がそこから取り出す「数」。';
+    showlegend:true,legend:{orientation:'h',y:1.12},height:300},{displayModeBar:false,responsive:true});
+  $('metrics').innerHTML=`<div class="metric"><div class="k">${outk}</div><div class="v">${outv}</div></div>`;
+  return {outk,outv};
 }
 
-['mu','sd'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=+e.target.value; update();}));
-document.querySelectorAll('#op button').forEach(b=>b.addEventListener('click',()=>{
-  S.op=b.dataset.op; document.querySelectorAll('#op button').forEach(x=>x.classList.toggle('on',x===b));
-  opControls(); update();
-}));
-opControls(); update();
+function renderExplain(key,out){
+  let h=`<span class="lbl">STEP ${wiz.stepIdx()+1} / ${STEPS.length}</span>`;
+  if(key==='prob'){
+    h+=`<h3>① 確率（面積）を取り出す</h3>
+    <p>区間 [${S.a}, ${S.b}] の下の面積が確率 <b>${out.outv}</b>。区間を狭めると確率は0へ近づく（1点の確率は0）。密度の「高さ」ではなく「面積」が確率。</p>
+    <p><b>同じ分布から、別の操作を当てるとどうなるでしょう？</b></p>`;
+  }else if(key==='mean'){
+    h+=`<h3>② 平均を取り出す</h3>
+    <p>各値 x を「起こりやすさ f(x)」で重みづけて足す（橙＝x·f(x)）。離散の Σx·p(x) が連続で ∫x·f(x)dx になる。結果は <b>μ=${out.outv}</b>。</p>
+    <p>①では面積（確率）が出たが、②では重み付き和（平均）が出る——<b>同じ分布でも操作が違えば数も違う</b>。</p>`;
+  }else if(key==='quant'){
+    h+=`<h3>③ 分位点を取り出す</h3>
+    <p>下から ${(S.p*100).toFixed(0)}% の値、つまり左の面積が ${S.p.toFixed(2)} になる x を取り出す。結果は <b>${out.outv}</b>。</p>
+    <p>チャンス制約・VaR・CVaRが使うのはこの分位点。平均でも確率でもない、また別の「数」。</p>`;
+  }else if(key==='vary'){
+    h+=`<h3>④ シナリオで近似する：Nを動かす</h3>
+    <p>積分が難しくても、標本を引いて平均すれば近似できる。Nを自動で増やしています——標本平均が真の平均 μ=${S.mu} にどう近づくか見てください。</p>
+    <p>今 N=${S.N} → 標本平均=${out.outv}。スライダーに触れると自動は止まります。</p>`;
+  }else{
+    h+=`<h3>⑤ 結果：操作＝あなたの目的</h3>
+    <p>同じ分布から、確率・平均・分位点・標本平均という<b>異なる数</b>が取り出せた。分布は「地図」、操作がそこから数を取り出す道具。</p>
+    <div class="eq"><b>要点</b><br>・分布から取り出せる数は1つではない<br>・どの操作を当てるかは、あなたが何を知りたいかで決まる<br>・積分が難しくてもシナリオ（標本）で近似できる（Nを増やすほど真の値に収束）</div>`;
+  }
+  $('explain').innerHTML=h;
+}
+
+function renderAll(key){
+  $('muval').textContent=S.mu; $('sdval').textContent=S.sd;
+  const op=KEY2OP[key];
+  const out=computeAndDraw(op);
+  renderExplain(key,out);
+}
+
+let autoN=50, autoDir=1;
+function applyStoryDefaults(key){
+  if(key==='prob'){ S.a=85; S.b=115; }
+  else if(key==='quant'){ S.p=0.8; }
+  else if(key==='vary'){ S.N=50; autoN=50; autoDir=1; }
+  else if(key==='result'){ S.N=800; }
+  opControls(KEY2OP[key]);
+}
+
+const wiz=LPSteps.create({
+  steps:STEPS,
+  autoKey:'vary',
+  onEnter:(key)=>applyStoryDefaults(key),
+  onRender:(key)=>renderAll(key),
+  onAutoTick:()=>{
+    let v=autoN+autoDir*8;
+    if(v>=2000){ v=2000; autoDir=-1; } else if(v<=5){ v=5; autoDir=1; }
+    autoN=v; S.N=Math.round(v);
+    const NEl=$('N'); if(NEl) NEl.value=S.N;
+    renderAll('vary');
+  }
+});
+
+['mu','sd'].forEach(id=>$(id).addEventListener('input',e=>{ wiz.stopAuto(); S[id]=+e.target.value; renderAll(wiz.key()); }));
+$('resetBtn').addEventListener('click',()=>{
+  wiz.stopAuto();
+  S={mu:100, sd:15, op:'prob', a:85, b:115, p:0.8, N:50, seed:1};
+  $('mu').value=100; $('sd').value=15;
+  wiz.goStep(0);
+});
+
+wiz.goStep(0);
 </script>
   <script src="lib/a11y.js"></script>
 </body>
