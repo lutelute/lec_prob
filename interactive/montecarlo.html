@@ -5,60 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>モンテカルロ収束（インタラクティブ）</title>
 <link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="lib/stats.js"></script>
 </head>
 <body>
 <div class="wrap">
   <h1>モンテカルロ収束ビジュアライザ</h1>
-  <div class="try"><b class="h">👉 やってみよう</b>
-  <ol>
-    <li><b>標本数 N を増やす</b> → 推定が真の値に寄っていく。</li>
-    <li>「希少事象」モードにする → 尾の推定は収束が<b>遅い</b>。</li>
-    <li><b>再サンプリング</b>を押す → 推定そのものが毎回ばらつく。</li>
-  </ol>
-  <div class="ins">誤差は 1/√N で縮む。希少事象は特に標本が要る。</div></div>
-  <div class="sub">平均は 1/√N で速く収束、希少事象（尾）は遅い、SAA はシナリオ数で収束——を動かして体感する。
+  <div class="sub">平均は 1/√N で速く収束、希少事象（尾）は遅い——を5ステップで確かめる。
     <a href="../notes/05_scenarios_and_monte_carlo/">Module 5 のノート →</a></div>
 
-  <div class="panel">
-    <div class="controls">
-      <h2>① 実験の種類</h2>
-      <div class="seg" id="mode">
-        <button data-m="mean" class="on">E[X]の収束</button>
-        <button data-m="rare">希少事象</button>
-        <button data-m="saa">SAA最適q</button>
+  <div class="stage">
+    <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
+    <div class="stagebody">
+      <div class="stagevis">
+        <div id="plot" class="plot" style="height:320px"></div>
+        <div class="metrics" id="metrics" style="margin-top:10px"></div>
       </div>
-      <h2>② 分布 N(μ, σ²)</h2>
-      <div class="ctl"><label>平均 μ<span class="val" id="muval">100</span></label>
-        <input type="range" id="mu" min="50" max="150" step="1" value="100"></div>
-      <div class="ctl"><label>標準偏差 σ<span class="val" id="sdval">15</span></label>
-        <input type="range" id="sd" min="1" max="40" step="1" value="15"></div>
-      <div id="modeCtl"></div>
-      <h2>③ 乱数</h2>
-      <button class="seg" id="resample" style="cursor:pointer;justify-content:center;font-weight:700">🎲 再サンプリング（別シード）</button>
-      <div class="sub" style="margin-top:6px">seed=<span id="seedval">42</span></div>
+      <div class="stageexplain" id="explain" aria-live="polite"></div>
     </div>
-
-    <div>
-      <div class="metrics" id="metrics"></div>
-      <div id="plot" style="width:100%;height:430px"></div>
+    <div class="stagebar">
+      <div class="navbtns">
+        <button class="navb" id="prevBtn">◀ 前へ</button>
+        <button class="navb primary" id="nextBtn">次へ ▶</button>
+        <button class="navb" id="autoBtn">⏵ 自動</button>
+        <button class="navb" id="resetBtn">↻ 最初から</button>
+      </div>
+      <div class="ctlrow">
+        <div class="seg" id="mode">
+          <button data-m="mean" class="on">E[X]の収束</button>
+          <button data-m="rare">希少事象</button>
+          <button data-m="saa">SAA最適q</button>
+        </div>
+        <div class="ctl"><label>平均 μ<span class="val" id="muval">100</span></label>
+          <input type="range" id="mu" min="50" max="150" step="1" value="100"></div>
+        <div class="ctl"><label>標準偏差 σ<span class="val" id="sdval">15</span></label>
+          <input type="range" id="sd" min="1" max="40" step="1" value="15"></div>
+        <div id="modeCtl"></div>
+        <div class="ctl"><label>&nbsp;<span class="val">seed=<span id="seedval">42</span></span></label>
+          <button type="button" class="navb" id="resample" style="margin-top:2px">🎲 再サンプリング</button></div>
+      </div>
     </div>
   </div>
 
-  <div class="note" id="note"></div>
-  <details>
-    <summary>🎯 観察点 / よくある誤解</summary>
-    <ul>
-      <li>E[X]：N×100 で CI 幅 ÷10（1/√N）。点推定には必ず CI を添える。</li>
-      <li>希少事象：閾値 c を上げると真の確率が小さくなり、小Nで0ヒット＝確率0と誤推定。～数十/p 必要。</li>
-      <li>SAA：シナリオ数が小さいと最適 q がぶれる＝有限シナリオの不確実性。真値は臨界分位点。</li>
-      <li>🎲 再サンプリングで結果が変わる＝モンテカルロ自体のばらつき。</li>
+  <details open style="margin-top:14px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">⚠ よくある誤解</summary>
+    <ul style="margin:8px 0 4px;padding-left:1.2em;font-size:.9rem;line-height:1.8">
+      <li>❌「標本数を増やせば誤差は比例して縮む」 → ✅ 誤差は<b>1/√N</b>でしか縮まない。精度10倍にはNを100倍必要。</li>
+      <li>❌「希少事象も同じ標本数で推定できる」 → ✅ 期待ヒット数が少ないと0ヒット→確率0と誤推定しがち。数十/pのオーダーが必要。</li>
+      <li>❌「一度の推定で十分」 → ✅ 🎲再サンプリングで結果が変わる＝モンテカルロ自体のばらつき。</li>
     </ul>
   </details>
   <div class="foot">SE(θ̂_N)=σ/√N。希少事象は重点サンプリング/層別/極値理論で対処。数理は <code>lib/stats.js</code>、Plotly.js で描画。</div>
 </div>
 
+<script src="lib/steps.js"></script>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
 const C={blue:'#4285f4',red:'#ea4335',purple:'#a142f4',green:'#34a853'};
@@ -68,26 +69,26 @@ function gauss(n){ const g=L.gaussianGen(L.mulberry32('mc'+S.seed)); const a=new
   for(let i=0;i<n;i++) a[i]=S.mu+S.sd*g(); return a; }
 function logspace(a,b,n){ const out=[]; for(let i=0;i<n;i++){ out.push(Math.round(Math.exp(Math.log(a)+(Math.log(b)-Math.log(a))*i/(n-1)))); } return [...new Set(out)]; }
 function fmt(x,n=3){ return (Math.abs(x)>=100)?x.toFixed(1):x.toFixed(n); }
+function metric(k,v,cls){ return `<div class="metric"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`; }
+
+const STEPS=[
+  {key:'prob',    t:'問題',            c:'var(--blue)'},
+  {key:'trap',    t:'直感のワナ',       c:'var(--red)'},
+  {key:'formula', t:'1/√Nの仕組み',    c:'var(--purple)'},
+  {key:'vary',    t:'再サンプリング',   c:'var(--amber)'},
+  {key:'result',  t:'結果',            c:'var(--green)'},
+];
 
 function buildModeCtl(){
   let h='';
-  if(S.mode==='rare') h=`<h2>閾値 c</h2><div class="ctl"><label>P(X&gt;c) の c<span class="val" id="cval">${S.c}</span></label>
+  if(S.mode==='rare') h=`<div class="ctl"><label>P(X&gt;c) の c<span class="val" id="cval">${S.c}</span></label>
     <input type="range" id="c" min="${S.mu}" max="${S.mu+4*S.sd}" step="1" value="${Math.min(S.c,S.mu+4*S.sd)}"></div>`;
-  else if(S.mode==='saa') h=`<h2>容量問題のコスト</h2>
-    <div class="ctl"><label>不足単価 c_s<span class="val" id="csval">${S.cs}</span></label><input type="range" id="cs" min="1" max="20" step="1" value="${S.cs}"></div>
+  else if(S.mode==='saa') h=`<div class="ctl"><label>不足単価 c_s<span class="val" id="csval">${S.cs}</span></label><input type="range" id="cs" min="1" max="20" step="1" value="${S.cs}"></div>
     <div class="ctl"><label>過剰単価 c_o<span class="val" id="coval">${S.co}</span></label><input type="range" id="co" min="1" max="20" step="1" value="${S.co}"></div>`;
   $('modeCtl').innerHTML=h;
-  if(S.mode==='rare'){ $('c').max=S.mu+4*S.sd; $('c').addEventListener('input',e=>{S.c=parseFloat(e.target.value);$('cval').textContent=S.c;update();}); }
-  if(S.mode==='saa'){ $('cs').addEventListener('input',e=>{S.cs=parseFloat(e.target.value);$('csval').textContent=S.cs;update();});
-    $('co').addEventListener('input',e=>{S.co=parseFloat(e.target.value);$('coval').textContent=S.co;update();}); }
-}
-function metric(k,v,cls){ return `<div class="metric"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`; }
-
-function update(){
-  $('muval').textContent=S.mu; $('sdval').textContent=S.sd; $('seedval').textContent=S.seed;
-  if(S.mode==='mean') runMean();
-  else if(S.mode==='rare') runRare();
-  else runSAA();
+  if(S.mode==='rare'){ $('c').max=S.mu+4*S.sd; $('c').addEventListener('input',e=>{wiz.stopAuto();S.c=parseFloat(e.target.value);renderAll(wiz.key());}); }
+  if(S.mode==='saa'){ $('cs').addEventListener('input',e=>{wiz.stopAuto();S.cs=parseFloat(e.target.value);renderAll(wiz.key());});
+    $('co').addEventListener('input',e=>{wiz.stopAuto();S.co=parseFloat(e.target.value);renderAll(wiz.key());}); }
 }
 
 function runMean(){
@@ -105,12 +106,11 @@ function runMean(){
      legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
   const ciFull=1.96*S.sd/Math.sqrt(Nmax);
   $('metrics').innerHTML=metric('最終推定値（N=5万）',fmt(est[est.length-1],3))+metric('真値',S.mu)+metric('95%CI半幅',`±${fmt(ciFull,3)}`,'ok');
-  $('note').innerHTML='<b>観察</b>：CI 幅は 1/√N。精度10倍にはサンプル100倍。点推定だけでなく必ず CI を添える。🎲 を押すとシードが変わり、特に小Nの推定がぶれる。';
 }
 
 function runRare(){
   const Ns=[300,1000,3000,10000,30000,100000,300000], Nmax=Ns[Ns.length-1], s=gauss(Nmax);
-  const ind=new Float64Array(Nmax); let run=0; const cum=new Float64Array(Nmax+1);
+  const cum=new Float64Array(Nmax+1);
   for(let i=0;i<Nmax;i++){ cum[i+1]=cum[i]+(s[i]>S.c?1:0); }
   const ptrue=1-L.normCdf(S.c,S.mu,S.sd);
   const est=Ns.map(n=>cum[n]/n), hits=Ns.map(n=>cum[n]);
@@ -123,7 +123,6 @@ function runRare(){
   const need=Math.round(30/Math.max(ptrue,1e-9));
   $('metrics').innerHTML=metric(`真の確率 P(X>${S.c})`,ptrue.toExponential(2))+
     metric('N=300 のヒット数',hits[0],hits[0]<3?'warn':'')+metric('安定推定に必要なN目安',need.toLocaleString());
-  $('note').innerHTML=`真値 ${ptrue.toExponential(2)}。期待ヒット数が少ないと <b>0ヒット→確率0と誤推定</b>。安定推定にはおおむね ≳ 数十/p ≈ ${need.toLocaleString()} サンプル。閾値 c を上げると一気に難しくなる。`;
 }
 
 function runSAA(){
@@ -140,16 +139,77 @@ function runSAA(){
      yaxis:{title:'SAA 最適容量 q̂'},title:{text:'SAA：シナリオ数で最適解が臨界分位点へ収束',font:{size:13}},
      legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
   $('metrics').innerHTML=metric('臨界比',(S.cs/(S.cs+S.co)).toFixed(3))+metric('真の最適 q*',fmt(qtrue,2))+metric('SAA q̂（N=1万）',fmt(qhat[qhat.length-1],2),'ok');
-  $('note').innerHTML=`真の最適 q* = 臨界比 ${(S.cs/(S.cs+S.co)).toFixed(3)} 分位点 = ${fmt(qtrue,2)}。少シナリオでは q̂ がぶれる＝<b>有限シナリオの不確実性</b>。c_s≫c_o ほど安全側（高い q）へ。`;
 }
 
-['mu','sd'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
-document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',e=>{
-  document.querySelectorAll('#mode button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  S.mode=b.dataset.m; buildModeCtl(); update();
+function runCurrent(){
+  if(S.mode==='mean') runMean(); else if(S.mode==='rare') runRare(); else runSAA();
+}
+
+function renderExplain(key){
+  let h=`<span class="lbl">STEP ${wiz.stepIdx()+1} / ${STEPS.length}</span>`;
+  if(key==='prob'){
+    h+=`<h3>① 問題：標本から真の値を推定する</h3>
+    <p>真の平均 ${S.mu}・標準偏差 ${S.sd} の分布から標本を取り、平均を推定する。グラフは標本数 N=1 から5万まで、推定値がどう動くかを一度に示している。</p>
+    <p><b>標本数を増やすと、推定はどれくらい速く真の値に近づくと思いますか？</b></p>`;
+  }else if(key==='trap'){
+    h+=`<h3>② 直感のワナ：Nを増やせば増やすほど良いが…</h3>
+    <p>グラフ左側（小さいN）では推定値が大きく暴れている。しかし95%信頼区間の幅はNに<b>比例して</b>縮むのではなく、<b>1/√N</b>でしか縮まない。</p>
+    <p>つまり精度を<b>10倍</b>にするには、標本を<b>100倍</b>必要とする。これは直感より厳しい。</p>`;
+  }else if(key==='formula'){
+    const se100=(S.sd/Math.sqrt(100)).toFixed(2), se10000=(S.sd/Math.sqrt(10000)).toFixed(2);
+    h+=`<h3>③ なぜ1/√Nか（標準誤差の式）</h3>
+    <div class="eq">標準誤差 SE(θ̂_N) = σ/√N = ${S.sd}/√N</div>
+    <p>N=100 なら SE=${se100}、N=10000（100倍）なら SE=${se10000}。標本を100倍にしても、誤差は10分の1にしかならない（√100=10）。</p>`;
+  }else if(key==='vary'){
+    h+=`<h3>④ 再サンプリングで確かめる</h3>
+    <p>別の乱数シードで何度も引き直しています（seed=${S.seed}）。同じ真の値・同じNでも、標本によって推定値の細部は変わる——これが<b>モンテカルロ自体のばらつき</b>。</p>
+    <p>🎲ボタンを押すか他のスライダーに触れると自動は止まります。</p>`;
+  }else{
+    h+=`<h3>⑤ 結果：現象によって収束速度は違う</h3>
+    <p>「希少事象」に切り替えると、平均の収束よりずっと不安定になる。閾値を超える確率が小さいと、小さいNでは<b>0ヒット→確率0と誤推定</b>することもある。</p>
+    <div class="eq"><b>要点</b><br>・誤差は1/√Nで縮む（精度10倍にはN100倍）<br>・希少事象は期待ヒット数が支配——数十/pのオーダーが必要<br>・SAAなど最適化を伴う推定も、有限シナリオでは解がぶれる</div>`;
+  }
+  $('explain').innerHTML=h;
+}
+
+function renderAll(key){
+  $('muval').textContent=S.mu; $('sdval').textContent=S.sd; $('seedval').textContent=S.seed;
+  document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on', b.dataset.m===S.mode));
+  runCurrent(); renderExplain(key);
+}
+
+let autoFrame=0;
+function applyStoryDefaults(key){
+  if(key==='prob'||key==='trap'||key==='formula'){ S.mode='mean'; S.mu=100; S.sd=15; S.seed=42;
+    $('mu').value=100; $('sd').value=15; buildModeCtl();
+  }else if(key==='vary'){ S.mode='mean'; buildModeCtl(); autoFrame=0; }
+  else if(key==='result'){ S.mode='rare'; S.mu=100; S.sd=15; S.c=145; buildModeCtl(); }
+}
+
+const wiz=LPSteps.create({
+  steps:STEPS,
+  autoKey:'vary',
+  onEnter:(key)=>applyStoryDefaults(key),
+  onRender:(key)=>renderAll(key),
+  onAutoTick:()=>{
+    autoFrame++;
+    if(autoFrame%45===0){ S.seed=(S.seed*1103515245+12345)%2147483647; renderAll('vary'); }
+  }
+});
+
+['mu','sd'].forEach(id=>$(id).addEventListener('input',e=>{ wiz.stopAuto(); S[id]=parseFloat(e.target.value); renderAll(wiz.key()); }));
+$('resample').addEventListener('click',()=>{ wiz.stopAuto(); S.seed=(S.seed*1103515245+12345)%2147483647; renderAll(wiz.key()); });
+document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',()=>{
+  wiz.stopAuto(); S.mode=b.dataset.m; buildModeCtl(); renderAll(wiz.key());
 }));
-$('resample').addEventListener('click',()=>{ S.seed=(S.seed*1103515245+12345)%2147483647; update(); });
-buildModeCtl(); update();
+$('resetBtn').addEventListener('click',()=>{
+  wiz.stopAuto();
+  S={mode:'mean',mu:100,sd:15,seed:42,c:145,cs:10,co:1};
+  $('mu').value=100; $('sd').value=15;
+  wiz.goStep(0);
+});
+
+wiz.goStep(0);
 </script>
   <script src="lib/a11y.js"></script>
 </body>
