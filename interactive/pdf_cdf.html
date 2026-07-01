@@ -47,11 +47,6 @@
       <div class="ctl"><label>b（上限／左裾の閾値）<span class="val" id="bval"></span></label>
         <input type="range" id="b"></div>
 
-      <h2>④ 点プローブ（密度≠確率の実験）</h2>
-      <div class="ctl"><label>点 x₀<span class="val" id="x0val"></span></label>
-        <input type="range" id="x0"></div>
-      <div class="ctl"><label>微小半幅 ε<span class="val" id="epsval"></span></label>
-        <input type="range" id="eps" min="0" max="7" step="1" value="3"></div>
     </div>
 
     <div>
@@ -67,13 +62,19 @@
     </div>
   </div>
 
-  <h2 style="font-size:1rem;margin-top:18px">実験：密度の高さ vs 点まわりの確率</h2>
-  <div class="metrics">
-    <div class="metric"><div class="k">密度の高さ f(x₀)（確率ではない）</div><div class="v" id="fheight">–</div></div>
-    <div class="metric"><div class="k">P(x₀−ε ≤ X ≤ x₀+ε)</div><div class="v" id="pinterval">–</div></div>
-    <div class="metric"><div class="k">近似 f(x₀)·2ε</div><div class="v" id="papprox">–</div></div>
-  </div>
-  <div class="note" id="probeNote"></div>
+  <details style="margin-top:8px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">🔍 実験：密度の高さ vs 点まわりの確率（点プローブ）</summary>
+    <div class="ctl"><label>点 x₀<span class="val" id="x0val"></span></label>
+      <input type="range" id="x0"></div>
+    <div class="ctl"><label>微小半幅 ε<span class="val" id="epsval"></span></label>
+      <input type="range" id="eps" min="0" max="7" step="1" value="3"></div>
+    <div class="metrics">
+      <div class="metric"><div class="k">密度の高さ f(x₀)（確率ではない）</div><div class="v" id="fheight">–</div></div>
+      <div class="metric"><div class="k">P(x₀−ε ≤ X ≤ x₀+ε)</div><div class="v" id="pinterval">–</div></div>
+      <div class="metric"><div class="k">近似 f(x₀)·2ε</div><div class="v" id="papprox">–</div></div>
+    </div>
+    <div class="note" id="probeNote"></div>
+  </details>
 
   <details>
     <summary>🎯 観察すべき点 / よくある誤解</summary>
