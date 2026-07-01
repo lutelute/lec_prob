@@ -77,7 +77,10 @@
       <div class="rec" id="rec" style="display:none"></div>
       <div id="pins"></div>
       <div id="tableWrap"></div>
-      <div class="note" id="sens" style="display:none"></div>
+      <details id="sensDetails" class="note" style="display:none;padding:8px 10px">
+        <summary style="cursor:pointer;font-weight:700">📐 感度分析（コスト見積りがずれたら？）</summary>
+        <div id="sens" style="margin-top:6px"></div>
+      </details>
       <div class="act" id="exports" style="display:none">
         <button id="csv">CSV書き出し</button>
         <button class="alt" id="print">印刷</button>
@@ -87,7 +90,10 @@
       <div class="plot" id="plot" style="margin-top:8px"></div>
     </div>
   </div>
-  <div class="note">各形式：①決定論=平均 ②期待値=newsvendor臨界比の分位点 ③ロバスト=±kσ箱の最悪 ④チャンス制約=1−ε分位点 ⑤CVaR=裾を抑える分位点 ⑥分布ロバスト=平均と分散だけ仮定（Scarf）。期待コスト・供給不足確率は<b>入力した分布（データならその標本）で実評価</b>。</div>
+  <details style="margin-top:8px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.9rem">📎 6形式の定義（一覧）</summary>
+    <div class="note">各形式：①決定論=平均 ②期待値=newsvendor臨界比の分位点 ③ロバスト=±kσ箱の最悪 ④チャンス制約=1−ε分位点 ⑤CVaR=裾を抑える分位点 ⑥分布ロバスト=平均と分散だけ仮定（Scarf）。期待コスト・供給不足確率は<b>入力した分布（データならその標本）で実評価</b>。</div>
+  </details>
 </div>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
@@ -149,7 +155,7 @@ function compute(){
   // 感度：不足損 c_s の見積りが 0.5×〜2× にぶれたら、②期待値の推奨量はどれだけ動くか
   const xLo=quant(ds,(cs*0.5)/(cs*0.5+co)), xHi=quant(ds,(cs*2)/(cs*2+co)), xMid=quant(ds,r);
   const span=xHi-xLo, spanPct=xMid>0?span/xMid*100:0;
-  $('sens').style.display='block';
+  $('sensDetails').style.display='block';
   $('sens').innerHTML=`<b>感度（コスト見積りへの頑健性）</b>：不足損 c_s が <b>半分〜2倍</b> にぶれると、②期待値の推奨量は `+
     `<b>${xLo.toFixed(1)}〜${xHi.toFixed(1)}${us}</b>（幅 ${span.toFixed(1)}${us}・中央比 ±${(spanPct/2).toFixed(0)}%）動く。`+
     (spanPct>20?' → <b>敏感</b>：コスト比の見積りを詰める価値が高い。':' → 頑健：多少のズレには鈍感。');
