@@ -5,20 +5,13 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 # ▶ ブラウザで動かす — インタラクティブ・ツール
 
 **インストール不要・その場で動く**ツール群です。各ツールの「**▶ ここで動かす**」ボタンを押すと読み込まれ、
-**スライダーを動かすと図と数値が即座に変わります**。すべてブラウザ内（JavaScript + Plotly.js）で完結します。
+**スライダーを動かすと図と数値が即座に変わります**。すべてブラウザ内（JavaScript + Plotly.js）で完結します。広い画面で使うなら各ツールの「全画面で開く」から。
 
 !!! note "🎓 はじめての人は：[学習コース（順番に触る・進捗つき）](course.html){target=_blank}"
-    **読む→触る→自分の問題で使う→確かめる**の一本道（約40分）。開いた項目に ✓ が付き、「▶ 次はこれ」が光ります。迷ったらここから。
+    **読む→触る→自分の問題で使う→確かめる**の一本道（約40分）。迷ったらここから。
 
-!!! success "🧮 実務で使う計算機（学習デモでなく、実際の決定に）"
-    - **[決定計算機](calculator.html){target=_blank}**：自分の需要データ＋コスト → 6形式の推奨確保量・供給不足確率・期待コストを表で出しCSV/印刷。「どれだけ確保するか」（在庫・予備力・発注）。
-    - **[やる/やらない計算機](gonogo.html){target=_blank}**：成功確率と損得 → 期待値・**損益分岐確率**・後悔で「やるべきか」。（投資・新製品・設備更新）。
-    計算はすべて手元のブラウザ内。
-
-!!! tip "まず全体像を俯瞰したいなら"
-    🗺 **[全体地図（2D俯瞰アトラス）](map.html){target=_blank}** … 全概念・ツールを2次元配置、ミニ可視化カード＋カテゴリゾーン＋推奨順路。クリックで各ページへ。
-    📐 **[全体ブループリント（仕様書版）](blueprint.html){target=_blank}** … モノスペースの技術設計図（印刷可）。
-    どちらも概念・モジュール・8ツールを1枚で俯瞰できます。
+    実務で使うなら → [決定計算機](calculator.html){target=_blank}（在庫・予備力・発注を実データで）／[やる・やらない計算機](gonogo.html){target=_blank}（成功確率と損得で判断）。
+    全体を俯瞰したいなら → [全体地図](map.html){target=_blank}（依存関係を対話的に）／[ブループリント](blueprint.html){target=_blank}（1枚の仕様書・印刷可）。
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0">
   <a href="#t1" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #4285f4"><b>① PDF・CDF・区間確率</b><br><span style="color:#5f6368;font-size:.85em">密度≠確率・面積＝CDF差（M2）</span></a>
@@ -28,9 +21,6 @@ title: ブラウザで動かす（インタラクティブ・ツール）
   <a href="#t5" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #f9ab00"><b>⑤ 蓄電池運用</b><br><span style="color:#5f6368;font-size:.85em">SoC・アービトラージ（M6b）</span></a>
   <a href="#t6" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #00897b"><b>⑥ 理解度チェック</b><br><span style="color:#5f6368;font-size:.85em">8問で確かめる（全体）</span></a>
 </div>
-
-!!! tip "使い方"
-    各ツールの「**▶ ここで動かす**」を押す → ツールが下に開く → **左のスライダーを動かす**と右の図・数値がリアルタイムで更新されます。広い画面で使うなら「**全画面で開く**」。
 
 ---
 
