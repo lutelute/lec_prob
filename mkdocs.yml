@@ -83,9 +83,6 @@ nav:
   - 🧭 確率の使い方: notes/how_to_use_probability.md
   - 🔢 分布をどう数値で扱うか: notes/distributions_and_methods.md
   - ▶ ブラウザで動かす: interactive/index.md
-  - 🎓 学習コース: https://lutelute.github.io/lec_prob/interactive/course.html
-  - 🧮 決定計算機: https://lutelute.github.io/lec_prob/interactive/calculator.html
-  - 🗺 全体地図: https://lutelute.github.io/lec_prob/interactive/map.html
   - ロードマップ:
       - 学習地図: roadmap/learning_map.md
       - 概念地図: roadmap/concept_map.md
