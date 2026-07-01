@@ -76,6 +76,7 @@
       <div class="summ" id="summ">需要を入れて「計算する」を押してください。</div>
       <div class="rec" id="rec" style="display:none"></div>
       <div id="tableWrap"></div>
+      <div class="note" id="sens" style="display:none"></div>
       <div class="act" id="exports" style="display:none">
         <button id="csv">CSV書き出し</button>
         <button class="alt" id="print">印刷</button>
@@ -142,6 +143,13 @@ function compute(){
   html+='</table>';
   $('rec').style.display='block';
   $('tableWrap').innerHTML=html; $('exports').style.display='flex';
+  // 感度：不足損 c_s の見積りが 0.5×〜2× にぶれたら、②期待値の推奨量はどれだけ動くか
+  const xLo=quant(ds,(cs*0.5)/(cs*0.5+co)), xHi=quant(ds,(cs*2)/(cs*2+co)), xMid=quant(ds,r);
+  const span=xHi-xLo, spanPct=xMid>0?span/xMid*100:0;
+  $('sens').style.display='block';
+  $('sens').innerHTML=`<b>感度（コスト見積りへの頑健性）</b>：不足損 c_s が <b>半分〜2倍</b> にぶれると、②期待値の推奨量は `+
+    `<b>${xLo.toFixed(1)}〜${xHi.toFixed(1)}${us}</b>（幅 ${span.toFixed(1)}${us}・中央比 ±${(spanPct/2).toFixed(0)}%）動く。`+
+    (spanPct>20?' → <b>敏感</b>：コスト比の見積りを詰める価値が高い。':' → 頑健：多少のズレには鈍感。');
   // plot: 分布(ヒスト) + 各形式の確保量を縦線
   const xs=L.linspace(Math.min(...ds)-5,Math.max(...ds)+10,80);
   const cols={'①決定論':'#9aa0a6','②期待値':'#4285f4','③ロバスト':'#ea4335','④チャンス制約':'#34a853','⑤CVaR':'#f9ab00','⑥分布ロバスト':'#a142f4'};
