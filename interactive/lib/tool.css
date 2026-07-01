@@ -57,6 +57,16 @@ input[type=range]:focus-visible{outline-offset:4px}
 button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 /* 動きに敏感な人向け：アニメーション抑制 */
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+/* 印刷：決定を綺麗なレポートとして出す（操作UIを隠し、結果を主役に） */
+@media print{
+  .try,.lp-toolnav,.act,.seg,.seg2,#preset,details{display:none!important}
+  .panel{display:block!important}
+  .controls{border:none!important;background:none!important;padding:0!important}
+  .plot,.plots>div,table,.metrics{page-break-inside:avoid}
+  a[href]{color:#000;text-decoration:none}
+  body{font-size:11pt;color:#000}
+  h1{font-size:15pt}
+}
 /* 全画面で開いたツールの戻り導線（埋め込み時は a11y.js が出さない） */
 .lp-toolnav{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
 .lp-toolnav a{color:var(--blue);text-decoration:none;font-weight:600}
