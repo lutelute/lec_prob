@@ -53,7 +53,7 @@
 <body>
 <div class="wrap">
   <h1>全体地図 — 確率から「決定」までの俯瞰アトラス</h1>
-  <div class="lead">この教材の<b>全概念・モジュール・ツール</b>を、性質で<b>2次元に配置</b>した地図。<b>横＝基礎・不確実性 ←→ 最適化・決定／縦＝離散・事象 ←→ 連続・分布・リスク</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋を重ねられる。▶印は触れるツール。</div>
+  <div class="lead">この教材の<b>全概念・モジュール・ツール</b>を、性質で<b>2次元に配置</b>した地図。<b>横＝基礎・不確実性 ←→ 最適化・決定／縦＝離散・事象 ←→ 連続・分布・リスク</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋、「🔗 前提関係」で<b>何が何の前提か（依存グラフ）</b>を重ねられる。▶印は触れるツール。</div>
 
   <div class="stage">
     <div class="maphost">
@@ -65,6 +65,7 @@
     </div>
     <div class="bar">
       <button id="pathBtn">⊹ 推奨順路</button>
+      <button id="edgeBtn">🔗 前提関係</button>
       <input id="search" placeholder="🔍 検索…" aria-label="ノードを検索" style="font-family:var(--mono);font-size:11px;padding:5px 9px;border:1px solid var(--ink);border-radius:2px;width:120px">
       <div class="legend" id="legend"></div>
       <span class="hint" id="hint">カード=概念/ツール · ▶=触る · ✓=訪問済 · クリックで開く</span>
@@ -117,6 +118,19 @@ const M=[
   {n:'理解度チェック',h:'quiz.html',c:'decide',x:0.93,y:0.22,mo:'target',tool:1},
 ];
 const SPINE=['確率の使い方','事象と確率','確率変数と分布','分布を数値で','シナリオとMC','不確実性下の最適化','ケーススタディ'];
+// 前提→依存（学習の依存グラフ DAG）
+const EDGES=[
+  ['なぜ確率','確率の使い方'],['なぜ確率','事象と確率'],
+  ['事象と確率','ベイズ更新'],['事象と確率','確率変数と分布'],
+  ['確率変数と分布','PDF・CDF'],['確率変数と分布','期待値・分散'],
+  ['期待値・分散','分布を数値で'],['分布を数値で','分布→数'],
+  ['確率変数と分布','データから分布'],['分布を数値で','シナリオとMC'],
+  ['シナリオとMC','モンテカルロ'],['期待値・分散','不確実性下の最適化'],
+  ['シナリオとMC','不確実性下の最適化'],['不確実性下の最適化','6形式コンパレータ'],
+  ['不確実性下の最適化','二段階(VSS/EVPI)'],['二段階(VSS/EVPI)','蓄電池運用'],
+  ['不確実性下の最適化','ケーススタディ'],['データから分布','ケーススタディ'],
+  ['ケーススタディ','理解度チェック'],
+];
 
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),CW=cv.width,CH=cv.height;
 const PAD=62, CWH=49, CHH=33;
@@ -152,7 +166,7 @@ const MOT={
   target(x,y,w,h,c){const cx=x+w/2,cy=y+h/2,R=Math.min(w,h)*0.36;ctx.strokeStyle=c;ctx.lineWidth=1.4;for(let r=1;r<=2;r++){ctx.beginPath();ctx.arc(cx,cy,R*r/2,0,7);ctx.stroke();}ctx.fillStyle=c;ctx.beginPath();ctx.arc(cx,cy,2.4,0,7);ctx.fill();},
 };
 
-let hover=-1,off={},showPath=false;
+let hover=-1,off={},showPath=false,showEdges=false;
 function drawGrid(){const step=29;ctx.lineWidth=1;
   for(let x=PAD%step;x<CW;x+=step){const mj=Math.round((x-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,CH);ctx.stroke();}
   for(let y=PAD%step;y<CH;y+=step){const mj=Math.round((y-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(CW,y+.5);ctx.stroke();}}
@@ -163,6 +177,16 @@ function drawHulls(){for(const k in CATS){if(off[k])continue;const pts=M.filter(
 function drawPath(){const pts=SPINE.map(n=>M.find(m=>m.n===n)).filter(m=>m&&!off[m.c]);if(pts.length<2)return;
   ctx.strokeStyle='rgba(26,26,23,0.55)';ctx.lineWidth=1.8;ctx.setLineDash([2,5]);ctx.beginPath();pts.forEach((m,i)=>i?ctx.lineTo(m.px,m.py):ctx.moveTo(m.px,m.py));ctx.stroke();ctx.setLineDash([]);
   pts.forEach((m,i)=>{const bx=m.px-CWH+8,by=m.py-CHH+8;ctx.beginPath();ctx.arc(bx,by,8,0,7);ctx.fillStyle='#1a1a17';ctx.fill();ctx.fillStyle='#fff';ctx.font='700 10px '+getCSS('--mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,bx,by+.5);ctx.textBaseline='alphabetic';});}
+function drawEdges(){ctx.save();
+  for(const [a,b] of EDGES){const A=M.find(m=>m.n===a),B=M.find(m=>m.n===b);if(!A||!B||off[A.c]||off[B.c])continue;
+    const dim=query&&A.n.toLowerCase().indexOf(query)<0&&B.n.toLowerCase().indexOf(query)<0;
+    const dx=B.px-A.px,dy=B.py-A.py,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;
+    const sx=A.px+ux*CWH*0.85,sy=A.py+uy*CHH*0.85,ex=B.px-ux*CWH*0.95,ey=B.py-uy*CHH*0.95;
+    ctx.strokeStyle=dim?'rgba(31,158,138,0.10)':'rgba(31,158,138,0.42)';ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(ex,ey);ctx.stroke();
+    const ah=6,ang=Math.atan2(ey-sy,ex-sx);ctx.fillStyle=dim?'rgba(31,158,138,0.14)':'rgba(31,158,138,0.6)';
+    ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-ah*Math.cos(ang-0.42),ey-ah*Math.sin(ang-0.42));ctx.lineTo(ex-ah*Math.cos(ang+0.42),ey-ah*Math.sin(ang+0.42));ctx.closePath();ctx.fill();}
+  ctx.restore();}
 function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,y=m.py-CHH,w=CWH*2,h=CHH*2;
   const match=!query||m.n.toLowerCase().indexOf(query)>=0; ctx.save(); if(!match)ctx.globalAlpha=0.18;
   ctx.shadowColor='rgba(0,0,0,0.10)';ctx.shadowBlur=hl?7:3;ctx.shadowOffsetY=1.5;rr(x,y,w,h,3);ctx.fillStyle='#fffefb';ctx.fill();ctx.shadowColor='transparent';
@@ -173,7 +197,7 @@ function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,
   if(visited.has(m.n)){ctx.fillStyle='#34a853';ctx.beginPath();ctx.arc(x+9,y+9,6,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+6,y+9);ctx.lineTo(x+8,y+11.4);ctx.lineTo(x+12.2,y+6.4);ctx.stroke();}
   ctx.fillStyle=hl?'#1a1a17':'rgba(26,26,23,0.9)';ctx.font=(hl?'700 ':'600 ')+'9.5px '+getCSS('--gothic');ctx.textAlign='center';ctx.textBaseline='middle';
   let nm=m.n;if(nm.length>9)nm=nm.slice(0,8)+'…';ctx.fillText(nm,m.px,y+h-8);ctx.textBaseline='alphabetic';ctx.restore();}
-function draw(){ctx.clearRect(0,0,CW,CH);drawGrid();drawHulls();if(showPath)drawPath();
+function draw(){ctx.clearRect(0,0,CW,CH);drawGrid();drawHulls();if(showEdges)drawEdges();if(showPath)drawPath();
   for(let i=0;i<M.length;i++)if(i!==hover)drawCard(M[i],i);if(hover>=0)drawCard(M[hover],hover);
   if(hover>=0){const m=M[hover];ctx.fillStyle='#1a1a17';ctx.font='700 11px '+getCSS('--gothic');ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(m.n,16,CH-15);const tw=ctx.measureText(m.n).width;ctx.fillStyle=getCSS('--ink-3');ctx.font='10px '+getCSS('--mono');ctx.fillText('  ▸ '+CATS[m.c].label+(m.tool?' / 触れるツール':'')+' / クリックで開く',16+tw+6,CH-15);}}
 function renderList(){const el=document.getElementById('maplist');if(!el)return;let html='';
@@ -191,6 +215,7 @@ cv.addEventListener('mousemove',e=>{const p=evt(e),h=pick(p.x,p.y);cv.style.curs
 cv.addEventListener('mouseleave',()=>{if(hover!==-1){hover=-1;draw();}});
 cv.addEventListener('click',e=>{const p=evt(e),h=pick(p.x,p.y);if(h>=0){markVisited(M[h]);location.href=M[h].h;}});
 document.getElementById('pathBtn').onclick=function(){showPath=!showPath;this.classList.toggle('on',showPath);draw();};
+document.getElementById('edgeBtn').onclick=function(){showEdges=!showEdges;this.classList.toggle('on',showEdges);draw();};
 // 検索
 document.getElementById('search').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();draw();renderList();});
 // 訪問済み（進捗）：localStorage に記録、✓表示。進捗をヒントに
