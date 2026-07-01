@@ -75,11 +75,14 @@
     <div class="plots" style="display:block">
       <div class="summ" id="summ">需要を入れて「計算する」を押してください。</div>
       <div class="rec" id="rec" style="display:none"></div>
+      <div id="pins"></div>
       <div id="tableWrap"></div>
       <div class="note" id="sens" style="display:none"></div>
       <div class="act" id="exports" style="display:none">
         <button id="csv">CSV書き出し</button>
         <button class="alt" id="print">印刷</button>
+        <button class="alt" id="pin">📌 この結果を比較に固定</button>
+        <button class="alt" id="clearpins" style="display:none">比較クリア</button>
       </div>
       <div class="plot" id="plot" style="margin-top:8px"></div>
     </div>
@@ -133,7 +136,7 @@ function compute(){
   const best=forms.reduce((a,b)=>b.c<a.c?b:a);
   const u=($('unit').value||'').trim(), qty=($('qty').value||'').trim()||'需要';
   const us=u?(' '+u):'';
-  lastRows=forms; lastMeta={src,mu,s,cs,co,eps,alpha,k,best:best.f,unit:u,qty};
+  lastRows=forms; lastMeta={src,mu,s,cs,co,eps,alpha,k,best:best.f,bestX:best.x,bestP:best.p,unit:u,qty};
   $('summ').innerHTML=`<b>${src}</b>：${qty}の平均 ${mu.toFixed(1)}${us} / SD ${s.toFixed(1)}${us}。不足損 ${cs} ${cs>co?'≫':cs<co?'≪':'='} 余剰損 ${co}。`;
   $('rec').innerHTML=`おすすめ：費用を平均的に小さくするなら <b>${best.f}＝${best.x.toFixed(1)}${us}</b> を確保（供給不足 ${(best.p*100).toFixed(0)}%）。`+
     `不足を絶対に避けたいなら下表で確保量の多い形式（CVaR・ロバスト）を選ぶ。`;
@@ -179,6 +182,32 @@ $('csv').onclick=()=>{
   a.href=URL.createObjectURL(blob); a.download='decision.csv'; a.click(); URL.revokeObjectURL(a.href);
 };
 $('print').onclick=()=>window.print();
+
+// シナリオを固定して並べて比較（夏/冬・コスト違いなど）
+let pins=[]; try{pins=JSON.parse(localStorage.getItem('lp_calc_pins')||'[]');}catch(e){}
+function renderPins(){
+  const el=$('pins');
+  if(!pins.length){ el.innerHTML=''; $('clearpins').style.display='none'; return; }
+  $('clearpins').style.display='';
+  let h='<div style="overflow-x:auto"><table class="res" style="margin:8px 0"><tr><th>固定した比較</th>'+
+    pins.map((p,i)=>`<th>案${i+1}</th>`).join('')+'</tr>';
+  h+='<tr><td class="f">平均μ</td>'+pins.map(p=>`<td>${p.mu.toFixed(1)}${p.us}</td>`).join('')+'</tr>';
+  h+='<tr><td class="f">コスト比 c_s:c_o</td>'+pins.map(p=>`<td>${p.cs}:${p.co}</td>`).join('')+'</tr>';
+  h+='<tr><td class="f">おすすめ形式</td>'+pins.map(p=>`<td>${p.best}</td>`).join('')+'</tr>';
+  h+='<tr class="best"><td class="f">推奨確保量</td>'+pins.map(p=>`<td><b>${p.x.toFixed(1)}${p.us}</b></td>`).join('')+'</tr>';
+  h+='<tr><td class="f">供給不足の確率</td>'+pins.map(p=>`<td>${(p.p*100).toFixed(0)}%</td>`).join('')+'</tr>';
+  h+='</table></div>';
+  el.innerHTML=h;
+}
+$('pin').onclick=()=>{
+  if(!lastMeta) return; const m=lastMeta;
+  pins.push({mu:m.mu,best:m.best,x:m.bestX,p:m.bestP,us:m.unit?(' '+m.unit):'',cs:m.cs,co:m.co});
+  if(pins.length>4)pins.shift();
+  try{localStorage.setItem('lp_calc_pins',JSON.stringify(pins));}catch(e){}
+  renderPins();
+};
+$('clearpins').onclick=()=>{ pins=[]; try{localStorage.removeItem('lp_calc_pins');}catch(e){} renderPins(); };
+renderPins();
 </script>
   <script src="lib/a11y.js"></script>
 </body>
