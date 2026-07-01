@@ -5,90 +5,164 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>触って学ぶ：確率はどう「決定」に変わるか</title>
 <link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="lib/stats.js"></script>
 </head>
 <body>
 <div class="wrap">
   <h1>触って学ぶ：同じ状況でも「何を大事にするか」で決定は変わる</h1>
-  <p class="sub">明日のピーク需要は不確実（青い山＝確率分布）。<b>あなたが確保する量 q を動かす</b>と、供給不足の確率とコストが変わります。「不足」は「余剰」よりずっと痛い設定です。</p>
-  <div class="try"><b class="h">👉 やってみよう</b>
-  <ol>
-    <li>「平均で決める」を押す → 供給不足の確率が約50%。半分の日が不足。</li>
-    <li>「コスト最小」を押す → 平均より多めの q で、期待コストが下がる。</li>
-    <li>q をさらに右へ → 不足は減るが、余剰コストで総コストは増える。</li>
-  </ol>
-  <div class="ins">不足が痛いぶん、平均より多めが正解。「何を大事にするか」で q が動く。</div></div>
-  <div class="panel">
-    <div class="controls">
-      <h2>あなたの決定</h2>
-      <div class="ctl"><label>確保する量 q <span class="val" id="qval">113</span></label><input type="range" id="q" min="70" max="145" step="1" value="113"></div>
-      <h2>立場を選んでみる</h2>
-      <div class="seg" id="seg">
-        <button type="button" data-q="100">平均で決める</button>
-        <button type="button" data-q="113" class="on">コスト最小</button>
-        <button type="button" data-q="125">不足5%以下</button>
+  <div class="sub">明日のピーク需要は不確実。確保する量 q をどう決めるか、5ステップで追う。「不足」は「余剰」よりずっと痛い設定です。</div>
+
+  <div class="stage">
+    <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
+    <div class="stagebody">
+      <div class="stagevis">
+        <div id="plot" class="plot" style="height:300px"></div>
+        <div class="metrics" id="metrics" style="margin-top:10px"></div>
       </div>
-      <div class="metrics">
-        <div class="metric"><div class="k">供給不足の確率 P(D &gt; q)</div><div class="v" id="pshort">–</div></div>
-        <div class="metric"><div class="k">期待コスト（小さいほど良い）</div><div class="v" id="ecost">–</div></div>
+      <div class="stageexplain" id="explain" aria-live="polite"></div>
+    </div>
+    <div class="stagebar">
+      <div class="navbtns">
+        <button class="navb" id="prevBtn">◀ 前へ</button>
+        <button class="navb primary" id="nextBtn">次へ ▶</button>
+        <button class="navb" id="autoBtn">⏵ 自動</button>
+        <button class="navb" id="resetBtn">↻ 最初から</button>
+      </div>
+      <div class="ctlrow">
+        <div class="ctl"><label>確保する量 q<span class="val" id="qval">113</span></label>
+          <input type="range" id="q" min="70" max="145" step="1" value="113"></div>
+        <div class="seg" id="seg">
+          <button type="button" data-q="100">平均で決める</button>
+          <button type="button" data-q="113" class="on">コスト最小</button>
+          <button type="button" data-q="125">不足5%以下</button>
+        </div>
       </div>
     </div>
-    <div class="plots"><div class="plot" id="plot"></div></div>
   </div>
-  <div class="note" id="note"></div>
-  <details style="margin-top:8px">
-    <summary>なぜこの量が最適か（限界分析で導く）</summary>
-    <div id="marg" style="font-size:.9rem;line-height:1.7;padding:6px 2px"></div>
+
+  <details open style="margin-top:14px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">⚠ よくある誤解</summary>
+    <ul style="margin:8px 0 4px;padding-left:1.2em;font-size:.9rem;line-height:1.8">
+      <li>❌「平均通り準備すれば十分」 → ✅ 平均ちょうどだと供給不足は約50%の確率で起きる。</li>
+      <li>❌「不足を避けるにはとにかく多く確保すればよい」 → ✅ 余剰コストが増える。最適点は損得の釣り合いで決まる。</li>
+      <li>❌「正解は1つ」 → ✅ 何を大事にするか（コスト最小／信頼度優先）で最適なqは変わる。</li>
+    </ul>
   </details>
+  <div class="foot">newsvendor：最適 q は臨界比 c_o/(c_s+c_o) の分位点。E[(D-q)+] は正規分布の期待不足量。数理は <code>lib/stats.js</code>、Plotly.js で描画。</div>
 </div>
+<script src="lib/steps.js"></script>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
-const MU=100, SD=15, CS=200, CO=50;       // 需要 N(100,15)、不足損 cs ≫ 余剰損 co
+const MU=100, SD=15, CS=200, CO=50; // 需要 N(100,15)、不足損 cs ≫ 余剰損 co
 let q=113;
 
 const eShort=q=>{const m=MU-q; return m*L.normCdf(m/SD,0,1)+SD*L.normSPdf(m/SD);}; // E[(D-q)+]
 
-function update(){
-  $('qval').textContent=q;
+function computeAll(){
   const pShort=1-L.normCdf(q,MU,SD);
-  const es=eShort(q), ex=es+(q-MU);        // E[(q-D)+] = E[(D-q)+] + (q-μ)
+  const es=eShort(q), ex=es+(q-MU); // E[(q-D)+] = E[(D-q)+] + (q-μ)
   const cost=CS*es+CO*ex;
-  $('pshort').textContent=(pShort*100).toFixed(0)+'%';
-  $('ecost').textContent=cost.toFixed(0);
+  const gain=CS*pShort, loss=CO*(1-pShort), net=gain-loss;
+  return {q,pShort,es,ex,cost,gain,loss,net};
+}
 
+const STEPS=[
+  {key:'prob',    t:'問題',          c:'var(--blue)'},
+  {key:'trap',    t:'直感のワナ',     c:'var(--red)'},
+  {key:'formula', t:'限界分析',       c:'var(--purple)'},
+  {key:'vary',    t:'qを動かす',      c:'var(--amber)'},
+  {key:'result',  t:'立場を選ぶ',     c:'var(--green)'},
+];
+
+function renderMetrics(V){
+  $('metrics').innerHTML=
+    `<div class="metric"><div class="k">供給不足の確率 P(D &gt; q)</div><div class="v">${(V.pShort*100).toFixed(0)}%</div></div>`+
+    `<div class="metric"><div class="k">期待コスト（小さいほど良い）</div><div class="v">${V.cost.toFixed(0)}</div></div>`;
+}
+
+function renderExplain(key,V){
+  let h=`<span class="lbl">STEP ${wiz.stepIdx()+1} / ${STEPS.length}</span>`;
+  if(key==='prob'){
+    h+=`<h3>① 問題：どれだけ確保すればいいか？</h3>
+    <p>明日のピーク需要は不確実（青い山＝確率分布 N(${MU},${SD}²)）。確保する量 <b>q</b> を決めなければならない。不足の損失（1単位あたり<b>${CS}</b>）は、余剰の損失（1単位あたり<b>${CO}</b>）よりずっと大きい。</p>
+    <p><b>あなたなら q をいくつにする？次へ進む前に予想してみてください。</b></p>`;
+  }else if(key==='trap'){
+    h+=`<h3>② 直感のワナ：「平均で決める」の落とし穴</h3>
+    <p>多くの人は「平均通りに準備すればいい」と考える。q=${V.q}（ちょうど平均）にすると——供給不足の確率は <b>${(V.pShort*100).toFixed(0)}%</b>。つまり<b>半分の日</b>で需要が確保量を超えて不足する。</p>
+    <p>「平均で計画」は不足と余剰が半々になるだけで、不足の方が痛いという非対称性を無視している。</p>`;
+  }else if(key==='formula'){
+    h+=`<h3>③ なぜ平均より多めが最適か（限界分析）</h3>
+    <div class="eq">確保量を <b>q=${V.q} からあと1単位増やす</b>と——<br>
+    ・需要が q を超えていれば（確率 ${(V.pShort*100).toFixed(0)}%）、不足を1減らせる：<b>得 ${CS}×${V.pShort.toFixed(2)} = ${V.gain.toFixed(0)}</b><br>
+    ・需要が q 以下なら（確率 ${((1-V.pShort)*100).toFixed(0)}%）、余剰が1増える：<b>損 ${CO}×${(1-V.pShort).toFixed(2)} = ${V.loss.toFixed(0)}</b></div>
+    <p>期待的な差し引き＝得−損＝<b>${V.net.toFixed(0)}</b>。釣り合う点は 得＝損、つまり P(D&gt;q)=c_o/(c_s+c_o) — これが「臨界比の分位点」の正体。</p>`;
+  }else if(key==='vary'){
+    h+=`<h3>④ 確保量 q を動かす</h3>
+    <p>q を自動で動かしています。q を増やすと不足確率は下がるが、余剰コストは増える。今 <b>q=${V.q}</b> → 供給不足 <b>${(V.pShort*100).toFixed(0)}%</b>・期待コスト <b>${V.cost.toFixed(0)}</b>。</p>
+    <p>スライダーに手を触れると自動は止まり、手動で動かせます。</p>`;
+  }else{
+    h+=`<h3>⑤ 結果：何を大事にするかで答えが変わる</h3>
+    <p>同じ需要・同じコストでも、立場によって最適な q は変わる。上の3つのボタンで切り替えてみてください。</p>
+    <div class="eq">・平均で決める：q=100（不足50%、素朴だが危険）<br>
+    ・コスト最小：q=113（不足約20%、期待コストが最小）<br>
+    ・不足5%以下：q=125（信頼度優先、余剰コストは増える）</div>
+    <p>「なぜこの形式を選ぶか」を自分の言葉で説明できることが、確率を使った意思決定の核心。</p>`;
+  }
+  $('explain').innerHTML=h;
+}
+
+function draw(V){
   const xs=L.linspace(55,150,180), pdf=xs.map(x=>L.normPdf(x,MU,SD));
-  const tx=xs.filter(x=>x>=q), ty=tx.map(x=>L.normPdf(x,MU,SD));
+  const tx=xs.filter(x=>x>=V.q), ty=tx.map(x=>L.normPdf(x,MU,SD));
   const peak=L.normPdf(MU,MU,SD);
   Plotly.react('plot',[
     {x:xs,y:pdf,type:'scatter',mode:'lines',line:{color:'#4285f4',width:2.5},name:'需要の分布',hoverinfo:'skip'},
-    {x:[q,...tx,tx[tx.length-1]||q],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(234,67,53,0.30)',name:'供給不足',hoverinfo:'skip'},
-    {x:[q,q],y:[0,peak*1.08],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'確保量 q',hoverinfo:'skip'}
+    {x:[V.q,...tx,tx[tx.length-1]||V.q],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(234,67,53,0.30)',name:'供給不足',hoverinfo:'skip'},
+    {x:[V.q,V.q],y:[0,peak*1.08],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'確保量 q',hoverinfo:'skip'}
   ],{margin:{t:8,r:10,b:42,l:48},xaxis:{title:'需要 ／ 確保量',range:[55,150]},
      yaxis:{title:'確率密度',rangemode:'tozero'},showlegend:true,
-     legend:{orientation:'h',y:1.12},height:330},{displayModeBar:false,responsive:true});
-
-  const stance = q<=101 ? '<b>平均で決める</b>：平均ぴったり。でも需要が平均を超える確率は約50% ——「平均で計画」は半分の日が供給不足。'
-    : q>=124 ? '<b>不足5%以下</b>：信頼度を優先して多めに確保（チャンス制約）。余剰コストは増えるが供給支障はめったに起きない。'
-    : '<b>コスト最小</b>：不足が余剰より重いぶん、平均より多めが最適（0.8分位点）。';
-  $('note').innerHTML=stance+' &nbsp;|&nbsp; 同じ需要・同じコストでも、<b>何を大事にするかで確保量が変わる</b>。これが「確率を使って決める」ということ。';
-
-  // 限界分析：q をあと1単位増やすと？
-  const gain=CS*pShort, loss=CO*(1-pShort), net=gain-loss;
-  const verdict = Math.abs(net)<3 ? '<b>ほぼ釣り合い＝ここが最適</b>。これ以上動かしても得しない。'
-    : net>0 ? `差は <b>+${net.toFixed(0)}</b> → <b>もっと増やすべき</b>（不足が痛いので）。`
-            : `差は <b>${net.toFixed(0)}</b> → <b>減らすべき</b>（余剰が無駄）。`;
-  $('marg').innerHTML=
-    `確保量を <b>q=${q} からあと1単位増やす</b>と——<br>`+
-    `・需要が q を超えていれば（確率 ${(pShort*100).toFixed(0)}%）、不足を1減らせる：<b>得 ${CS}×${pShort.toFixed(2)} = ${gain.toFixed(0)}</b><br>`+
-    `・需要が q 以下なら（確率 ${((1-pShort)*100).toFixed(0)}%）、余剰が1増える：<b>損 ${CO}×${(1-pShort).toFixed(2)} = ${loss.toFixed(0)}</b><br>`+
-    `期待的な差し引き ＝ 得−損 ＝ <b>${net.toFixed(0)}</b>。${verdict}<br>`+
-    `<span style="color:#5f6368">釣り合う点は 得＝損、つまり P(D&gt;q)=c_o/(c_s+c_o)。これが「臨界比の分位点」の正体。</span>`;
-  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on', +b.dataset.q===q));
+     legend:{orientation:'h',y:1.12},height:300},{displayModeBar:false,responsive:true});
 }
-$('q').addEventListener('input',e=>{q=+e.target.value; update();});
-document.querySelectorAll('#seg button').forEach(b=>b.addEventListener('click',()=>{q=+b.dataset.q; $('q').value=q; update();}));
-update();
+
+function renderAll(key){
+  const V=computeAll();
+  $('qval').textContent=V.q;
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on', +b.dataset.q===V.q));
+  renderMetrics(V); renderExplain(key,V); draw(V);
+}
+
+let autoDir=1;
+
+function applyStoryDefaults(key){
+  if(key==='prob'||key==='trap'){ q=100; $('q').value=q; }
+  else if(key==='formula'){ q=113; $('q').value=q; }
+  else if(key==='result'){ q=113; $('q').value=q; }
+}
+
+const wiz=LPSteps.create({
+  steps:STEPS,
+  autoKey:'vary',
+  onEnter:(key)=>applyStoryDefaults(key),
+  onRender:(key)=>renderAll(key),
+  onAutoTick:()=>{
+    let v=q+autoDir*0.6;
+    if(v>=140){ v=140; autoDir=-1; } else if(v<=85){ v=85; autoDir=1; }
+    q=v; $('q').value=v;
+    renderAll('vary');
+  }
+});
+
+$('q').addEventListener('input',e=>{ wiz.stopAuto(); q=+e.target.value; renderAll(wiz.key()); });
+document.querySelectorAll('#seg button').forEach(b=>b.addEventListener('click',()=>{
+  wiz.stopAuto(); q=+b.dataset.q; $('q').value=q; renderAll(wiz.key());
+}));
+$('resetBtn').addEventListener('click',()=>{
+  wiz.stopAuto(); q=113; $('q').value=q; wiz.goStep(0);
+});
+
+wiz.goStep(0);
 </script>
   <script src="lib/a11y.js"></script>
 </body>
