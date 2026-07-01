@@ -5,62 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>確率的最適化コンパレータ（6形式・インタラクティブ）</title>
 <link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="lib/stats.js"></script>
+<style>.stagevis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:900px){.stagevis{grid-template-columns:1fr}}</style>
 </head>
 <body>
 <div class="wrap">
   <h1>確率的最適化コンパレータ（6形式）</h1>
-  <div class="try"><b class="h">👉 やってみよう</b>
-  <ol>
-    <li><b>不足コスト c_s を上げる</b> → どの形式も確保量 x* が増える（多めに備える）。</li>
-    <li><b>ε を下げる</b> → チャンス制約の x* が上へ（失敗を強く抑える）。</li>
-    <li><b>CVaR の α を上げる</b> → 裾（大損）に強く備え、x* が伸びる。</li>
-  </ol>
-  <div class="ins">同じ問題でも「何を大事にするか」で決定が動く。形式選択＝価値判断。</div></div>
-  <div class="sub">同じ容量調達問題を6形式で解く。決定 x* がどう変わるかで「なぜこの形式を選ぶか」を学ぶ。
-    これが教材の到達点。<a href="../notes/06_optimization_under_uncertainty/">Module 6 のノート →</a></div>
+  <div class="sub">同じ容量調達問題を6形式で解く。決定 x* がどう変わるかで「なぜこの形式を選ぶか」を学ぶ。教材の到達点。
+    <a href="../notes/06_optimization_under_uncertainty/">Module 6 のノート →</a></div>
 
-  <div class="panel">
-    <div class="controls">
-      <h2>需要 N(μ, σ²)</h2>
-      <div class="ctl"><label>平均 μ<span class="val" id="muval">100</span></label><input type="range" id="mu" min="50" max="150" step="1" value="100"></div>
-      <div class="ctl"><label>標準偏差 σ<span class="val" id="sdval">15</span></label><input type="range" id="sd" min="1" max="40" step="1" value="15"></div>
-      <h2>コスト（非対称性が鍵）</h2>
-      <div class="ctl"><label>不足の単価 c_s<span class="val" id="csval">10</span></label><input type="range" id="cs" min="1" max="20" step="1" value="10"></div>
-      <div class="ctl"><label>過剰の単価 c_o<span class="val" id="coval">1</span></label><input type="range" id="co" min="1" max="20" step="1" value="1"></div>
-      <h2>リスクのパラメータ</h2>
-      <div class="ctl"><label>チャンス制約 ε（許容不足確率）<span class="val" id="epsval">0.10</span></label><input type="range" id="eps" min="0.01" max="0.30" step="0.01" value="0.1"></div>
-      <div class="ctl"><label>CVaR 信頼水準 α<span class="val" id="alphaval">0.90</span></label><input type="range" id="alpha" min="0.5" max="0.99" step="0.01" value="0.9"></div>
-      <div class="ctl"><label>ロバスト集合の幅 k（±kσ）<span class="val" id="kval">3.0</span></label><input type="range" id="k" min="1" max="4" step="0.5" value="3"></div>
-    </div>
-
-    <div>
-      <div class="plots">
-        <div id="mapPlot" class="plot"></div>
-        <div id="barPlot" class="plot"></div>
+  <div class="stage">
+    <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
+    <div class="stagebody" style="grid-template-columns:1fr 1fr">
+      <div class="stagevis" style="grid-column:1">
+        <div id="mapPlot" class="plot" style="height:260px"></div>
+        <div id="barPlot" class="plot" style="height:260px"></div>
       </div>
-      <div id="table" style="margin-top:10px"></div>
+      <div class="stageexplain" id="explain" aria-live="polite"></div>
+    </div>
+    <div style="padding:10px 14px;background:var(--soft);border-top:1px solid var(--line)" id="tableWrap"></div>
+    <div class="stagebar">
+      <div class="navbtns">
+        <button class="navb" id="prevBtn">◀ 前へ</button>
+        <button class="navb primary" id="nextBtn">次へ ▶</button>
+        <button class="navb" id="autoBtn">⏵ 自動</button>
+        <button class="navb" id="resetBtn">↻ 最初から</button>
+      </div>
+      <div class="ctlrow">
+        <div class="ctl"><label>平均 μ<span class="val" id="muval">100</span></label><input type="range" id="mu" min="50" max="150" step="1" value="100"></div>
+        <div class="ctl"><label>標準偏差 σ<span class="val" id="sdval">15</span></label><input type="range" id="sd" min="1" max="40" step="1" value="15"></div>
+        <div class="ctl"><label>不足の単価 c_s<span class="val" id="csval">10</span></label><input type="range" id="cs" min="1" max="20" step="1" value="10"></div>
+        <div class="ctl"><label>過剰の単価 c_o<span class="val" id="coval">1</span></label><input type="range" id="co" min="1" max="20" step="1" value="1"></div>
+        <div class="ctl"><label>チャンス制約 ε<span class="val" id="epsval">0.10</span></label><input type="range" id="eps" min="0.01" max="0.30" step="0.01" value="0.1"></div>
+        <div class="ctl"><label>CVaR 信頼水準 α<span class="val" id="alphaval">0.90</span></label><input type="range" id="alpha" min="0.5" max="0.99" step="0.01" value="0.9"></div>
+        <div class="ctl"><label>ロバスト幅 k<span class="val" id="kval">3.0</span></label><input type="range" id="k" min="1" max="4" step="0.5" value="3"></div>
+      </div>
     </div>
   </div>
 
-  <div class="note" id="note"></div>
-  <details>
-    <summary>🎯 観察点 / どの形式を選ぶか</summary>
-    <ul>
-      <li>c_s/c_o（非対称性）を 1 に近づけると、<b>コスト由来の形式（決定論・期待値・ロバスト・CVaR・DRO）が μ へ集まる</b>（平均の罠が消える）。チャンス制約だけは ε で決まるので分位点に残る。</li>
-      <li>ε を小さく→チャンスの x* 上昇。α を上げる→CVaR の x* 上昇。k を広げる→ロバストが急上昇。</li>
-      <li>各形式は<b>自分の目的では最良・他では譲る</b>：②=期待費用最小、⑤=CVaR最小、④=不足確率≈ε、③=最安全だが高コスト。</li>
-      <li>①決定論は平均すら最小化しない（非対称コストを無視）。形式選択＝価値判断。</li>
+  <details open style="margin-top:14px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">⚠ よくある誤解</summary>
+    <ul style="margin:8px 0 4px;padding-left:1.2em;font-size:.9rem;line-height:1.8">
+      <li>❌「決定論（平均で計画）が一番自然で無難」 → ✅ 非対称コストを無視するため、平均費用すら最小化しない。</li>
+      <li>❌「1つの正しい形式がある」 → ✅ 各形式は自分の目的では最良・他では譲る。形式選択は価値判断。</li>
+      <li>❌「c_s/c_oが1に近くても形式によって決定は割れる」 → ✅ コスト由来の形式はμへ収束するが、チャンス制約はεだけで決まるので分位点に残る。</li>
     </ul>
   </details>
   <div class="foot">統一問題＝容量調達(newsvendor)。C(x,ξ)=c_s·max(ξ−x,0)+c_o·max(x−ξ,0)。CVaRはサンプル近似（Rockafellar–Uryasev）、Scarfは閉形式。数理は <code>lib/stats.js</code>、Plotly.js。</div>
 </div>
 
+<script src="lib/steps.js"></script>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
 let S={mu:100,sd:15,cs:10,co:1,eps:0.1,alpha:0.9,k:3};
-// 形式（保守性の順）
 const COL={det:'#9aa0a6',exp:'#4285f4',chance:'#34a853',dro:'#a142f4',cvar:'#f9ab00',rob:'#ea4335'};
 function gauss(n,seed){const g=L.gaussianGen(L.mulberry32(seed));const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=S.mu+S.sd*g();return a;}
 const cost=(x,d)=>S.cs*Math.max(d-x,0)+S.co*Math.max(x-d,0);
@@ -80,56 +80,129 @@ function evalX(x,sEval){
   return {mean:sum/sEval.length, short:short/sEval.length, cvar:s/(cs2.length-kk)};
 }
 
-function update(){
-  $('muval').textContent=S.mu;$('sdval').textContent=S.sd;$('csval').textContent=S.cs;$('coval').textContent=S.co;
-  $('epsval').textContent=S.eps.toFixed(2);$('alphaval').textContent=S.alpha.toFixed(2);$('kval').textContent=S.k.toFixed(1);
+function computeForms(){
   const sOpt=gauss(3000,'opt'), sEval=gauss(20000,'eval');
   const forms=[
     {k:'det',name:'①決定論',x:S.mu,note:'平均で計画',col:COL.det},
-    {k:'chance',name:'④チャンス制約',x:L.normPpf(1-S.eps,S.mu,S.sd),note:'P(不足)≤ε',col:COL.chance},
     {k:'exp',name:'②期待値最小化',x:L.normPpf(S.cs/(S.cs+S.co),S.mu,S.sd),note:'平均費用最小',col:COL.exp},
-    {k:'dro',name:'⑥分布ロバスト',x:S.mu+S.sd/2*(Math.sqrt(S.cs/S.co)-Math.sqrt(S.co/S.cs)),note:'Scarf(平均分散)',col:COL.dro},
-    {k:'cvar',name:'⑤CVaR最小化',x:cvarMin(sOpt),note:'尾部の平均',col:COL.cvar},
     {k:'rob',name:'③ロバスト',x:(S.cs*(S.mu+S.k*S.sd)+S.co*(S.mu-S.k*S.sd))/(S.cs+S.co),note:'区間±kσの最悪',col:COL.rob},
+    {k:'chance',name:'④チャンス制約',x:L.normPpf(1-S.eps,S.mu,S.sd),note:'P(不足)≤ε',col:COL.chance},
+    {k:'cvar',name:'⑤CVaR最小化',x:cvarMin(sOpt),note:'尾部の平均',col:COL.cvar},
+    {k:'dro',name:'⑥分布ロバスト',x:S.mu+S.sd/2*(Math.sqrt(S.cs/S.co)-Math.sqrt(S.co/S.cs)),note:'Scarf(平均分散)',col:COL.dro},
   ];
   forms.forEach(f=>{const e=evalX(f.x,sEval); f.mean=e.mean; f.short=e.short; f.cvar=e.cvar;});
-  const ord=forms.slice().sort((a,b)=>a.x-b.x);
-  const minE=Math.min(...forms.map(f=>f.mean)), minC=Math.min(...forms.map(f=>f.cvar));
+  return forms;
+}
 
-  // 決定マップ：需要分布 + x* 縦線
+const STEPS=[
+  {key:'prob',    t:'問題',            c:'var(--blue)', show:['det']},
+  {key:'trap',    t:'直感のワナ',       c:'var(--red)',  show:['det','exp']},
+  {key:'formula', t:'リスクを測る',     c:'var(--purple)', show:['det','exp','chance','cvar']},
+  {key:'vary',    t:'c_sを動かす',      c:'var(--amber)', show:['det','exp','chance','cvar','rob','dro']},
+  {key:'result',  t:'結果',            c:'var(--green)', show:['det','exp','chance','cvar','rob','dro']},
+];
+
+function draw(forms,show){
+  const vis=forms.filter(f=>show.includes(f.k));
+  const ord=vis.slice().sort((a,b)=>a.x-b.x);
   const lo=L.normPpf(0.001,S.mu,S.sd), hi=L.normPpf(0.999,S.mu,S.sd);
-  const xs=L.linspace(lo,Math.max(hi,Math.max(...forms.map(f=>f.x))+5),300), pdf=xs.map(x=>L.normPdf(x,S.mu,S.sd));
+  const xs=L.linspace(lo,Math.max(hi,Math.max(...vis.map(f=>f.x))+5),300), pdf=xs.map(x=>L.normPdf(x,S.mu,S.sd));
   const ymax=Math.max(...pdf);
   const traces=[{x:xs,y:pdf,mode:'lines',line:{color:'#bbb',width:2},fill:'tozeroy',fillcolor:'rgba(180,180,180,.15)',name:'需要 ξ'}];
   ord.forEach(f=>traces.push({x:[f.x,f.x],y:[0,ymax*1.05],mode:'lines',line:{color:f.col,width:2.5},name:`${f.name} ${f.x.toFixed(0)}`}));
-  Plotly.react('mapPlot',traces,{margin:{t:30,r:8,b:38,l:42},title:{text:'決定マップ：6形式の最適容量 x*',font:{size:12}},
+  Plotly.react('mapPlot',traces,{margin:{t:30,r:8,b:38,l:42},title:{text:'決定マップ：最適容量 x*',font:{size:12}},
     xaxis:{title:'容量 x / 需要 ξ'},yaxis:{title:'密度',rangemode:'tozero'},legend:{font:{size:9}}},{displayModeBar:false,responsive:true});
 
-  // x* バー（保守性順）
   Plotly.react('barPlot',[{type:'bar',orientation:'h',
     y:ord.map(f=>f.name), x:ord.map(f=>f.x), marker:{color:ord.map(f=>f.col)},
     text:ord.map(f=>f.x.toFixed(1)), textposition:'outside'}],
     {margin:{t:30,r:30,b:38,l:96},title:{text:'最適決定 x*（上=楽観/安, 下=保守/高）',font:{size:12}},
-     xaxis:{title:'x*',range:[Math.min(...forms.map(f=>f.x))-8,Math.max(...forms.map(f=>f.x))+12]}},{displayModeBar:false,responsive:true});
+     xaxis:{title:'x*',range:[Math.min(...vis.map(f=>f.x))-8,Math.max(...vis.map(f=>f.x))+12]}},{displayModeBar:false,responsive:true});
 
-  // 評価表
-  let rows=forms.map(f=>{
-    const eb=Math.abs(f.mean-minE)<1e-6?' style="background:#e6f4ea;font-weight:700"':'';
-    const cb=Math.abs(f.cvar-minC)<1e-6?' style="background:#fef7e0;font-weight:700"':'';
-    return `<tr><td style="text-align:left;border-left:4px solid ${f.col}">${f.name}</td>
-      <td>${f.x.toFixed(1)}</td><td${eb}>${f.mean.toFixed(1)}</td><td>${f.short.toFixed(3)}</td><td${cb}>${f.cvar.toFixed(1)}</td>
-      <td style="text-align:left;color:#5f6368">${f.note}</td></tr>`;
-  }).join('');
-  $('table').innerHTML=`<table class="mini" style="width:100%"><thead><tr>
-    <th style="text-align:left">形式</th><th>最適 x*</th><th>期待費用 E[C]</th><th>不足確率</th><th>CVaR<sub>${S.alpha.toFixed(2)}</sub></th><th style="text-align:left">ねらい</th>
-    </tr></thead><tbody>${rows}</tbody></table>`;
-
-  const be=forms.find(f=>Math.abs(f.mean-minE)<1e-6).name, bc=forms.find(f=>Math.abs(f.cvar-minC)<1e-6).name;
-  $('note').innerHTML=`<b>期待費用が最小</b>：${be}（②が平均を最小化）／ <b>CVaRが最小</b>：${bc}（⑤が尾部を最小化）。`+
-    ` 各形式は自分の目的では最良・他では譲る＝<b>形式選択は価値判断</b>。決定が ${Math.min(...forms.map(f=>f.x)).toFixed(0)}〜${Math.max(...forms.map(f=>f.x)).toFixed(0)} と変わる。`;
+  if(vis.length>=3){
+    const minE=Math.min(...vis.map(f=>f.mean)), minC=Math.min(...vis.map(f=>f.cvar));
+    let rows=vis.map(f=>{
+      const eb=Math.abs(f.mean-minE)<1e-6?' style="background:#e6f4ea;font-weight:700"':'';
+      const cb=Math.abs(f.cvar-minC)<1e-6?' style="background:#fef7e0;font-weight:700"':'';
+      return `<tr><td style="text-align:left;border-left:4px solid ${f.col}">${f.name}</td>
+        <td>${f.x.toFixed(1)}</td><td${eb}>${f.mean.toFixed(1)}</td><td>${f.short.toFixed(3)}</td><td${cb}>${f.cvar.toFixed(1)}</td>
+        <td style="text-align:left;color:#5f6368">${f.note}</td></tr>`;
+    }).join('');
+    $('tableWrap').innerHTML=`<table class="mini" style="width:100%"><thead><tr>
+      <th style="text-align:left">形式</th><th>最適 x*</th><th>期待費用 E[C]</th><th>不足確率</th><th>CVaR<sub>${S.alpha.toFixed(2)}</sub></th><th style="text-align:left">ねらい</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+  } else { $('tableWrap').innerHTML=''; }
+  return {vis,ord};
 }
-['mu','sd','cs','co','eps','alpha','k'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value);update();}));
-update();
+
+function renderExplain(key,forms,vis){
+  const minE=Math.min(...vis.map(f=>f.mean)), minC=Math.min(...vis.map(f=>f.cvar));
+  const be=vis.find(f=>Math.abs(f.mean-minE)<1e-6), bc=vis.find(f=>Math.abs(f.cvar-minC)<1e-6);
+  const det=forms.find(f=>f.k==='det'), exp=forms.find(f=>f.k==='exp');
+  let h=`<span class="lbl">STEP ${wiz.stepIdx()+1} / ${STEPS.length}</span>`;
+  if(key==='prob'){
+    h+=`<h3>① 問題：容量をいくら確保するか</h3>
+    <p>需要 ξ〜N(${S.mu},${S.sd}²)、不足の単価 c_s=${S.cs}、過剰の単価 c_o=${S.co}（不足の方が痛い）。まず最も素朴な<b>①決定論</b>＝平均で計画（x*=${det.x.toFixed(0)}）を見る。</p>
+    <p><b>これで十分でしょうか？次へ進む前に予想してみてください。</b></p>`;
+  }else if(key==='trap'){
+    h+=`<h3>② 直感のワナ：平均で計画するだけでは最適ではない</h3>
+    <p><b>①決定論</b>（x*=${det.x.toFixed(0)}）の期待費用は<b>${det.mean.toFixed(1)}</b>。一方<b>②期待値最小化</b>（x*=${exp.x.toFixed(0)}）は期待費用<b>${exp.mean.toFixed(1)}</b>で、決定論より${det.mean>exp.mean?'安い':'高い'}。</p>
+    <p>決定論は非対称コストを無視するため、<b>平均費用すら最小化しない</b>。「平均で計画」は直感的だが最適ではない。</p>`;
+  }else if(key==='formula'){
+    h+=`<h3>③ リスクを測る：何を大事にするかで式が変わる</h3>
+    <p>④<b>チャンス制約</b>：P(不足)≤εとなる分位点。⑤<b>CVaR</b>：尾部（大損）の平均を最小化。同じ需要・同じコストでも、<b>何を制約/目的にするか</b>で最適な確保量は変わる。</p>
+    <p>チャンス制約は基準率εだけで決まるので、コストの非対称性とは独立に動く点に注意。</p>`;
+  }else if(key==='vary'){
+    h+=`<h3>④ 不足単価 c_s を動かす</h3>
+    <p>c_s を自動で動かしています。c_s/c_o（非対称性）が大きいほど、コスト由来の形式（②③⑤⑥）は多めの確保へ動く。<b>④チャンス制約だけはεで決まる</b>ので、あまり動きません。</p>
+    <p>今 c_s=${S.cs}・c_o=${S.co}（比${(S.cs/S.co).toFixed(1)}）。スライダーに触れると自動は止まります。</p>`;
+  }else{
+    h+=`<h3>⑤ 結果：6形式を並べて比べる</h3>
+    <p><b>期待費用が最小</b>：${be.name}／<b>CVaRが最小</b>：${bc.name}。決定は <b>${Math.min(...vis.map(f=>f.x)).toFixed(0)}〜${Math.max(...vis.map(f=>f.x)).toFixed(0)}</b> と変わる。</p>
+    <div class="eq"><b>要点</b><br>・各形式は自分の目的では最良・他では譲る<br>・決定論は非対称コストを無視し、平均費用すら最小化しない<br>・形式選択＝何を大事にするかという価値判断</div>`;
+  }
+  $('explain').innerHTML=h;
+}
+
+function renderAll(key){
+  $('muval').textContent=S.mu;$('sdval').textContent=S.sd;$('csval').textContent=S.cs;$('coval').textContent=S.co;
+  $('epsval').textContent=S.eps.toFixed(2);$('alphaval').textContent=S.alpha.toFixed(2);$('kval').textContent=S.k.toFixed(1);
+  const forms=computeForms();
+  const show=STEPS.find(s=>s.key===key).show;
+  const {vis}=draw(forms,show);
+  renderExplain(key,forms,vis);
+}
+
+let autoDir=1;
+function applyStoryDefaults(key){
+  if(key==='prob'||key==='trap'||key==='formula'){
+    S.mu=100; S.sd=15; S.cs=10; S.co=1; S.eps=0.1; S.alpha=0.9; S.k=3;
+    $('mu').value=100; $('sd').value=15; $('cs').value=10; $('co').value=1; $('eps').value=0.1; $('alpha').value=0.9; $('k').value=3;
+  }
+}
+
+const wiz=LPSteps.create({
+  steps:STEPS,
+  autoKey:'vary',
+  onEnter:(key)=>applyStoryDefaults(key),
+  onRender:(key)=>renderAll(key),
+  onAutoTick:()=>{
+    let v=S.cs+autoDir*0.15;
+    if(v>=20){ v=20; autoDir=-1; } else if(v<=1){ v=1; autoDir=1; }
+    S.cs=v; $('cs').value=v;
+    renderAll('vary');
+  }
+});
+
+['mu','sd','cs','co','eps','alpha','k'].forEach(id=>$(id).addEventListener('input',e=>{ wiz.stopAuto(); S[id]=parseFloat(e.target.value); renderAll(wiz.key()); }));
+$('resetBtn').addEventListener('click',()=>{
+  wiz.stopAuto();
+  S={mu:100,sd:15,cs:10,co:1,eps:0.1,alpha:0.9,k:3};
+  $('mu').value=100; $('sd').value=15; $('cs').value=10; $('co').value=1; $('eps').value=0.1; $('alpha').value=0.9; $('k').value=3;
+  wiz.goStep(0);
+});
+
+wiz.goStep(0);
 </script>
   <script src="lib/a11y.js"></script>
 </body>
