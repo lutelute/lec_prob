@@ -54,7 +54,7 @@
         var nav = document.createElement('nav');
         nav.className = 'lp-toolnav';
         nav.setAttribute('aria-label', '戻る');
-        nav.innerHTML = '← <a href="course.html">🎓 学習コース</a> · <a href="map.html">🗺 全体地図</a> · <a href="../">🏠 ホーム</a>';
+        nav.innerHTML = '← <a href="course.html">🎓 学習コース</a> · <a href="map.html">🗺 手法マップ</a> · <a href="../">🏠 ホーム</a>';
         host.appendChild(nav);
       }
     } catch (e) {}

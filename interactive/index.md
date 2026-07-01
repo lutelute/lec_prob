@@ -11,7 +11,7 @@ title: ブラウザで動かす（インタラクティブ・ツール）
     **読む→触る→自分の問題で使う→確かめる**の一本道（約40分）。迷ったらここから。
 
     実務で使うなら → [決定計算機](calculator.html){target=_blank}（在庫・予備力・発注を実データで）／[やる・やらない計算機](gonogo.html){target=_blank}（成功確率と損得で判断）。
-    全体を俯瞰したいなら → [全体地図](map.html){target=_blank}（依存関係を対話的に）／[ブループリント](blueprint.html){target=_blank}（1枚の仕様書・印刷可）。
+    確率的最適化6形式を俯瞰したいなら → [手法マップ](map.html){target=_blank}（依存関係を対話的に）／[ブループリント](blueprint.html){target=_blank}（1枚の仕様書・印刷可）。
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0">
   <a href="#t1" style="display:block;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-decoration:none;color:inherit;border-left:4px solid #4285f4"><b>① PDF・CDF・区間確率</b><br><span style="color:#5f6368;font-size:.85em">密度≠確率・面積＝CDF差（M2）</span></a>

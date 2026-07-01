@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>全体地図 — 確率から決定までの俯瞰アトラス</title>
+<title>手法マップ — 確率的最適化6形式の俯瞰アトラス</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -52,16 +52,16 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>全体地図 — 確率から「決定」までの俯瞰アトラス</h1>
-  <div class="lead">この教材の<b>全概念・モジュール・ツール</b>を、性質で<b>2次元に配置</b>した地図。<b>横＝基礎・不確実性 ←→ 最適化・決定／縦＝離散・事象 ←→ 連続・分布・リスク</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋、「🔗 前提関係」で<b>何が何の前提か（依存グラフ）</b>を重ねられる（この状態でカードにホバーすると<b>前提チェーンだけ強調</b>）。▶印は触れるツール。</div>
+  <h1>手法マップ — 確率的最適化6形式の俯瞰アトラス</h1>
+  <div class="lead">この教材の到達点である<b>確率的最適化の手法</b>を、性質で<b>2次元に配置</b>した地図（<a href="../roadmap/optimization_map/">最適化地図</a>の2軸に対応）。<b>横＝不確実性の表現（点→分布→集合→分布族）／縦＝何を最適化するか（最悪値→違反確率→尾部→平均）</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋、「🔗 前提関係」で<b>何が何の前提か（依存グラフ）</b>を重ねられる（この状態でカードにホバーすると<b>前提チェーンだけ強調</b>）。▶印は触れるツール。</div>
 
   <div class="stage">
     <div class="maphost">
       <canvas id="cv" width="1160" height="720"></canvas>
-      <span class="axis x">最適化・決定 →</span>
-      <span class="axis x2">← 基礎・不確実性</span>
-      <span class="axis y">↑ 連続・分布・リスク</span>
-      <span class="axis y2">↓ 離散・事象</span>
+      <span class="axis x">集合・分布族（範囲で表す） →</span>
+      <span class="axis x2">← 点・分布（値/確率で表す）</span>
+      <span class="axis y">↑ 平均を最適化</span>
+      <span class="axis y2">↓ 最悪値を最適化</span>
     </div>
     <div class="bar">
       <button id="pathBtn">⊹ 推奨順路</button>
@@ -79,7 +79,7 @@
 
   <details>
     <summary>この地図の見方 / 別バージョン</summary>
-    <div class="det">各概念に「基礎度・離散か連続か・計算か最適化か」などの<b>属性</b>を与え 2 次元に配置（似た性質＝近い位置）。重なり回避でカードを整列。各カードのミニ図は概念の<b>サムネ</b>（山＝分布、面積＝確率、散布＝モンテカルロ、バー＝6形式、分岐＝二段階、的＝決定）。点線枠はカテゴリのまとまり、背景の方眼は位置の目安。「⊹ 推奨順路」で <a href="../notes/how_to_use_probability/">使い方</a>→…→<a href="../notes/07_case_study/">ケース</a> の学習ルートを重ねられる。仕様書様式の<b>1枚版</b>は <a href="blueprint.html">📐 全体ブループリント</a>。</div>
+    <div class="det">各手法に「<a href="../roadmap/optimization_map/">最適化地図</a>」の2軸——<b>横＝不確実性の表現</b>（点→分布→集合→分布族）・<b>縦＝何を最適化するか</b>（最悪値→違反確率→尾部→平均）——で座標を与え2次元に配置（似た性質＝近い位置）。重なり回避でカードを整列。各カードのミニ図は手法の<b>サムネ</b>（的＝1点に決め打ち、山＝重み付き平均、階段＝分位点、尾の影＝CVaR、区間＝ロバスト集合、重ね山＝分布族、散布＝シナリオ、収束＝モンテカルロ/SAA、分岐＝二段階）。点線枠はカテゴリのまとまり。「⊹ 推奨順路」で決定論的→期待値→チャンス制約→CVaR→ロバスト→分布ロバスト→6形式コンパレータの順路を重ねられる。仕様書様式の<b>1枚版</b>は <a href="blueprint.html">📐 全体ブループリント</a>。</div>
   </details>
 </div>
 
@@ -88,48 +88,42 @@
 function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function rng(s){let x=s>>>0;return ()=>{x=(Math.imul(x,1103515245)+12345)&0x7fffffff;return x/0x7fffffff;};}
 const CATS={
-  basis:{label:'基礎',color:'#7a776e'},
-  event:{label:'事象・ベイズ',color:'#2f6fae'},
-  dist:{label:'分布・期待値',color:'#6f54c4'},
-  data:{label:'データ',color:'#c2891b'},
-  compute:{label:'計算・シナリオ',color:'#1f9e8a'},
-  opt:{label:'最適化',color:'#cf4f5f'},
-  decide:{label:'決定・応用',color:'#4e9a4e'},
+  det:{label:'決定論的',color:'#9aa0a6'},
+  exp:{label:'期待値系',color:'#4285f4'},
+  chance:{label:'チャンス制約',color:'#34a853'},
+  cvar:{label:'CVaR',color:'#f9ab00'},
+  rob:{label:'ロバスト',color:'#ea4335'},
+  dro:{label:'分布ロバスト',color:'#a142f4'},
+  scenario:{label:'シナリオ・計算',color:'#8d6e63'},
 };
-// n:名, h:リンク, c:カテゴリ, x,y:概念座標(0..1), mo:ミニ可視化, tool:触れるツール
+// n:名, h:リンク, c:カテゴリ, x,y:概念座標(0..1)＝roadmap/optimization_map.mdの2軸, mo:ミニ可視化, tool:触れるツール
 const M=[
-  {n:'なぜ確率',h:'../notes/00_why_probability/',c:'basis',x:0.07,y:0.50,mo:'meanline'},
-  {n:'確率の使い方',h:'../notes/how_to_use_probability/',c:'basis',x:0.17,y:0.34,mo:'target'},
-  {n:'事象と確率',h:'../notes/01_events_and_probability/',c:'event',x:0.12,y:0.17,mo:'event'},
-  {n:'ベイズ更新',h:'bayes.html',c:'event',x:0.23,y:0.10,mo:'bayes',tool:1},
-  {n:'確率変数と分布',h:'../notes/02_random_variables_and_distributions/',c:'dist',x:0.30,y:0.64,mo:'bell'},
-  {n:'PDF・CDF',h:'pdf_cdf.html',c:'dist',x:0.39,y:0.76,mo:'area',tool:1},
-  {n:'期待値・分散',h:'../notes/03_expectation_variance_covariance/',c:'dist',x:0.30,y:0.46,mo:'meanline'},
-  {n:'分布を数値で',h:'../notes/distributions_and_methods/',c:'dist',x:0.45,y:0.55,mo:'quant'},
-  {n:'分布→数',h:'dist_to_number.html',c:'dist',x:0.52,y:0.67,mo:'quant',tool:1},
-  {n:'データから分布',h:'../notes/04_from_data_to_distribution/',c:'data',x:0.47,y:0.86,mo:'hist'},
-  {n:'シナリオとMC',h:'../notes/05_scenarios_and_monte_carlo/',c:'compute',x:0.58,y:0.58,mo:'dots'},
-  {n:'モンテカルロ',h:'montecarlo.html',c:'compute',x:0.64,y:0.72,mo:'converge',tool:1},
-  {n:'不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/',c:'opt',x:0.76,y:0.52,mo:'bars'},
-  {n:'6形式コンパレータ',h:'comparator.html',c:'opt',x:0.85,y:0.60,mo:'bars',tool:1},
-  {n:'二段階(VSS/EVPI)',h:'../notes/06b_two_stage_stochastic_programming/',c:'opt',x:0.78,y:0.73,mo:'tree'},
-  {n:'蓄電池運用',h:'battery.html',c:'opt',x:0.88,y:0.75,mo:'tree',tool:1},
-  {n:'ケーススタディ',h:'../notes/07_case_study/',c:'decide',x:0.90,y:0.40,mo:'hist'},
-  {n:'理解度チェック',h:'quiz.html',c:'decide',x:0.93,y:0.22,mo:'target',tool:1},
+  {n:'決定論的最適化',h:'../notes/06_optimization_under_uncertainty/',c:'det',x:0.06,y:0.88,mo:'target'},
+  {n:'期待値最小化',h:'../notes/06_optimization_under_uncertainty/',c:'exp',x:0.40,y:0.88,mo:'meanline'},
+  {n:'チャンス制約',h:'../notes/06_optimization_under_uncertainty/',c:'chance',x:0.40,y:0.38,mo:'quant'},
+  {n:'CVaR最小化',h:'../notes/06_optimization_under_uncertainty/',c:'cvar',x:0.40,y:0.60,mo:'tail'},
+  {n:'ロバスト最適化',h:'../notes/06_optimization_under_uncertainty/',c:'rob',x:0.78,y:0.14,mo:'interval'},
+  {n:'分布ロバスト',h:'../notes/06_optimization_under_uncertainty/',c:'dro',x:0.94,y:0.86,mo:'fambell'},
+  {n:'6形式コンパレータ',h:'comparator.html',c:'exp',x:0.62,y:0.52,mo:'bars',tool:1},
+  {n:'シナリオベース確率計画',h:'../notes/05_scenarios_and_monte_carlo/',c:'scenario',x:0.20,y:0.98,mo:'dots'},
+  {n:'モンテカルロ／SAA',h:'montecarlo.html',c:'scenario',x:0.30,y:0.98,mo:'converge',tool:1},
+  {n:'二段階(VSS/EVPI)',h:'../notes/06b_two_stage_stochastic_programming/',c:'scenario',x:0.56,y:0.92,mo:'tree'},
+  {n:'蓄電池運用',h:'battery.html',c:'scenario',x:0.68,y:0.92,mo:'tree',tool:1},
+  {n:'決定計算機',h:'calculator.html',c:'exp',x:0.42,y:0.74,mo:'hist',tool:1},
+  {n:'やる/やらない',h:'gonogo.html',c:'exp',x:0.18,y:0.74,mo:'target',tool:1},
 ];
-const SPINE=['確率の使い方','事象と確率','確率変数と分布','分布を数値で','シナリオとMC','不確実性下の最適化','ケーススタディ'];
+const SPINE=['決定論的最適化','期待値最小化','チャンス制約','CVaR最小化','ロバスト最適化','分布ロバスト','6形式コンパレータ'];
 // 前提→依存（学習の依存グラフ DAG）
 const EDGES=[
-  ['なぜ確率','確率の使い方'],['なぜ確率','事象と確率'],
-  ['事象と確率','ベイズ更新'],['事象と確率','確率変数と分布'],
-  ['確率変数と分布','PDF・CDF'],['確率変数と分布','期待値・分散'],
-  ['期待値・分散','分布を数値で'],['分布を数値で','分布→数'],
-  ['確率変数と分布','データから分布'],['分布を数値で','シナリオとMC'],
-  ['シナリオとMC','モンテカルロ'],['期待値・分散','不確実性下の最適化'],
-  ['シナリオとMC','不確実性下の最適化'],['不確実性下の最適化','6形式コンパレータ'],
-  ['不確実性下の最適化','二段階(VSS/EVPI)'],['二段階(VSS/EVPI)','蓄電池運用'],
-  ['不確実性下の最適化','ケーススタディ'],['データから分布','ケーススタディ'],
-  ['ケーススタディ','理解度チェック'],
+  ['シナリオベース確率計画','モンテカルロ／SAA'],['モンテカルロ／SAA','期待値最小化'],
+  ['決定論的最適化','期待値最小化'],
+  ['期待値最小化','チャンス制約'],['期待値最小化','CVaR最小化'],
+  ['期待値最小化','ロバスト最適化'],['期待値最小化','分布ロバスト'],
+  ['チャンス制約','6形式コンパレータ'],['CVaR最小化','6形式コンパレータ'],
+  ['ロバスト最適化','6形式コンパレータ'],['分布ロバスト','6形式コンパレータ'],
+  ['期待値最小化','6形式コンパレータ'],
+  ['期待値最小化','二段階(VSS/EVPI)'],['二段階(VSS/EVPI)','蓄電池運用'],
+  ['期待値最小化','決定計算機'],['期待値最小化','やる/やらない'],
 ];
 
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),CW=cv.width,CH=cv.height;
@@ -164,6 +158,19 @@ const MOT={
   event(x,y,w,h,c){ctx.strokeStyle=c;ctx.lineWidth=1.6;rr(x+w*0.12,y+h*0.30,w*0.3,h*0.4,2);ctx.stroke();ctx.strokeStyle='#cf4f5f';ctx.beginPath();ctx.moveTo(x+w*0.6,y+h*0.32);ctx.lineTo(x+w*0.86,y+h*0.72);ctx.moveTo(x+w*0.86,y+h*0.32);ctx.lineTo(x+w*0.6,y+h*0.72);ctx.stroke();},
   bayes(x,y,w,h,c){ctx.fillStyle='rgba(60,60,52,0.12)';ctx.fillRect(x+4,y+5,w-8,h-10);const[r,g,bl]=hex2rgb(c);ctx.fillStyle=`rgba(${r},${g},${bl},0.85)`;ctx.fillRect(x+4,y+5,(w-8)*0.2,h-10);ctx.strokeStyle=c;ctx.lineWidth=1;ctx.strokeRect(x+4,y+5,w-8,h-10);},
   target(x,y,w,h,c){const cx=x+w/2,cy=y+h/2,R=Math.min(w,h)*0.36;ctx.strokeStyle=c;ctx.lineWidth=1.4;for(let r=1;r<=2;r++){ctx.beginPath();ctx.arc(cx,cy,R*r/2,0,7);ctx.stroke();}ctx.fillStyle=c;ctx.beginPath();ctx.arc(cx,cy,2.4,0,7);ctx.fill();},
+  tail(x,y,w,h,c){bellPath(x,y,w,h);ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();
+    const a=0.62,b=1.0;ctx.beginPath();ctx.moveTo(x+a*w,y+h);
+    for(let i=0;i<=14;i++){const t=a+(b-a)*i/14,px=x+t*w,z=(t-0.5)*5,py=y+h-(h*0.9)*Math.exp(-z*z/2);ctx.lineTo(px,py);}
+    ctx.lineTo(x+b*w,y+h);ctx.closePath();const[r,g,bl]=hex2rgb(c);ctx.fillStyle=`rgba(${r},${g},${bl},0.42)`;ctx.fill();},
+  interval(x,y,w,h,c){ctx.strokeStyle=c;ctx.lineWidth=1.6;const y0=y+h*0.55;
+    ctx.beginPath();ctx.moveTo(x+w*0.1,y0);ctx.lineTo(x+w*0.9,y0);ctx.stroke();
+    [0.1,0.9].forEach(t=>{ctx.beginPath();ctx.moveTo(x+w*t,y0-h*0.2);ctx.lineTo(x+w*t,y0+h*0.2);ctx.stroke();});
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+w*0.5,y0,3,0,7);ctx.fill();},
+  fambell(x,y,w,h,c){const[r,g,bl]=hex2rgb(c);
+    [[-0.09,0.8,0.35],[0,1,0.6],[0.09,0.8,0.35]].forEach(([dx,sc,al])=>{
+      ctx.strokeStyle=`rgba(${r},${g},${bl},${al})`;ctx.lineWidth=1.2;ctx.beginPath();
+      for(let i=0;i<=24;i++){const t=i/24,px=x+t*w,z=((t-0.5+dx)*5)/sc,py=y+h-(h*0.85)*Math.exp(-z*z/2);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+      ctx.stroke();});},
 };
 
 let hover=-1,off={},showPath=false,showEdges=false,chain=null;
