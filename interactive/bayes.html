@@ -47,7 +47,7 @@
         <div class="metric"><div class="k">感度 P(警報|F)（混同注意）</div><div class="v" id="sensmetric">–</div></div>
       </div>
       <div class="note" id="warnNote" style="display:none"></div>
-      <details open style="margin:8px 0"><summary style="cursor:pointer;font-weight:700;font-size:.92rem">計算の内訳（ベイズの式に数値を入れる）</summary>
+      <details style="margin:8px 0"><summary style="cursor:pointer;font-weight:700;font-size:.92rem">計算の内訳（ベイズの式に数値を入れる）</summary>
         <div id="derive" style="font-size:.9rem;line-height:1.9;padding:6px 2px"></div>
       </details>
       <div class="plots">
@@ -57,9 +57,11 @@
     </div>
   </div>
 
-  <h2 style="font-size:1rem;margin-top:18px">逐次ベイズ更新：独立な警報を重ねる</h2>
-  <div id="seqPlot" style="width:100%;height:300px"></div>
-  <div class="note" id="seqNote"></div>
+  <details id="seqDetails" style="margin-top:8px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">🔁 逐次ベイズ更新：独立な警報を重ねると？</summary>
+    <div id="seqPlot" style="width:100%;height:300px"></div>
+    <div class="note" id="seqNote"></div>
+  </details>
 
   <details>
     <summary>🎯 観察点 / よくある誤解</summary>
@@ -145,6 +147,7 @@ document.querySelectorAll('#ncases button').forEach(b=>b.addEventListener('click
   document.querySelectorAll('#ncases button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); S.n=parseInt(b.dataset.n); update();
 }));
+$('seqDetails').addEventListener('toggle',()=>{ if($('seqDetails').open) Plotly.Plots.resize('seqPlot'); });
 update();
 </script>
   <script src="lib/a11y.js"></script>
