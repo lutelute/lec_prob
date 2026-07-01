@@ -5,101 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDF・CDF・区間確率（インタラクティブ）</title>
 <link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="lib/stats.js"></script>
+<style>.stagevis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:900px){.stagevis{grid-template-columns:1fr}}</style>
 </head>
 <body>
 <div class="wrap">
   <h1>PDF・CDF・区間確率ビジュアライザ</h1>
-  <div class="try"><b class="h">👉 やってみよう</b>
-  <ol>
-    <li>分布を「正規」にして<b>区間プローブ</b>を左右に動かす → 区間の<b>面積（＝確率）</b>が変わる。</li>
-    <li><b>σ（幅）を大きく</b> → 山は低く広がるが、面積の合計は 1 のまま。</li>
-    <li>区間を<b>うんと狭める</b> → 確率は 0 へ。でも密度の「高さ」は 0 でない。</li>
-  </ol>
-  <div class="ins">確率は密度の「高さ」ではなく、区間の「面積」。</div></div>
-  <div class="sub">確率は密度の「高さ」ではなく区間の「面積」。その面積は CDF の「差」でもある——をスライダーで動かして体感する。
+  <div class="sub">確率は密度の「高さ」ではなく区間の「面積」。その面積は CDF の「差」でもある。5ステップで確かめる。
     <a href="../notes/02_random_variables_and_distributions/">Module 2 のノート →</a></div>
 
-  <div class="panel">
-    <div class="controls">
-      <h2>① 分布</h2>
-      <div class="ctl">
-        <select id="dist">
-          <option value="normal">正規分布 Normal</option>
-          <option value="lognormal">対数正規 Lognormal（右裾）</option>
-          <option value="exponential">指数分布 Exponential</option>
-          <option value="uniform">一様分布 Uniform</option>
-        </select>
+  <div class="stage">
+    <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
+    <div class="stagebody" style="grid-template-columns:1fr 1fr">
+      <div class="stagevis" style="grid-column:1">
+        <div id="pdfPlot" class="plot" style="height:270px"></div>
+        <div id="cdfPlot" class="plot" style="height:270px"></div>
       </div>
-      <div id="params"></div>
-
-      <h2>② 何を問うか</h2>
-      <div class="seg" id="query">
-        <button data-q="interval" class="on">区間 P(a≤X≤b)</button>
-        <button data-q="left">左裾 P(X≤b)</button>
-        <button data-q="right">右裾 P(X&gt;a)</button>
-      </div>
-
-      <h2>③ 区間・閾値</h2>
-      <div class="ctl"><label>a（下限／右裾の閾値）<span class="val" id="aval"></span></label>
-        <input type="range" id="a"></div>
-      <div class="ctl"><label>b（上限／左裾の閾値）<span class="val" id="bval"></span></label>
-        <input type="range" id="b"></div>
-
+      <div class="stageexplain" id="explain" aria-live="polite"></div>
     </div>
-
-    <div>
-      <div class="metrics">
-        <div class="metric"><div class="k" id="plabel">P(a≤X≤b)</div><div class="v" id="pval">–</div></div>
-        <div class="metric"><div class="k">同じ確率（PDFの面積を数値積分）</div><div class="v" id="areaval">–</div></div>
-        <div class="metric"><div class="k">|CDF差 − 面積|（一致の検証）</div><div class="v ok" id="diffval">–</div></div>
+    <div style="padding:0 14px;background:var(--soft);border-top:1px solid var(--line)">
+      <div class="metrics" id="metrics" style="margin:10px 0"></div>
+      <div class="metrics" id="probeMetrics" style="margin:0 0 10px;display:none"></div>
+    </div>
+    <div class="stagebar">
+      <div class="navbtns">
+        <button class="navb" id="prevBtn">◀ 前へ</button>
+        <button class="navb primary" id="nextBtn">次へ ▶</button>
+        <button class="navb" id="autoBtn">⏵ 自動</button>
+        <button class="navb" id="resetBtn">↻ 最初から</button>
       </div>
-      <div class="plots">
-        <div id="pdfPlot" class="plot"></div>
-        <div id="cdfPlot" class="plot"></div>
+      <div class="ctlrow">
+        <div class="ctl"><label>分布</label>
+          <select id="dist">
+            <option value="normal">正規分布 Normal</option>
+            <option value="lognormal">対数正規 Lognormal（右裾）</option>
+            <option value="exponential">指数分布 Exponential</option>
+            <option value="uniform">一様分布 Uniform</option>
+          </select></div>
+        <div id="params" style="display:flex;gap:16px;flex-wrap:wrap"></div>
+        <div class="seg" id="query">
+          <button data-q="interval" class="on">区間 P(a≤X≤b)</button>
+          <button data-q="left">左裾 P(X≤b)</button>
+          <button data-q="right">右裾 P(X&gt;a)</button>
+        </div>
+        <div class="ctl"><label>a（下限／右裾の閾値）<span class="val" id="aval"></span></label>
+          <input type="range" id="a"></div>
+        <div class="ctl"><label>b（上限／左裾の閾値）<span class="val" id="bval"></span></label>
+          <input type="range" id="b"></div>
+        <div class="ctl"><label>点 x₀<span class="val" id="x0val"></span></label>
+          <input type="range" id="x0"></div>
+        <div class="ctl"><label>微小半幅 ε<span class="val" id="epsval"></span></label>
+          <input type="range" id="eps" min="0" max="7" step="1" value="3"></div>
       </div>
     </div>
   </div>
 
-  <details style="margin-top:8px">
-    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">🔍 実験：密度の高さ vs 点まわりの確率（点プローブ）</summary>
-    <div class="ctl"><label>点 x₀<span class="val" id="x0val"></span></label>
-      <input type="range" id="x0"></div>
-    <div class="ctl"><label>微小半幅 ε<span class="val" id="epsval"></span></label>
-      <input type="range" id="eps" min="0" max="7" step="1" value="3"></div>
-    <div class="metrics">
-      <div class="metric"><div class="k">密度の高さ f(x₀)（確率ではない）</div><div class="v" id="fheight">–</div></div>
-      <div class="metric"><div class="k">P(x₀−ε ≤ X ≤ x₀+ε)</div><div class="v" id="pinterval">–</div></div>
-      <div class="metric"><div class="k">近似 f(x₀)·2ε</div><div class="v" id="papprox">–</div></div>
-    </div>
-    <div class="note" id="probeNote"></div>
-  </details>
-
-  <details>
-    <summary>🎯 観察すべき点 / よくある誤解</summary>
-    <ul>
-      <li>σ（正規）を大きくすると山は<b>低く広く</b>。高さ（密度）が下がっても全面積は常に1。</li>
-      <li>一様で区間を広げると密度の高さ 1/(b−a) が下がる：<b>広いほど1点の密度は低い</b>。</li>
-      <li>ε を小さくすると区間確率は0へ近づくが、高さ f(x₀) は不変＝<b>密度は確率ではない</b>。</li>
-      <li>左の3つの数値（P・面積・|差|）がいつも一致＝<b>面積＝CDF差</b>をその場で検証。</li>
-      <li>密度は1を超えてよい（例：正規でσを小さく）。確率なら1以下のはず。</li>
+  <details open style="margin-top:14px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">⚠ よくある誤解</summary>
+    <ul style="margin:8px 0 4px;padding-left:1.2em;font-size:.9rem;line-height:1.8">
+      <li>❌「密度は確率だから1を超えない」 → ✅ 密度は1を超えてよい（σが小さいときなど）。確率なら1以下のはず。</li>
+      <li>❌「区間を狭めると密度も下がる」 → ✅ 区間確率は0へ近づくが、密度の高さ f(x₀) は変わらない。</li>
+      <li>❌「P・面積・CDF差はそれぞれ別の値」 → ✅ 3つは常に一致する（面積＝CDF差＝数値積分）。</li>
     </ul>
   </details>
-
   <div class="foot">数式：F(x)=∫f、P(a≤X≤b)=∫ₐᵇf=F(b)−F(a)、P(X=x)=0、P(x₀±ε)≈f(x₀)·2ε。
     数理は <code>lib/stats.js</code>（教材の数値と一致を検証済み）。Plotly.js で描画。</div>
 </div>
 
+<script src="lib/steps.js"></script>
 <script>
 const L = window.LP;
 const C = {pdf:'#4285f4', area:'rgba(52,168,83,.35)', areaLine:'#34a853', cdf:'#ea4335', probe:'#f9ab00', gray:'#bbb'};
 
-// 分布定義（mean/sd 等で素直にパラメータ化）
 const DISTS = {
   normal: {
     params:[{k:'mu',label:'平均 μ',min:-50,max:150,step:1,def:100},
-            {k:'sigma',label:'標準偏差 σ',min:0.5,max:40,step:0.5,def:15}],
+            {k:'sigma',label:'標準偏差 σ',min:0.1,max:40,step:0.1,def:15}],
     make:p=>({pdf:x=>L.normPdf(x,p.mu,p.sigma), cdf:x=>L.normCdf(x,p.mu,p.sigma), ppf:q=>L.normPpf(q,p.mu,p.sigma)})
   },
   lognormal: {
@@ -133,7 +117,7 @@ function buildParams(){
   $('params').innerHTML = html;
   spec.forEach(p=>{
     $('p_'+p.k).addEventListener('input', e=>{
-      state.params[p.k]=parseFloat(e.target.value); $('pv_'+p.k).textContent=e.target.value; resetRange(); update();
+      state.params[p.k]=parseFloat(e.target.value); $('pv_'+p.k).textContent=e.target.value; resetRange(); renderAll(wiz.key());
     });
   });
 }
@@ -154,66 +138,159 @@ function resetRange(){
 
 function fmt(x,n=4){ return (Math.abs(x)>=1000)? x.toFixed(0): x.toFixed(n); }
 
-function update(){
+function computeAll(){
   const d=dist(); const [lo,hi]=support();
   let a=Math.min(state.a,state.b), b=Math.max(state.a,state.b);
-  $('aval').textContent=fmt(state.a,1); $('bval').textContent=fmt(state.b,1);
-  $('x0val').textContent=fmt(state.x0,1); $('epsval').textContent=state.eps;
-
-  // 塗る領域と確率
-  let region, prob, label, formula;
+  let region, prob, label;
   if(state.query==='interval'){ region=[a,b]; prob=d.cdf(b)-d.cdf(a); label=`P(${fmt(a,1)} ≤ X ≤ ${fmt(b,1)})`; }
   else if(state.query==='left'){ region=[lo,state.b]; prob=d.cdf(state.b); label=`P(X ≤ ${fmt(state.b,1)})`; }
   else { region=[state.a,hi]; prob=1-d.cdf(state.a); label=`P(X > ${fmt(state.a,1)})`; }
-
   const area=L.trapz(d.pdf, region[0], region[1], 3000);
-  $('plabel').textContent=label; $('pval').textContent=fmt(prob,4);
-  $('areaval').textContent=fmt(area,4); $('diffval').textContent=Math.abs(prob-area).toExponential(1);
-
-  // PDF プロット
-  const xs=L.linspace(lo,hi,400), pdf=xs.map(d.pdf);
-  const mask=xs.map(x=> x>=region[0] && x<=region[1]);
-  const xr=xs.filter((x,i)=>mask[i]), yr=pdf.filter((y,i)=>mask[i]);
   const f0=d.pdf(state.x0);
+  const eps=state.eps, pInt=d.cdf(state.x0+eps)-d.cdf(state.x0-eps), approx=f0*2*eps;
+  return {d,lo,hi,region,prob,label,area,f0,eps,pInt,approx};
+}
+
+const STEPS=[
+  {key:'prob',    t:'問題',        c:'var(--blue)'},
+  {key:'trap',    t:'直感のワナ',   c:'var(--red)'},
+  {key:'formula', t:'面積=CDF差',  c:'var(--purple)'},
+  {key:'vary',    t:'εを動かす',   c:'var(--amber)'},
+  {key:'result',  t:'結果',        c:'var(--green)'},
+];
+
+function renderMetrics(V){
+  $('metrics').innerHTML=
+    `<div class="metric"><div class="k">${V.label}</div><div class="v">${fmt(V.prob,4)}</div></div>`+
+    `<div class="metric"><div class="k">同じ確率（PDFの面積を数値積分）</div><div class="v">${fmt(V.area,4)}</div></div>`+
+    `<div class="metric"><div class="k">|CDF差 − 面積|（一致の検証）</div><div class="v ok">${Math.abs(V.prob-V.area).toExponential(1)}</div></div>`;
+  const showProbe = (wiz.key()==='vary' || wiz.key()==='result');
+  $('probeMetrics').style.display = showProbe ? 'flex' : 'none';
+  if(showProbe){
+    $('probeMetrics').innerHTML=
+      `<div class="metric"><div class="k">密度の高さ f(x₀)（確率ではない）</div><div class="v">${fmt(V.f0,4)}</div></div>`+
+      `<div class="metric"><div class="k">P(x₀−ε ≤ X ≤ x₀+ε)</div><div class="v">${fmt(V.pInt,5)}</div></div>`+
+      `<div class="metric"><div class="k">近似 f(x₀)·2ε</div><div class="v">${fmt(V.approx,5)}</div></div>`;
+  }
+}
+
+function renderExplain(key,V){
+  let h=`<span class="lbl">STEP ${wiz.stepIdx()+1} / ${STEPS.length}</span>`;
+  if(key==='prob'){
+    h+=`<h3>① 問題：確率は「面積」か「高さ」か？</h3>
+    <p>正規分布 N(${state.params.mu||100}, ${state.params.sigma||15}²) を見ている。左のPDF図の<b>山の高さ</b>と、色つき<b>面積</b>、そして右のCDF図の<b>縦の差</b>——確率を表しているのはどれでしょう？</p>
+    <p><b>次へ進む前に予想してみてください。</b></p>`;
+  }else if(key==='trap'){
+    h+=`<h3>② 直感のワナ：密度は1を超えてよい</h3>
+    <p>σ を小さくすると、密度の高さ <b>f(x₀)=${fmt(V.f0,4)}</b> が1を超えることがある。「確率なら1以下のはず」という直感は<b>密度には当てはまらない</b>。</p>
+    <p>密度は「確率の濃さ」であって確率そのものではない。確率は面積（＝幅×高さの積分）としてはじめて求まる。</p>`;
+  }else if(key==='formula'){
+    h+=`<h3>③ なぜ一致するか：面積＝CDFの差</h3>
+    <p><b>${V.label} = ${fmt(V.prob,4)}</b> は、PDFの下の<b>面積</b>を数値積分した値 <b>${fmt(V.area,4)}</b> と一致し、CDFの<b>縦の差</b> F(b)−F(a) とも一致する（差は${Math.abs(V.prob-V.area).toExponential(1)}）。</p>
+    <p>これは定義そのもの：F(x)=∫f なので、F(b)−F(a)=∫ₐᵇf。面積・CDF差・定義上の確率は同じもの。</p>`;
+  }else if(key==='vary'){
+    h+=`<h3>④ 微小半幅 ε を動かす</h3>
+    <p>点 x₀=${fmt(state.x0,1)} まわりの区間を自動で狭めています。区間確率 P(x₀±ε) は0へ近づきますが、密度の高さ <b>f(x₀)=${fmt(V.f0,4)}</b> は変わりません。</p>
+    <p>今 ε=${fmt(state.eps,3)} → P(x₀±ε)=${fmt(V.pInt,5)}。スライダーに触れると自動は止まります。</p>`;
+  }else{
+    h+=`<h3>⑤ 結果：密度は確率ではない</h3>
+    <p>ε を小さくすると<b>区間確率は0</b>へ近づくのに、<b>密度の高さは変わりません</b>。高さは確率ではなく、幅 2ε を掛けて初めて確率（面積）になる——これが「連続変数で P(X=x)=0 なのに X は必ず何かの値をとる」の数理です。</p>
+    <div class="eq"><b>要点</b><br>・確率＝面積＝CDF差（3つは常に一致）<br>・密度の高さは確率ではなく、1を超えてもよい<br>・区間を狭めても密度は不変、確率だけが0に近づく</div>`;
+  }
+  $('explain').innerHTML=h;
+}
+
+function draw(V){
+  const xs=L.linspace(V.lo,V.hi,400), pdf=xs.map(V.d.pdf);
+  const mask=xs.map(x=> x>=V.region[0] && x<=V.region[1]);
+  const xr=xs.filter((x,i)=>mask[i]), yr=pdf.filter((y,i)=>mask[i]);
   Plotly.react('pdfPlot',[
     {x:xs,y:pdf,mode:'lines',line:{color:C.pdf,width:3},name:'密度 f(x)'},
-    {x:xr,y:yr,fill:'tozeroy',mode:'none',fillcolor:C.area,name:'面積='+label},
-    {x:[state.x0,state.x0],y:[0,f0],mode:'lines+markers',line:{color:C.probe,width:2,dash:'dot'},
-      marker:{size:7},name:`高さ f(x₀)=${fmt(f0,4)}`}
+    {x:xr,y:yr,fill:'tozeroy',mode:'none',fillcolor:C.area,name:'面積='+V.label},
+    {x:[state.x0,state.x0],y:[0,V.f0],mode:'lines+markers',line:{color:C.probe,width:2,dash:'dot'},
+      marker:{size:7},name:`高さ f(x₀)=${fmt(V.f0,4)}`}
   ],{margin:{t:30,r:10,b:35,l:45},title:{text:'PDF：確率は「面積」',font:{size:13}},
      xaxis:{title:'x'},yaxis:{title:'密度 f(x)',rangemode:'tozero'},
      legend:{orientation:'h',y:-0.25},showlegend:true},{displayModeBar:false,responsive:true});
 
-  // CDF プロット
-  const cdf=xs.map(d.cdf), Fa=d.cdf(region[0]), Fb=d.cdf(region[1]);
+  const cdf=xs.map(V.d.cdf), Fa=V.d.cdf(V.region[0]), Fb=V.d.cdf(V.region[1]);
   Plotly.react('cdfPlot',[
     {x:xs,y:cdf,mode:'lines',line:{color:C.cdf,width:3},name:'累積 F(x)'},
-    {x:[lo,region[0]],y:[Fa,Fa],mode:'lines',line:{color:'#999',dash:'dot',width:1},showlegend:false},
-    {x:[lo,region[1]],y:[Fb,Fb],mode:'lines',line:{color:'#999',dash:'dot',width:1},showlegend:false},
-    {x:[region[0],region[1]],y:[Fa,Fb],mode:'markers',marker:{color:C.cdf,size:9},name:`F(b)−F(a)=${fmt(prob,3)}`},
-    {x:[lo+(hi-lo)*0.02,lo+(hi-lo)*0.02],y:[Fa,Fb],mode:'lines',line:{color:C.areaLine,width:6},name:'差'}
+    {x:[V.lo,V.region[0]],y:[Fa,Fa],mode:'lines',line:{color:'#999',dash:'dot',width:1},showlegend:false},
+    {x:[V.lo,V.region[1]],y:[Fb,Fb],mode:'lines',line:{color:'#999',dash:'dot',width:1},showlegend:false},
+    {x:[V.region[0],V.region[1]],y:[Fa,Fb],mode:'markers',marker:{color:C.cdf,size:9},name:`F(b)−F(a)=${fmt(V.prob,3)}`},
+    {x:[V.lo+(V.hi-V.lo)*0.02,V.lo+(V.hi-V.lo)*0.02],y:[Fa,Fb],mode:'lines',line:{color:C.areaLine,width:6},name:'差'}
   ],{margin:{t:30,r:10,b:35,l:45},title:{text:'CDF：同じ確率が「縦の差」',font:{size:13}},
      xaxis:{title:'x'},yaxis:{title:'累積確率 F(x)',range:[-0.03,1.03]},
      legend:{orientation:'h',y:-0.25}},{displayModeBar:false,responsive:true});
-
-  // 点プローブ実験
-  const eps=state.eps, pInt=d.cdf(state.x0+eps)-d.cdf(state.x0-eps), approx=f0*2*eps;
-  $('fheight').textContent=fmt(f0,4); $('pinterval').textContent=fmt(pInt,5); $('papprox').textContent=fmt(approx,5);
-  $('probeNote').innerHTML=`ε を小さくすると <b>真ん中（区間確率）は0へ</b>近づくのに、<b>左（密度の高さ）は変わりません</b>。`+
-    `高さは確率ではなく、幅 2ε を掛けて初めて確率（面積）になる。これが「連続変数で P(X=x)=0 なのに X は必ず何かの値をとる」の数理です。`;
 }
 
-// イベント
-$('dist').addEventListener('change', e=>{ state.dist=e.target.value; buildParams(); resetRange(); update(); });
-document.querySelectorAll('#query button').forEach(btn=>btn.addEventListener('click', e=>{
-  document.querySelectorAll('#query button').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on'); state.query=btn.dataset.q; update();
-}));
-['a','b','x0'].forEach(id=>$(id).addEventListener('input', e=>{ state[id]=parseFloat(e.target.value); update(); }));
-$('eps').addEventListener('input', e=>{ state.eps=EPS_OPTS[parseInt(e.target.value)]; update(); });
+function renderAll(key){
+  $('aval').textContent=fmt(state.a,1); $('bval').textContent=fmt(state.b,1);
+  $('x0val').textContent=fmt(state.x0,1); $('epsval').textContent=fmt(state.eps,3);
+  const V=computeAll();
+  renderMetrics(V); renderExplain(key,V); draw(V);
+}
 
-// 初期化
-buildParams(); resetRange(); state.eps=EPS_OPTS[3]; $('eps').value=3; update();
+let autoEpsIdx=3, autoDir=1;
+
+function applyStoryDefaults(key){
+  if(key==='prob'){
+    state.dist='normal'; $('dist').value='normal'; buildParams();
+    state.params.mu=100; state.params.sigma=15; $('p_mu').value=100; $('p_sigma').value=15; $('pv_mu').textContent=100; $('pv_sigma').textContent=15;
+    state.query='interval'; document.querySelectorAll('#query button').forEach(b=>b.classList.toggle('on', b.dataset.q==='interval'));
+    resetRange(); state.a=85; state.b=115; $('a').value=85; $('b').value=115;
+  }else if(key==='trap'){
+    state.dist='normal'; $('dist').value='normal'; buildParams();
+    state.params.mu=100; state.params.sigma=0.2; $('p_mu').value=100; $('p_sigma').value=0.2; $('pv_mu').textContent=100; $('pv_sigma').textContent=0.2;
+    resetRange();
+  }else if(key==='formula'){
+    state.dist='normal'; $('dist').value='normal'; buildParams();
+    state.params.mu=100; state.params.sigma=15; $('p_mu').value=100; $('p_sigma').value=15; $('pv_mu').textContent=100; $('pv_sigma').textContent=15;
+    resetRange(); state.a=85; state.b=115; $('a').value=85; $('b').value=115;
+  }else if(key==='vary'||key==='result'){
+    state.x0=100; $('x0').value=100;
+    autoEpsIdx=3; state.eps=EPS_OPTS[autoEpsIdx]; $('eps').value=autoEpsIdx;
+  }
+}
+
+const wiz=LPSteps.create({
+  steps:STEPS,
+  autoKey:'vary',
+  onEnter:(key)=>applyStoryDefaults(key),
+  onRender:(key)=>renderAll(key),
+  onAutoTick:()=>{
+    let v=autoEpsIdx+autoDir*0.06;
+    if(v>=7){ v=7; autoDir=-1; } else if(v<=0){ v=0; autoDir=1; }
+    autoEpsIdx=v;
+    state.eps=EPS_OPTS[Math.round(v)]!==undefined?EPS_OPTS[Math.round(v)]:EPS_OPTS[EPS_OPTS.length-1];
+    // 連続的に見せるため、丸めた添字間を対数補間
+    const lo=Math.floor(v), hi=Math.ceil(v), frac=v-lo;
+    const eLo=EPS_OPTS[Math.max(0,Math.min(7,lo))], eHi=EPS_OPTS[Math.max(0,Math.min(7,hi))];
+    state.eps=eLo+(eHi-eLo)*frac;
+    $('eps').value=v;
+    renderAll('vary');
+  }
+});
+
+$('dist').addEventListener('change', e=>{ wiz.stopAuto(); state.dist=e.target.value; buildParams(); resetRange(); renderAll(wiz.key()); });
+document.querySelectorAll('#query button').forEach(btn=>btn.addEventListener('click', e=>{
+  wiz.stopAuto();
+  document.querySelectorAll('#query button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); state.query=btn.dataset.q; renderAll(wiz.key());
+}));
+['a','b','x0'].forEach(id=>$(id).addEventListener('input', e=>{ wiz.stopAuto(); state[id]=parseFloat(e.target.value); renderAll(wiz.key()); }));
+$('eps').addEventListener('input', e=>{ wiz.stopAuto(); state.eps=EPS_OPTS[parseInt(e.target.value)]; renderAll(wiz.key()); });
+$('resetBtn').addEventListener('click',()=>{
+  wiz.stopAuto();
+  state={dist:'normal', query:'interval', params:{}, a:85, b:115, x0:100, eps:1};
+  $('dist').value='normal'; buildParams(); resetRange();
+  document.querySelectorAll('#query button').forEach(b=>b.classList.toggle('on', b.dataset.q==='interval'));
+  wiz.goStep(0);
+});
+
+buildParams(); resetRange(); state.eps=EPS_OPTS[3]; $('eps').value=3;
+wiz.goStep(0);
 </script>
   <script src="lib/a11y.js"></script>
 </body>
