@@ -39,7 +39,9 @@ $\mathcal{N}(0,0.2^2)$ の $x=0$：$f(0)=\dfrac{1}{\sqrt{2\pi}\,\sigma}=\dfrac{1
 
 **6（記憶なし性）**
 指数 $F(x)=1-e^{-\lambda x}$、$P(X>x)=e^{-\lambda x}$。
+
 $$P(X>s+t\mid X>s)=\frac{P(X>s+t)}{P(X>s)}=\frac{e^{-\lambda(s+t)}}{e^{-\lambda s}}=e^{-\lambda t}=P(X>t).$$
+
 「すでに $s$ 時間故障しなかった」情報が将来の故障確率を変えない。**摩耗故障**は使用とともに故障率が上がる（記憶あり）ので指数は不適（ワイブル等が適切）。
 数値例：$\mathrm{Exp}(\text{平均}10)$ で $P(X>15\mid X>5)=0.368=P(X>10)$。
 

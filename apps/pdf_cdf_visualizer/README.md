@@ -66,7 +66,9 @@ python3 apps/pdf_cdf_visualizer/core.py
 ## 5. 数学的な対応式
 
 $$F_X(x)=P(X\le x)=\int_{-\infty}^x f_X(t)\,dt,\qquad f_X(x)=\frac{d}{dx}F_X(x)$$
+
 $$P(a\le X\le b)=\int_a^b f_X(x)\,dx = F_X(b)-F_X(a)$$
+
 $$P(X=x)=0,\qquad P(x_0-\varepsilon\le X\le x_0+\varepsilon)\approx f_X(x_0)\cdot 2\varepsilon$$
 
 ---

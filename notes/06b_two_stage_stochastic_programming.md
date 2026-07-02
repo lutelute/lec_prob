@@ -62,20 +62,24 @@ related:
 ## 2. 数学的定義：二段階確率計画
 
 一般形：
+
 $$
 \min_{x}\ \ c^\top x + \mathbb{E}_{\xi}\big[\,Q(x,\xi)\,\big],
 \qquad
 Q(x,\xi) = \min_{y\ge 0}\ \big\{\,q^\top y \ :\ W y = h(\xi) - T x\,\big\}.
 $$
+
 > **意味**：$x$ は**第1段決定**（不確実性を知る前に決める here-and-now 変数）。
 > $Q(x,\xi)$ は**第2段の最適リコース費用**——$\xi$ が判明した後、$y$ で帳尻を合わせる最小費用。
 > 目的は「第1段費用 ＋ リコース費用の期待値」。$\mathbb{E}$ で全シナリオを平均する。
 
 有限シナリオ $\{(\xi_s,\pi_s)\}_{s=1}^S$ なら、**extensive form**（1つの大きな最適化）：
+
 $$
 \min_{x,\,y_1,\dots,y_S}\ c^\top x + \sum_{s=1}^S \pi_s\, q^\top y_s
 \quad\text{s.t.}\quad W y_s = h(\xi_s) - T x,\ \ y_s\ge0\ \ (\forall s).
 $$
+
 > **意味**：シナリオごとに別々のリコース変数 $y_s$ を持たせ、第1段 $x$ は**全シナリオで共通**（non-anticipativity：未来を先取りして $x$ を変えてはいけない）。これを1つの線形計画として解く。
 
 ---
@@ -103,10 +107,12 @@ $$
 | **EEV** | expected result of EV solution | $c^\top \bar x + \mathbb{E}_\xi[Q(\bar x,\xi)]$ | 平均で決めた $\bar x$ を全シナリオで採点 |
 
 2つのギャップ：
+
 $$
 \boxed{\ \text{VSS} = \text{EEV} - \text{RP} \ge 0\ },\qquad
 \boxed{\ \text{EVPI} = \text{RP} - \text{WS} \ge 0\ }.
 $$
+
 > **VSS（value of the stochastic solution）**：決定論（平均で決め打ち）を、確率的最適化に替えると**いくら得するか**。
 > **EVPI（expected value of perfect information）**：完全な予測があれば**さらにいくら得するか**（＝不確実性が残すコスト）。
 > 必ず $\text{WS} \le \text{RP} \le \text{EEV}$（確率的は決定論より良く、完全予測には及ばない）。
@@ -122,9 +128,11 @@ $$
 - **目的＝期待値**（リスク中立）。**制約＝各シナリオで需給balance（確率的というより全シナリオで充足）**。
 
 第2段リコース費用：
+
 $$
 Q(x,\xi) = c_2\max(\xi-x,0)\ -\ v\,\min(\max(x-\xi,0),\,B).
 $$
+
 > **意味**：不足 $\xi>x$ は実時間で $c_2$ 払う。余剰 $x>\xi$ は蓄電池に最大 $B$ だけ貯めて $v$ ずつ回収（残りは捨てる）。
 
 **手計算**：
@@ -138,6 +146,7 @@ $$
 $$
 \text{VSS}=714.2-658=\mathbf{56.2},\qquad \text{EVPI}=658-515=\mathbf{143}.
 $$
+
 > **解釈**：平均で決め打ち（$x{=}103$）より、確率的に決める（$x{=}140$）と **56.2 安くなる**（VSS）。
 > さらに完全予測があれば **143 安くなる**（EVPI）＝不確実性が残しているコスト。
 > 確率的解が $x{=}140$ と高めなのは、**割高な実時間調達を避けるため高需要に事前ヘッジ**するから。recourse があるので過剰投資にもならない。
@@ -227,10 +236,12 @@ print(f"VSS = EEV-RP = {EEV-RP:.1f}   EVPI = RP-WS = {RP-WS:.1f}")
 - **決定変数**：第1段 $x\ge0$、第2段リコース $y_s$、CVaR 補助変数 $\eta,\,u_s$。
 - **不確実変数**：$\xi$（シナリオ $\{(\xi_s,\pi_s)\}$）。
 - **目的（CVaR 最小化）**：
+
 $$
 \min_{x,\eta,u_s,y_s}\ \ \eta + \frac{1}{1-\alpha}\sum_s \pi_s\,u_s
 \quad\text{s.t.}\quad u_s \ge \big(c^\top x + q^\top y_s\big) - \eta,\ \ u_s\ge0,
 $$
+
 かつ各シナリオの第2段制約（需給balance・蓄電池容量）。
 > **意味**：総費用 $c^\top x + q^\top y_s$ の**最悪 $(1-\alpha)$ の平均（CVaR$_\alpha$）**を最小化する（Rockafellar–Uryasev、第3章 §8）。
 > 制約は各シナリオで満たす（**最悪ケース満足ではなく、全シナリオ満足＋目的で尾部を抑制**）。

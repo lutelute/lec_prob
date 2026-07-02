@@ -44,9 +44,11 @@ related:
 ## 1. 統一問題：容量調達（reserve / newsvendor）
 
 明日の需要 $\xi$（=$D$）に備え、容量 $x$（=$q$）を**前もって**確保する（第0章の問題の連続版）。
+
 $$
 C(x,\xi) = \underbrace{c_s\,\max(\xi-x,0)}_{\text{不足}} + \underbrace{c_o\,\max(x-\xi,0)}_{\text{過剰}},\qquad c_s=10,\ c_o=1.
 $$
+
 不確実性 $\xi\sim\mathcal{N}(100,15^2)$（必要に応じてデータ・シナリオ・集合で表す）。
 **不足が過剰の10倍痛い**——この非対称性が、形式ごとに違う $x$ を生みます。
 
@@ -70,6 +72,7 @@ $$
 $$
 \min_x\ C(x,\hat\xi)\quad\text{s.t. 制約},\qquad \hat\xi = E[\xi]=100.
 $$
+
 - **不確実性 $\xi$**：無視（代表値1点に固定）。
 - **表現**：点推定。 **目的**：1シナリオのコスト。
 - **結果**：$x^\*=100$。第0章で見た通り、**非対称コストを取りこぼし過小**。実際の期待費用は最適より大幅に悪い。
@@ -87,6 +90,7 @@ $$
 $$
 \min_x\ E[C(x,\xi)]\ \approx\ \min_x\ \frac1S\sum_{s=1}^S C(x,\xi_s)\quad(\text{SAA, 第5章}).
 $$
+
 - **不確実性 $\xi$**：確率変数（分布 $\mathbb{P}$）。 **表現**：分布／シナリオ。
 - **目的**：**平均**コスト。 **制約**：平均的に／各シナリオで。
 - **結果**：$x^\*=F_\xi^{-1}\!\big(\tfrac{c_s}{c_s+c_o}\big)=F_\xi^{-1}(0.909)=120.0$（臨界分位点）。
@@ -114,6 +118,7 @@ $$
 $$
 \min_x\ \max_{\xi\in\mathcal{U}} C(x,\xi),\qquad \mathcal{U}=[\,\underline{\xi},\,\overline{\xi}\,].
 $$
+
 - **不確実性 $\xi$**：**集合** $\mathcal{U}$ の元（確率を付けない）。 **表現**：範囲のみ。
 - **目的**：集合内の**最悪値**。 **制約**：集合内**すべて**で満たす。
 - **結果**：区間 $[\underline\xi,\overline\xi]$ で $x^\*=\dfrac{c_s\overline\xi+c_o\underline\xi}{c_s+c_o}$。$[55,145]$ なら **136.8**、$[70,130]$ なら 124.6。
@@ -141,6 +146,7 @@ $$
 $$
 \min_x\ f(x)\quad\text{s.t.}\quad P\big(g(x,\xi)\le0\big)\ge 1-\varepsilon.
 $$
+
 容量問題では「不足を起こさない」を確率 $1-\varepsilon$ で：$P(\xi> x)\le\varepsilon$。
 - **不確実性 $\xi$**：確率変数。 **表現**：分布。 **目的**：（費用）＋**違反確率**の制御。
 - **結果**：$x^\*=F_\xi^{-1}(1-\varepsilon)$。$\varepsilon=0.1$ なら **119.2**、$\varepsilon=0.05$ なら 124.7。
@@ -164,6 +170,7 @@ $$
 \min_x\ \mathrm{CVaR}_\alpha\big(C(x,\xi)\big)
 = \min_{x,\eta}\ \Big\{\eta + \tfrac{1}{1-\alpha}E[\,(C(x,\xi)-\eta)^+\,]\Big\}\quad(\text{Rockafellar–Uryasev}).
 $$
+
 - **不確実性 $\xi$**：確率変数。 **表現**：分布／シナリオ。 **目的**：**尾部の平均**（最悪 $(1-\alpha)$ の平均費用）。
 - **結果**：$\alpha=0.9$ で $x^\*=130.2$、$\alpha=0.95$ で 132.6（SAA＋cvxpy、§8）。
 
@@ -181,9 +188,11 @@ $$
 $$
 \min_x\ \sup_{\mathbb{P}\in\mathcal{P}}\ E_{\mathbb{P}}\big[C(x,\xi)\big].
 $$
+
 - **不確実性 $\xi$**：確率変数だが**分布が曖昧**。 **表現**：分布の族（曖昧性集合）$\mathcal{P}$。
 - **目的**：$\mathcal{P}$ の中の**最悪分布**のもとでの期待値。
 - **結果**：平均 $\mu$・分散 $\sigma^2$ だけを信じる Scarf の曖昧性集合では
+
 $$
 x^\* = \mu + \frac{\sigma}{2}\Big(\sqrt{\tfrac{c_s}{c_o}}-\sqrt{\tfrac{c_o}{c_s}}\Big) = 100+\frac{15}{2}(\sqrt{10}-\tfrac{1}{\sqrt{10}}) = 121.4.
 $$

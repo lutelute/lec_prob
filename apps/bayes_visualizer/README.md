@@ -39,6 +39,7 @@ python3 apps/bayes_visualizer/core.py
 ## 5. 数学的対応
 
 $$P(F\mid\text{警報})=\frac{P(\text{警報}\mid F)P(F)}{P(\text{警報}\mid F)P(F)+P(\text{警報}\mid\neg F)P(\neg F)}$$
+
 オッズ更新：事前オッズ $\times$ 尤度比 $\mathrm{LR}^+=P(\text{警報}\mid F)/P(\text{警報}\mid\neg F)$、独立 $k$ 回で $(\mathrm{LR}^+)^k$。
 
 ## 6. よくある誤解 / 電力への接続

@@ -30,7 +30,9 @@ python3 apps/monte_carlo_visualizer/core.py   # 自己テスト
 - SAA：N が小さいと q̂ が大きくぶれる＝有限シナリオの不確実性。
 
 ## 5. 数学
+
 $$\mathrm{SE}(\hat\theta_N)=\sigma/\sqrt N,\qquad \hat\theta_N\to\theta\ (N\to\infty).$$
+
 希少事象は重点サンプリング・層別・極値理論で対処（ノート §5）。
 
 ## 6. ファイル
