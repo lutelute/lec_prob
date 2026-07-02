@@ -18,7 +18,7 @@ title: ブラウザで動かす（インタラクティブ・ツール）
   <a class="card" href="#t3"><span class="ch"><span class="nm">③ モンテカルロ収束</span><span class="kd">第5章</span></span><span class="tags"><span class="tag t-me">1/√N</span><span class="tag t-me">SAA</span></span><span class="use">収束・希少事象</span></a>
   <a class="card" href="#t4"><span class="ch"><span class="nm">④ 6形式コンパレータ</span><span class="kd">第6章 · 到達点</span></span><span class="tags"><span class="tag t-op">最適化</span><span class="tag t-op">x*=100〜137</span></span><span class="use">形式の選択で決定が変わる</span></a>
   <a class="card" href="#t5"><span class="ch"><span class="nm">⑤ 蓄電池運用</span><span class="kd">第6b章</span></span><span class="tags"><span class="tag t-to">SoC</span><span class="tag t-to">予測の価値</span></span><span class="use">アービトラージ・EVPI直感</span></a>
-  <a class="card" href="#t6"><span class="ch"><span class="nm">⑥ 理解度チェック</span><span class="kd">ALL</span></span><span class="tags"><span class="tag t-er">8問</span></span><span class="use">どこを復習すべきかが分かる</span></a>
+  <a class="card" href="#t6"><span class="ch"><span class="nm">⑥ 理解度チェック</span><span class="kd">ALL</span></span><span class="tags"><span class="tag t-er">10問</span></span><span class="use">どこを復習すべきかが分かる</span></a>
 </div>
 
 ---
@@ -78,9 +78,9 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-## 6. 理解度チェック — 触って確かめる8問（全章） {#t6}
+## 6. 理解度チェック — 触って確かめる10問（全章） {#t6}
 
-学んだことが身についたか、8問で確かめる。選ぶと正誤と解説が出て、**どこを復習すればよいか**が分かる。
+学んだことが身についたか、10問で確かめる。選ぶと正誤と解説が出て、**どこを復習すればよいか**が分かる。
 密度≠確率・基準率の誤謬・形式選択・平均の罠・1/√N・偶然/認識・CVaR・EVPI を横断。
 
 [▶ 全画面で開く](quiz.html){target=_blank}

@@ -53,7 +53,7 @@
 <body>
 <div class="wrap">
   <h1>手法マップ — 確率的最適化6形式の俯瞰アトラス</h1>
-  <div class="lead">この教材の到達点である<b>確率的最適化の手法</b>を、性質で<b>2次元に配置</b>した地図（<a href="../roadmap/optimization_map/">最適化地図</a>の2軸に対応）。<b>横＝不確実性の表現（点→分布→集合→分布族）／縦＝何を最適化するか（最悪値→違反確率→尾部→平均）</b>。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋、「🔗 前提関係」で<b>何が何の前提か（依存グラフ）</b>を重ねられる（この状態でカードにホバーすると<b>前提チェーンだけ強調</b>）。▶印は触れるツール。</div>
+  <div class="lead">この教材の到達点である<b>確率的最適化の手法</b>を、性質で<b>2次元に配置</b>した地図（<a href="../roadmap/optimization_map/">最適化地図</a>の2軸に対応）。<b>横＝不確実性の表現（点→分布→集合→分布族）／縦＝何を最適化するか（最悪値→違反確率→尾部→平均）</b>。6形式に加え、<b>発展手法</b>（多段階・MDP・強化学習・調整可能ロバスト・Wasserstein DRO など）も配置——これらのカードは<b>例題つきの<a href="../notes/methods_atlas/">手法ミニ辞典</a></b>へ飛ぶ。各カードは中身を表す<b>ミニ可視化</b>、色＝カテゴリ、点線枠＝まとまり。カードに乗ると強調、<b>クリックでそのページへ</b>。「⊹ 推奨順路」で学びの道筋、「🔗 前提関係」で<b>何が何の前提か（依存グラフ）</b>を重ねられる（この状態でカードにホバーすると<b>前提チェーンだけ強調</b>）。▶印は触れるツール。</div>
 
   <div class="stage">
     <div class="maphost">
@@ -91,10 +91,11 @@ const CATS={
   det:{label:'決定論的',color:'#9a9a9a'},
   exp:{label:'期待値系',color:'#1e40af'},
   chance:{label:'チャンス制約',color:'#1f6b2e'},
-  cvar:{label:'CVaR',color:'#d8a04d'},
+  cvar:{label:'リスク尺度・選好',color:'#d8a04d'},
   rob:{label:'ロバスト',color:'#9a3a10'},
   dro:{label:'分布ロバスト',color:'#5b2a94'},
   scenario:{label:'シナリオ・計算',color:'#8a5a10'},
+  seq:{label:'逐次決定',color:'#167a6e'},
 };
 // n:名, h:リンク, c:カテゴリ, x,y:概念座標(0..1)＝roadmap/optimization_map.mdの2軸, mo:ミニ可視化, tool:触れるツール
 const M=[
@@ -111,6 +112,17 @@ const M=[
   {n:'蓄電池運用',h:'battery.html',c:'scenario',x:0.68,y:0.92,mo:'tree',tool:1},
   {n:'決定計算機',h:'calculator.html',c:'exp',x:0.42,y:0.74,mo:'hist',tool:1},
   {n:'やる/やらない',h:'gonogo.html',c:'exp',x:0.18,y:0.74,mo:'target',tool:1},
+  // ---- 発展手法（手法ミニ辞典・例題つき notes/methods_atlas へ） ----
+  {n:'多段階確率計画',h:'../notes/methods_atlas/#multistage',c:'seq',x:0.50,y:0.99,mo:'tree'},
+  {n:'確率的MPC',h:'../notes/methods_atlas/#mpc',c:'seq',x:0.47,y:0.80,mo:'horizon'},
+  {n:'MDP／動的計画',h:'../notes/methods_atlas/#mdp',c:'seq',x:0.32,y:0.80,mo:'chain'},
+  {n:'強化学習',h:'../notes/methods_atlas/#rl',c:'seq',x:0.20,y:0.86,mo:'chain'},
+  {n:'調整可能ロバスト',h:'../notes/methods_atlas/#aro',c:'rob',x:0.84,y:0.26,mo:'interval'},
+  {n:'VaR',h:'../notes/methods_atlas/#var',c:'cvar',x:0.47,y:0.48,mo:'quant'},
+  {n:'平均分散',h:'../notes/methods_atlas/#meanvar',c:'cvar',x:0.52,y:0.70,mo:'frontier'},
+  {n:'期待効用',h:'../notes/methods_atlas/#utility',c:'cvar',x:0.58,y:0.64,mo:'concave'},
+  {n:'モーメントDRO',h:'../notes/methods_atlas/#momentdro',c:'dro',x:0.97,y:0.68,mo:'fambell'},
+  {n:'Wasserstein DRO',h:'../notes/methods_atlas/#wdro',c:'dro',x:0.86,y:0.72,mo:'fambell'},
 ];
 const SPINE=['決定論的最適化','期待値最小化','チャンス制約','CVaR最小化','ロバスト最適化','分布ロバスト','6形式コンパレータ'];
 // 前提→依存（学習の依存グラフ DAG）
@@ -124,6 +136,15 @@ const EDGES=[
   ['期待値最小化','6形式コンパレータ'],
   ['期待値最小化','二段階(VSS/EVPI)'],['二段階(VSS/EVPI)','蓄電池運用'],
   ['期待値最小化','決定計算機'],['期待値最小化','やる/やらない'],
+  // ---- 発展手法の前提関係 ----
+  ['期待値最小化','平均分散'],['期待値最小化','期待効用'],
+  ['チャンス制約','VaR'],['VaR','CVaR最小化'],
+  ['二段階(VSS/EVPI)','多段階確率計画'],['多段階確率計画','確率的MPC'],
+  ['蓄電池運用','確率的MPC'],
+  ['多段階確率計画','MDP／動的計画'],['MDP／動的計画','強化学習'],
+  ['モンテカルロ／SAA','強化学習'],
+  ['ロバスト最適化','調整可能ロバスト'],['二段階(VSS/EVPI)','調整可能ロバスト'],
+  ['分布ロバスト','モーメントDRO'],['分布ロバスト','Wasserstein DRO'],
 ];
 
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),CW=cv.width,CH=cv.height;
@@ -171,6 +192,33 @@ const MOT={
       ctx.strokeStyle=`rgba(${r},${g},${bl},${al})`;ctx.lineWidth=1.2;ctx.beginPath();
       for(let i=0;i<=24;i++){const t=i/24,px=x+t*w,z=((t-0.5+dx)*5)/sc,py=y+h-(h*0.85)*Math.exp(-z*z/2);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
       ctx.stroke();});},
+  horizon(x,y,w,h,c){ // ローリング窓：時間軸＋予測窓＋前進矢印
+    ctx.strokeStyle=MUT;ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(x+3,y+h*0.72);ctx.lineTo(x+w-3,y+h*0.72);ctx.stroke();
+    const[r,g,b]=hex2rgb(c);ctx.fillStyle=`rgba(${r},${g},${b},0.25)`;ctx.fillRect(x+w*0.12,y+h*0.22,w*0.42,h*0.5);
+    ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.strokeRect(x+w*0.12,y+h*0.22,w*0.42,h*0.5);
+    ctx.beginPath();ctx.moveTo(x+w*0.58,y+h*0.47);ctx.lineTo(x+w*0.82,y+h*0.47);
+    ctx.moveTo(x+w*0.82,y+h*0.47);ctx.lineTo(x+w*0.75,y+h*0.37);
+    ctx.moveTo(x+w*0.82,y+h*0.47);ctx.lineTo(x+w*0.75,y+h*0.57);ctx.stroke();},
+  chain(x,y,w,h,c){ // 状態遷移：2状態と往復矢印
+    const y0=y+h*0.5,x1=x+w*0.24,x2=x+w*0.76,R=Math.min(w,h)*0.19;
+    ctx.strokeStyle=c;ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.arc(x1,y0,R,0,7);ctx.stroke();
+    ctx.beginPath();ctx.arc(x2,y0,R,0,7);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x1+R,y0-3);ctx.lineTo(x2-R,y0-3);
+    ctx.moveTo(x2-R,y0-3);ctx.lineTo(x2-R-4,y0-6.5);
+    ctx.moveTo(x2-R,y0+4);ctx.lineTo(x1+R,y0+4);
+    ctx.moveTo(x1+R,y0+4);ctx.lineTo(x1+R+4,y0+7.5);ctx.stroke();},
+  frontier(x,y,w,h,c){ // 効率的フロンティア：凹曲線＋選択点
+    ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.beginPath();
+    for(let i=0;i<=24;i++){const t=i/24,px=x+w*(0.14+0.76*t),py=y+h*(0.85-0.68*Math.sqrt(t));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+    ctx.stroke();
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+w*(0.14+0.76*0.35),y+h*(0.85-0.68*Math.sqrt(0.35)),2.6,0,7);ctx.fill();},
+  concave(x,y,w,h,c){ // 凹効用：u(w)と弦（リスク回避）
+    ctx.strokeStyle=c;ctx.lineWidth=1.6;ctx.beginPath();
+    for(let i=0;i<=24;i++){const t=i/24,px=x+w*(0.1+0.8*t),py=y+h*(0.85-0.72*Math.log1p(9*t)/Math.log(10));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+    ctx.stroke();
+    ctx.strokeStyle=MUT;ctx.setLineDash([2,2]);ctx.beginPath();
+    ctx.moveTo(x+w*0.1,y+h*0.85);ctx.lineTo(x+w*0.9,y+h*0.13);ctx.stroke();ctx.setLineDash([]);},
 };
 
 let hover=-1,off={},showPath=false,showEdges=false,chain=null;
@@ -179,10 +227,15 @@ function buildChain(name){const seen=new Set([name]);const stack=parentsOf(name)
 function drawGrid(){const step=29;ctx.lineWidth=1;
   for(let x=PAD%step;x<CW;x+=step){const mj=Math.round((x-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,CH);ctx.stroke();}
   for(let y=PAD%step;y<CH;y+=step){const mj=Math.round((y-PAD%step)/step)%5===0;ctx.strokeStyle=mj?'rgba(150,143,127,0.26)':'rgba(150,143,127,0.12)';ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(CW,y+.5);ctx.stroke();}}
-function drawHulls(){for(const k in CATS){if(off[k])continue;const pts=M.filter(m=>m.c===k).map(m=>({x:m.px,y:m.py}));if(!pts.length)continue;const[r,g,b]=hex2rgb(CATS[k].color);
+let hullLabels=[];
+function drawHulls(){hullLabels=[];for(const k in CATS){if(off[k])continue;const pts=M.filter(m=>m.c===k).map(m=>({x:m.px,y:m.py}));if(!pts.length)continue;const[r,g,b]=hex2rgb(CATS[k].color);
   let poly;if(pts.length>=3)poly=expand(hull(pts),40);else{const cx=pts.reduce((s,p)=>s+p.x,0)/pts.length,cy=pts.reduce((s,p)=>s+p.y,0)/pts.length;poly=[];for(let a=0;a<14;a++)poly.push({x:cx+Math.cos(a/14*6.283)*(CWH+30),y:cy+Math.sin(a/14*6.283)*(CHH+26)});}
   ctx.beginPath();poly.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle=`rgba(${r},${g},${b},0.06)`;ctx.fill();ctx.strokeStyle=`rgba(${r},${g},${b},0.45)`;ctx.setLineDash([5,4]);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
-  let tx=poly[0].x,ty=poly[0].y;for(const p of poly)if(p.y<ty){ty=p.y;tx=p.x;}ctx.fillStyle=`rgba(${r},${g},${b},0.95)`;ctx.font='600 11px '+getCSS('--mono');ctx.textAlign='center';ctx.fillText(CATS[k].label,tx,ty-6);}}
+  let tx=poly[0].x,ty=poly[0].y;for(const p of poly)if(p.y<ty){ty=p.y;tx=p.x;}
+  hullLabels.push({tx:Math.max(40,Math.min(CW-40,tx)),ty:Math.max(16,ty-6),color:`rgba(${r},${g},${b},0.95)`,label:CATS[k].label});}}
+// カテゴリ名はカードの上に重ねて描く（カードに隠れないよう白フチ付き）
+function drawHullLabels(){ctx.font='600 11px '+getCSS('--mono');ctx.textAlign='center';
+  for(const L of hullLabels){ctx.lineWidth=3;ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.strokeText(L.label,L.tx,L.ty);ctx.fillStyle=L.color;ctx.fillText(L.label,L.tx,L.ty);}}
 function drawPath(){const pts=SPINE.map(n=>M.find(m=>m.n===n)).filter(m=>m&&!off[m.c]);if(pts.length<2)return;
   ctx.strokeStyle='rgba(17,17,17,0.55)';ctx.lineWidth=1.8;ctx.setLineDash([2,5]);ctx.beginPath();pts.forEach((m,i)=>i?ctx.lineTo(m.px,m.py):ctx.moveTo(m.px,m.py));ctx.stroke();ctx.setLineDash([]);
   pts.forEach((m,i)=>{const bx=m.px-CWH+8,by=m.py-CHH+8;ctx.beginPath();ctx.arc(bx,by,8,0,7);ctx.fillStyle='#111111';ctx.fill();ctx.fillStyle='#fff';ctx.font='700 10px '+getCSS('--mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i+1,bx,by+.5);ctx.textBaseline='alphabetic';});}
@@ -206,9 +259,11 @@ function drawCard(m,i){if(off[m.c])return;const hl=(i===hover);const x=m.px-CWH,
   if(m.tool){ctx.fillStyle=CATS[m.c].color;ctx.beginPath();ctx.moveTo(x+w-10,y+6);ctx.lineTo(x+w-4,y+9.5);ctx.lineTo(x+w-10,y+13);ctx.closePath();ctx.fill();}
   if(visited.has(m.n)){ctx.fillStyle='#1f6b2e';ctx.beginPath();ctx.arc(x+9,y+9,6,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+6,y+9);ctx.lineTo(x+8,y+11.4);ctx.lineTo(x+12.2,y+6.4);ctx.stroke();}
   ctx.fillStyle=hl?'#111111':'rgba(17,17,17,0.9)';ctx.font=(hl?'700 ':'600 ')+'9.5px '+getCSS('--gothic');ctx.textAlign='center';ctx.textBaseline='middle';
-  let nm=m.n;if(nm.length>9)nm=nm.slice(0,8)+'…';ctx.fillText(nm,m.px,y+h-8);ctx.textBaseline='alphabetic';ctx.restore();}
+  ctx.fillText(fitName(m.n),m.px,y+h-8);ctx.textBaseline='alphabetic';ctx.restore();}
+// 全角=1・半角=0.55換算で名前をカード幅に収める（半角英字名を無駄に切らない）
+function fitName(s){let acc=0,out='';for(const ch of s){acc+=/[ -~]/.test(ch)?0.55:1;if(acc>9.2)return out+'…';out+=ch;}return s;}
 function draw(){ctx.clearRect(0,0,CW,CH);chain=(showEdges&&hover>=0)?buildChain(M[hover].n):null;drawGrid();drawHulls();if(showEdges)drawEdges();if(showPath)drawPath();
-  for(let i=0;i<M.length;i++)if(i!==hover)drawCard(M[i],i);if(hover>=0)drawCard(M[hover],hover);
+  for(let i=0;i<M.length;i++)if(i!==hover)drawCard(M[i],i);drawHullLabels();if(hover>=0)drawCard(M[hover],hover);
   if(hover>=0){const m=M[hover];ctx.fillStyle='#111111';ctx.font='700 11px '+getCSS('--gothic');ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(m.n,16,CH-15);const tw=ctx.measureText(m.n).width;ctx.fillStyle=getCSS('--ink-3');ctx.font='10px '+getCSS('--mono');const pr=parentsOf(m.n);ctx.fillText('  ▸ '+CATS[m.c].label+(m.tool?' / 触れるツール':'')+(showEdges&&pr.length?' / ◂前提: '+pr.join('・'):' / クリックで開く'),16+tw+6,CH-15);}}
 function renderList(){const el=document.getElementById('maplist');if(!el)return;let html='';
   for(const k in CATS){if(off[k])continue;const items=M.filter(m=>m.c===k&&(!query||m.n.toLowerCase().indexOf(query)>=0));if(!items.length)continue;

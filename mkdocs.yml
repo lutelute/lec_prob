@@ -129,6 +129,7 @@ nav:
       - 学習地図: roadmap/learning_map.md
       - 概念地図: roadmap/concept_map.md
       - 最適化地図: roadmap/optimization_map.md
+      - 手法ミニ辞典（例題つき）: notes/methods_atlas.md
       - 記法規約: roadmap/notation.md
   - 参考資料:
       - チートシート（1枚）: reference/cheatsheet.md
