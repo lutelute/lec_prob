@@ -11,11 +11,11 @@ description: 730日の実ピーク需要データから、分布推定→6形式
     - **分かること**：データ→分布→6形式の容量決定。**平均で決めると期待損失が40%余計**。
     - **使う場面**：手元データで「どれだけ確保するか」を実際に決めるとき。 → [▶ コンパレータ](../interactive/index.md) で同じ問題を動かす。
 
-Module 0–6 で部品はそろいました。ここでは **`data/daily_peak_demand.csv`（実データ）** を使い、
+第0章–6 で部品はそろいました。ここでは **`data/daily_peak_demand.csv`（実データ）** を使い、
 **観測 → 分布 → 6形式の決定 → 解釈** を最後まで通します。数値はすべて
 [`scripts/case_study_capacity.py`](https://github.com/lutelute/lec_prob/blob/main/scripts/case_study_capacity.py) の出力で、`python scripts/case_study_capacity.py` で再現できます。
 
-## ① データを見る（Module 4）
+## ① データを見る（第4章）
 
 730日分の日次ピーク需要。要約統計は：
 
@@ -27,16 +27,16 @@ Module 0–6 で部品はそろいました。ここでは **`data/daily_peak_de
 | 歪度 | +0.40（やや右に裾） |
 | 超過尖度 | −0.56 |
 
-**観測は真の分布ではありません**（Module 4）。これは730日という有限標本で、$\hat\mu,\hat\sigma$ 自体に推定誤差があります。
+**観測は真の分布ではありません**（第4章）。これは730日という有限標本で、$\hat\mu,\hat\sigma$ 自体に推定誤差があります。
 
-## ② 分布に当てはめる（Module 2）
+## ② 分布に当てはめる（第2章）
 
 第一近似として正規分布 $N(98.8,\,12.9^2)$ を当てます。歪度 +0.40 はわずかに右に裾がある合図で、
 **不足側（高需要）をやや過小評価**しがちです——だから後で「保守側の形式」が効いてきます。
 
 ![需要ヒストグラムと正規当てはめ、6形式の最適容量](../figures/07_demand_hist.svg)
 
-## ③ 6形式で「確保容量」を決める（Module 6）
+## ③ 6形式で「確保容量」を決める（第6章）
 
 不足コスト $c_s=10$ ≫ 余剰コスト $c_o=1$（臨界比 $c_s/(c_s+c_o)=0.909$）。
 同じデータ・同じコストでも、**何を大事にするか**で最適容量 $q^\*$ は変わります：
@@ -63,12 +63,12 @@ Module 0–6 で部品はそろいました。ここでは **`data/daily_peak_de
 | 期待コスト最小（②） | 40.47 |
 
 **平均で決めるだけで 40% 余計に損**をします（不足が余剰より痛いのに、平均は両者を対称に扱うから）。
-これが Module 0 の「平均の罠」が、実データ・実決定で表れた姿です。
+これが 第0章の「平均の罠」が、実データ・実決定で表れた姿です。
 
 > **このケースの教訓**：分布の中心（平均）でなく、**コストの非対称性と「許容するリスク」**が容量を決める。
 > 形式の選択は技術ではなく**価値判断**——だから6つを並べて比べる（[▶ コンパレータ](../interactive/index.md)）。
 
-## ⑤ PV を入れると：相関が効く（Module 3）
+## ⑤ PV を入れると：相関が効く（第3章）
 
 太陽光（PV）があると、備えるべきは需要そのものでなく**正味需要**（needからPV発電を引いた量）です。
 2つ目の実データ `data/pv_daily_factor.csv`（PV利用率）を使い、設置容量40で
@@ -86,7 +86,7 @@ $$ \mathrm{Cov}(\text{需要},\text{PV})<0\quad(\rho=-0.47). $$
 
 高需要の日ほどPVが弱い（曇り・冬）ため、両者は**打ち消し合わず重なり**、
 $\mathrm{Var}(\text{正味})=\mathrm{Var}(D)+C^2\mathrm{Var}(\text{PV})-2C\,\mathrm{Cov}(D,\text{PV})$ の
-最後の項が**負の相関で符号反転して分散を増やす**のです（Module 3）。
+最後の項が**負の相関で符号反転して分散を増やす**のです（第3章）。
 
 > **教訓**：「PVを入れたから安心」ではない。**平均は下がるが、需要と負相関なら裾（最悪）はむしろ悪化**しうる。
 > 平均だけでなく**相関と分散**を見ないと、必要な予備力を読み違える。
@@ -94,5 +94,5 @@ $\mathrm{Var}(\text{正味})=\mathrm{Var}(D)+C^2\mathrm{Var}(\text{PV})-2C\,\mat
 ## 再現とつながり
 
 - 数値：`python scripts/case_study_capacity.py`、図：`python scripts/fig_case_study.py`
-- 理論：[Module 4（データ→分布）](04_from_data_to_distribution.md)・[Module 6（6形式）](06_optimization_under_uncertainty.md)
-- 二段階に拡張（後で直せるなら？）：[Module 6b](06b_two_stage_stochastic_programming.md)
+- 理論：[第4章（データ→分布）](04_from_data_to_distribution.md)・[第6章（6形式）](06_optimization_under_uncertainty.md)
+- 二段階に拡張（後で直せるなら？）：[第6b章](06b_two_stage_stochastic_programming.md)

@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 3 期待値・分散・相関"
+title: "演習（初級）— 第3章 期待値・分散・相関"
 module: 3
 level: basic
 prerequisites: ["notes/03_expectation_variance_covariance.md"]
@@ -7,7 +7,7 @@ estimated_time: 20–30 分
 solutions: "../solutions/03_expectation_variance_covariance_solutions.md"
 ---
 
-# 演習（初級）★ — Module 3
+# 演習（初級）★ — 第3章
 
 > 学習目標：期待値・分散の計算、線形性、「平均同じでもリスク違い」を使えるようにする。
 

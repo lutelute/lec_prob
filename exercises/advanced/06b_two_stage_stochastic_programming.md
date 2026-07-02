@@ -1,5 +1,5 @@
 ---
-title: "演習（発展）— Module 6b 二段階確率計画（VSS・EVPI）"
+title: "演習（発展）— 第6b章 二段階確率計画（VSS・EVPI）"
 module: 6.5
 level: advanced
 prerequisites: ["notes/06b_two_stage_stochastic_programming.md", "notes/03_expectation_variance_covariance.md"]
@@ -7,7 +7,7 @@ estimated_time: 45–65 分
 solutions: "../solutions/06b_two_stage_solutions.md"
 ---
 
-# 演習（発展）★★★ — Module 6b
+# 演習（発展）★★★ — 第6b章
 
 > 学習目標：EVPI を投資判断に使う、リスク回避二段階を定式化・選択する。
 
@@ -24,4 +24,4 @@ EVPI が「予測改善への投資上限」を与えるとはどういう意味
 あなたが運用する系統で、二段階の意思決定を1つ設定せよ（例：予備力、蓄電池、起動停止）。次を論ぜよ。
 1. その問題で**リスク中立（期待値）**で十分か、**リスク回避（CVaR）**にすべきか。判断基準（損失の非対称性・回復可能性・規制）を明示。
 2. リスク回避にする場合、$\alpha$（保守度）をどう決めるか。高すぎる $\alpha$ の弊害は何か。
-3. この選択が Module 6 の二軸マップ（不確実性の表現×目的）のどのマス目に対応するか。
+3. この選択が 第6章の二軸マップ（不確実性の表現×目的）のどのマス目に対応するか。

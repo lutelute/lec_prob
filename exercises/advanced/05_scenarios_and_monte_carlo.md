@@ -1,5 +1,5 @@
 ---
-title: "演習（発展）— Module 5 シナリオとモンテカルロ"
+title: "演習（発展）— 第5章 シナリオとモンテカルロ"
 module: 5
 level: advanced
 prerequisites: ["notes/05_scenarios_and_monte_carlo.md"]
@@ -7,7 +7,7 @@ estimated_time: 35–50 分
 solutions: "../solutions/05_scenarios_and_monte_carlo_solutions.md"
 ---
 
-# 演習（発展）★★★ — Module 5
+# 演習（発展）★★★ — 第5章
 
 > 学習目標：シナリオ削減の損失、二段階木の対応を論じる。
 
@@ -17,7 +17,7 @@ solutions: "../solutions/05_scenarios_and_monte_carlo_solutions.md"
 
 ## A5-2 ★★★（17分）
 **学習目標**：二段階木の対応。
-二段階確率計画の木で、第1段と第2段が電力運用の何に対応するか具体化し、なぜ「今すべてを決めない（recourse がある）」ことに価値があるか説明せよ。（発展：Module 6b の VSS と結びつけよ。）
+二段階確率計画の木で、第1段と第2段が電力運用の何に対応するか具体化し、なぜ「今すべてを決めない（recourse がある）」ことに価値があるか説明せよ。（発展：第6b章の VSS と結びつけよ。）
 
 ## A5-3 ★★★（15分）
 **学習目標**：希少事象の推定法。

@@ -45,7 +45,7 @@ pip install streamlit cvxpy           # まだなら
 streamlit run apps/stochastic_optimization_comparator/app.py
 ```
 
-数理コアの自己テスト（Streamlit 不要、Module 6 §8 の検証値を再現）：
+数理コアの自己テスト（Streamlit 不要、第6章 §8 の検証値を再現）：
 
 ```bash
 python3 apps/stochastic_optimization_comparator/core.py

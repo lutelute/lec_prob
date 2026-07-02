@@ -1,5 +1,5 @@
 ---
-title: "演習（中級）— Module 1 事象と確率"
+title: "演習（中級）— 第1章 事象と確率"
 module: 1
 level: intermediate
 prerequisites: ["notes/01_events_and_probability.md"]
@@ -7,7 +7,7 @@ estimated_time: 35–50 分
 solutions: "../solutions/01_events_and_probability_solutions.md"
 ---
 
-# 演習（中級）★★ — Module 1
+# 演習（中級）★★ — 第1章
 
 > 学習目標：ベイズで基準率の効果を計算・解釈し、独立と無相関の違いを具体例で示す。
 

@@ -1,6 +1,6 @@
 # ベイズ更新ビジュアライザ（基準率の誤謬）
 
-Module 1 の核心——**$P(\text{警報}\mid F)$（感度）と $P(F\mid\text{警報})$（事後）は別物**——を、
+第1章の核心——**$P(\text{警報}\mid F)$（感度）と $P(F\mid\text{警報})$（事後）は別物**——を、
 保護リレー（故障検知）を題材に対話的に体感するツールです。
 
 関連ノート：[`notes/01_events_and_probability.md`](../../notes/01_events_and_probability.md) §6–7。

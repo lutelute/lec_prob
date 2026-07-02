@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 2 確率変数と分布"
+title: "演習（初級）— 第2章 確率変数と分布"
 module: 2
 level: basic
 prerequisites: ["notes/02_random_variables_and_distributions.md"]
@@ -7,7 +7,7 @@ estimated_time: 20–30 分
 solutions: "../solutions/02_random_variables_and_distributions_solutions.md"
 ---
 
-# 演習（初級）★ — Module 2
+# 演習（初級）★ — 第2章
 
 > 学習目標：質量と密度の区別、CDF の読み、点確率0を**用語として**使えるようにする。
 

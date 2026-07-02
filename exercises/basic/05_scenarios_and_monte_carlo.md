@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 5 シナリオとモンテカルロ"
+title: "演習（初級）— 第5章 シナリオとモンテカルロ"
 module: 5
 level: basic
 prerequisites: ["notes/05_scenarios_and_monte_carlo.md"]
@@ -7,7 +7,7 @@ estimated_time: 20–30 分
 solutions: "../solutions/05_scenarios_and_monte_carlo_solutions.md"
 ---
 
-# 演習（初級）★ — Module 5
+# 演習（初級）★ — 第5章
 
 > 学習目標：シナリオ＝離散近似、MC 収束、シナリオ上の期待値を用語として使う。
 

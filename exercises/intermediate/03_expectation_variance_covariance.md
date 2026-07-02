@@ -1,5 +1,5 @@
 ---
-title: "演習（中級）— Module 3 期待値・分散・相関"
+title: "演習（中級）— 第3章 期待値・分散・相関"
 module: 3
 level: intermediate
 prerequisites: ["notes/03_expectation_variance_covariance.md"]
@@ -7,7 +7,7 @@ estimated_time: 35–45 分
 solutions: "../solutions/03_expectation_variance_covariance_solutions.md"
 ---
 
-# 演習（中級）★★ — Module 3
+# 演習（中級）★★ — 第3章
 
 > 学習目標：相関が合成リスクを変えること、独立≠無相関、条件付き期待値を使う。
 

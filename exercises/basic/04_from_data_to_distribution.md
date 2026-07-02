@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 4 データから分布へ"
+title: "演習（初級）— 第4章 データから分布へ"
 module: 4
 level: basic
 prerequisites: ["notes/04_from_data_to_distribution.md"]
@@ -7,7 +7,7 @@ estimated_time: 20–30 分
 solutions: "../solutions/04_from_data_to_distribution_solutions.md"
 ---
 
-# 演習（初級）★ — Module 4
+# 演習（初級）★ — 第4章
 
 > 学習目標：観測≠真の分布、標準誤差、ECDF を用語として使えるようにする。
 

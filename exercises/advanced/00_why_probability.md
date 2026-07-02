@@ -1,5 +1,5 @@
 ---
-title: "演習（発展）— Module 0 なぜ確率が必要か"
+title: "演習（発展）— 第0章 なぜ確率が必要か"
 module: 0
 level: advanced
 prerequisites: ["notes/00_why_probability.md", "roadmap/optimization_map.md"]
@@ -7,7 +7,7 @@ estimated_time: 40–60 分
 solutions: "../solutions/00_why_probability_solutions.md"
 ---
 
-# 演習（発展）★★★ — Module 0
+# 演習（発展）★★★ — 第0章
 
 > 学習目標：不確実性の分類と最適化形式の対応を、自分の問題設定で結びつける。
 

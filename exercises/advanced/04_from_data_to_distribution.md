@@ -1,5 +1,5 @@
 ---
-title: "演習（発展）— Module 4 データから分布へ"
+title: "演習（発展）— 第4章 データから分布へ"
 module: 4
 level: advanced
 prerequisites: ["notes/04_from_data_to_distribution.md"]
@@ -7,7 +7,7 @@ estimated_time: 40–55 分
 solutions: "../solutions/04_from_data_to_distribution_solutions.md"
 ---
 
-# 演習（発展）★★★ — Module 4
+# 演習（発展）★★★ — 第4章
 
 > 学習目標：非定常・標本誤差・外挿のリスク、予測誤差分布の層別を論じる。
 
@@ -21,4 +21,4 @@ solutions: "../solutions/04_from_data_to_distribution_solutions.md"
 
 ## A4-3 ★★★（15分）
 **学習目標**：外れ値の扱い。
-需要データに猛暑日の極端値が混じっている。これを「外れ値として除く」前に問うべきことを述べ、もしそれが本物の極端事象なら、Module 3 の CVaR・Module 6 のチャンス制約にとってなぜ**重要な情報**かを論ぜよ。
+需要データに猛暑日の極端値が混じっている。これを「外れ値として除く」前に問うべきことを述べ、もしそれが本物の極端事象なら、第3章の CVaR・第6章のチャンス制約にとってなぜ**重要な情報**かを論ぜよ。

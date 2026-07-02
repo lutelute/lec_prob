@@ -35,4 +35,4 @@ type: guide
 
 平均ぴったり（100）は半分の日が供給不足。不足が余剰より痛いぶん、平均より多めが正解——同じ状況でも重視点で決定が変わる。これが「確率を使う」ということです。
 
-→ 6形式すべての比較は [▶ コンパレータ](../interactive/index.md)。「事象」（故障率・停電）は [Module 1](01_events_and_probability.md)・[ベイズ](../interactive/index.md)、「誤差」（推定の不確かさ）は [Module 4](04_from_data_to_distribution.md) へ。
+→ 6形式すべての比較は [▶ コンパレータ](../interactive/index.md)。「事象」（故障率・停電）は [第1章](01_events_and_probability.md)・[ベイズ](../interactive/index.md)、「誤差」（推定の不確かさ）は [第4章](04_from_data_to_distribution.md) へ。

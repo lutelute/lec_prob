@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 1 事象と確率"
+title: "演習（初級）— 第1章 事象と確率"
 module: 1
 level: basic
 prerequisites: ["notes/01_events_and_probability.md"]
@@ -7,7 +7,7 @@ estimated_time: 25–35 分
 solutions: "../solutions/01_events_and_probability_solutions.md"
 ---
 
-# 演習（初級）★ — Module 1
+# 演習（初級）★ — 第1章
 
 > 学習目標：事象を集合で書く・基本規則・条件付き確率の定義を**正確に**使う。
 

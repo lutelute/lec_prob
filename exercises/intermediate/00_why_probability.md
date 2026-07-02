@@ -1,5 +1,5 @@
 ---
-title: "演習（中級）— Module 0 なぜ確率が必要か"
+title: "演習（中級）— 第0章 なぜ確率が必要か"
 module: 0
 level: intermediate
 prerequisites: ["notes/00_why_probability.md"]
@@ -7,7 +7,7 @@ estimated_time: 30–45 分
 solutions: "../solutions/00_why_probability_solutions.md"
 ---
 
-# 演習（中級）★★ — Module 0
+# 演習（中級）★★ — 第0章
 
 > 学習目標：「平均の罠」を数値で操作し、非対称コストが意思決定をどう動かすかを説明する。
 

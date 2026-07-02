@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 6b 二段階確率計画（VSS・EVPI）"
+title: "演習（初級）— 第6b章 二段階確率計画（VSS・EVPI）"
 module: 6.5
 level: basic
 prerequisites: ["notes/06b_two_stage_stochastic_programming.md"]
@@ -7,7 +7,7 @@ estimated_time: 20–30 分
 solutions: "../solutions/06b_two_stage_solutions.md"
 ---
 
-# 演習（初級）★ — Module 6b
+# 演習（初級）★ — 第6b章
 
 > 学習目標：二段階の構造（第1段／第2段）、WS≤RP≤EEV、VSS/EVPI を用語として使えるようにする。
 

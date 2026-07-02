@@ -28,10 +28,10 @@
 >    — 1枚の概念図で、不確実さの3つの顔（事象・ばらつき・誤差）と、それが決定に変わる筋道をつかむ。
 > 2. **[▶ 6形式コンパレータを動かす](interactive/index.md)**（10分）
 >    — スライダーでコスト・リスクを変えると、**同じ問題でも最適決定が 100〜137 と変わる**のが一目で分かる。
-> 3. **[Module 0：なぜ確率が必要か](notes/00_why_probability.md)**（10分）
->    — 「平均で計画する罠」を数値で体感。ここから体系的な学習（Module 1〜6）へ。
+> 3. **[第0章：なぜ確率が必要か](notes/00_why_probability.md)**（10分）
+>    — 「平均で計画する罠」を数値で体感。ここから体系的な学習（第1章〜6）へ。
 >
-> これで「曖昧な状況 → 具体的な決定」に確率を使う感覚がつかめます。あとは必要なモジュールを[学習地図](roadmap/learning_map.md)から。
+> これで「曖昧な状況 → 具体的な決定」に確率を使う感覚がつかめます。あとは必要な章を[学習地図](roadmap/learning_map.md)から。
 >
 > **インストール不要**：8本のインタラクティブツールは[ブラウザでそのまま動きます](interactive/index.md)。
 
@@ -61,7 +61,7 @@
 
 ---
 
-## 3. 学習の全体像（モジュール構成）
+## 3. 学習の全体像（章構成）
 
 | Module | テーマ | 中心的な問い | 状態 |
 |---|---|---|---|
@@ -78,7 +78,7 @@
 
 **Deep-dive**：`notes/06b_two_stage_stochastic_programming.md` — 二段階確率計画（recourse）と「確率的にする価値」VSS・EVPI を、蓄電池つき日前調達の worked example（cvxpy 検証）で扱う。
 
-> **全7モジュールのノート・解答・図、および到達点の「6形式比較ツール」まで実装・検証済み**（各数値は Python/cvxpy で検証）。進捗の詳細は [`development_log.md`](development_log.md)。
+> **第0〜7章のノート・解答・図、および到達点の「6形式比較ツール」まで実装・検証済み**（各数値は Python/cvxpy で検証）。進捗の詳細は [`development_log.md`](development_log.md)。
 
 ### 学習順序の指針
 
@@ -96,19 +96,19 @@ lec_prob/
 ├── development_log.md          ← 各成果物の作成意図・未解決事項・次にやること
 ├── requirements.txt            ← Python 依存パッケージ
 ├── roadmap/                    ← 概念地図・依存関係・記法規約
-│   ├── learning_map.md         ← モジュール依存関係（Mermaid）
+│   ├── learning_map.md         ← 章の依存関係（Mermaid）
 │   ├── concept_map.md          ← 概念どうしのつながり
 │   ├── optimization_map.md     ← 最適化6形式の二軸マップ
 │   └── notation.md             ← 記法規約（教材全体で統一）
 ├── notes/                      ← 本文（Markdown + LaTeX、Obsidian対応）
 ├── exercises/                  ← 演習（basic / intermediate / advanced / solutions）
 ├── apps/                       ← インタラクティブツール（Streamlit / Plotly）
-│   ├── pdf_cdf_visualizer/             ← PDF・CDF・区間確率の可視化（Module 2）
-│   ├── bayes_visualizer/              ← ベイズ更新・基準率の誤謬（Module 1）
-│   ├── monte_carlo_visualizer/        ← MC収束・希少事象・SAA（Module 5）
-│   ├── scenario_tree_visualizer/      ← 二段階シナリオ木（図ベース, Module 5–6）
-│   ├── battery_dispatch/              ← 蓄電池アービトラージ・SoC・予測価値（Module 6b, cvxpy）
-│   └── stochastic_optimization_comparator/ ← capstone：6形式を同一問題で比較（Module 6, cvxpy）
+│   ├── pdf_cdf_visualizer/             ← PDF・CDF・区間確率の可視化（第2章）
+│   ├── bayes_visualizer/              ← ベイズ更新・基準率の誤謬（第1章）
+│   ├── monte_carlo_visualizer/        ← MC収束・希少事象・SAA（第5章）
+│   ├── scenario_tree_visualizer/      ← 二段階シナリオ木（図ベース, 第5章–6）
+│   ├── battery_dispatch/              ← 蓄電池アービトラージ・SoC・予測価値（第6b章, cvxpy）
+│   └── stochastic_optimization_comparator/ ← capstone：6形式を同一問題で比較（第6章, cvxpy）
 ├── notebooks/                  ← Jupyter（探索用）
 ├── figures/                    ← 図（SVG または再生成スクリプトの出力）
 ├── scripts/                    ← 図・データ生成スクリプト（再現可能）

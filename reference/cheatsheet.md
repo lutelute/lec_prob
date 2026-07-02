@@ -5,7 +5,7 @@ description: 確率的最適化の意思決定レシピ・6形式の早見表・
 
 # チートシート（1枚）
 
-迷ったらここ。詳しくは [🧭 確率の使い方](../notes/how_to_use_probability.md) と各 Module へ。
+迷ったらここ。詳しくは [確率の使い方](../notes/how_to_use_probability.md) と各章へ。
 
 ## 意思決定レシピ
 
@@ -50,12 +50,12 @@ $$q^\*=F^{-1}\!\Big(\frac{c_s}{c_s+c_o}\Big)\quad(\text{臨界比の分位点}).
 
 $$\mathrm{CVaR}_\alpha=\min_{\eta}\;\Big\{\eta+\tfrac{1}{1-\alpha}\,E[(L-\eta)^+]\Big\}.$$
 
-**確率的にする価値**：$\text{VSS}=\text{EEV}-\text{SP}$、$\;\text{EVPI}=\text{SP}-\text{WS}$（[Module 6b](../notes/06b_two_stage_stochastic_programming.md)）。
+**確率的にする価値**：$\text{VSS}=\text{EEV}-\text{SP}$、$\;\text{EVPI}=\text{SP}-\text{WS}$（[第6b章](../notes/06b_two_stage_stochastic_programming.md)）。
 
 ## 早見：種類 → 表し方 → 道具
 
 | 不確実の種類 | 表し方 | 主な道具 / Module |
 |---|---|---|
-| 事象（故障・停電） | $P(A)$・信頼性 | ベイズ（M1） |
-| ばらつき（需要・天候） | 確率分布 | 分布・期待値・CVaR（M2,M3,M6） |
-| 誤差（測定・推定・予報） | 区間・ベイズ・集合 | 推定・ロバスト・分布ロバスト（M4,M6） |
+| 事象（故障・停電） | $P(A)$・信頼性 | ベイズ（第1章） |
+| ばらつき（需要・天候） | 確率分布 | 分布・期待値・CVaR（第2章,第3章,第6章） |
+| 誤差（測定・推定・予報） | 区間・ベイズ・集合 | 推定・ロバスト・分布ロバスト（第4章,第6章） |

@@ -9,14 +9,14 @@ exercises/
 ├── basic/         初級：定義の確認、1ステップ計算
 ├── intermediate/  中級：複数概念の接続、解釈
 ├── advanced/      発展：モデリング判断、電力応用、証明の直感
-└── solutions/     解答・解説（全レベルをモジュール別にまとめる）
+└── solutions/     解答・解説（全レベルを章別にまとめる）
 ```
 
-ファイル名はモジュール番号に対応：`00_why_probability.md`, `01_events_and_probability.md`, …
+ファイル名は章番号に対応：`00_why_probability.md`, `01_events_and_probability.md`, …
 
 ### カバレッジ
 
-| Module | basic | intermediate | advanced | solutions |
+| 章 | basic | intermediate | advanced | solutions |
 |---|---|---|---|---|
 | 0 なぜ確率 | ✅ | ✅ | ✅ | ✅ |
 | 1 事象と確率 | ✅ | ✅ | ✅ | ✅ |
@@ -47,4 +47,4 @@ exercises/
 
 ## 進捗の目安（合格ライン）
 
-各モジュールの「言えたら合格」（`roadmap/learning_map.md` §5）を、**人に説明できる**水準で。
+各章の「言えたら合格」（`roadmap/learning_map.md` §5）を、**人に説明できる**水準で。

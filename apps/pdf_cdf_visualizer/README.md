@@ -4,7 +4,7 @@
 > 以下は Streamlit 版（ローカル実行）の解説です。
 
 確率の最初の山——**「密度 $f(x)$ は確率ではない。確率は区間の面積であり、CDF の差でもある」**——を、
-スライダーで動かしながら体得するための小規模ツールです。Module 2（確率変数と分布）の主教材と対で使います。
+スライダーで動かしながら体得するための小規模ツールです。第2章（確率変数と分布）の主教材と対で使います。
 
 関連ノート：[`notes/02_random_variables_and_distributions.md`](../../notes/02_random_variables_and_distributions.md)（本論）、
 [`notes/01_events_and_probability.md`](../../notes/01_events_and_probability.md)（確率0≠不可能）。
@@ -16,7 +16,7 @@
 1. **密度（高さ）と確率（面積）の区別**：$f(x)$ の高さは確率ではない。確率は区間の面積 $\int_a^b f$。
 2. **PDF と CDF は同じ情報の別表現**：$P(a\le X\le b)=\int_a^b f = F(b)-F(a)$ を、左右2つの図で同時に見る。
 3. **点の確率は0**：区間 $[x_0-\varepsilon, x_0+\varepsilon]$ を縮めると確率は0へ。高さ $f(x_0)$ は残る。
-4. **超過確率＝右裾の面積**：$P(X>c)=1-F(c)$。Module 6 のチャンス制約に直結。
+4. **超過確率＝右裾の面積**：$P(X>c)=1-F(c)$。第6章のチャンス制約に直結。
 
 ---
 
@@ -97,7 +97,7 @@ $$P(X=x)=0,\qquad P(x_0-\varepsilon\le X\le x_0+\varepsilon)\approx f_X(x_0)\cdo
 - **超過確率** $P(X>\text{容量})$ ＝供給支障・制約違反の確率＝右裾の面積。
 - **分位点**（CDF の逆読み）＝「90%の日はこの需要以下」＝設計値・VaR。
 - **裾の重さ**：対数正規は右に重い裾。正規で価格・需要を近似すると極端事象を過小評価。
-- → Module 6 の**チャンス制約** $P(g(x,\xi)\le 0)\ge 1-\varepsilon$ は、この右裾の面積を $\varepsilon$ 以下に抑える定式化。
+- → 第6章の**チャンス制約** $P(g(x,\xi)\le 0)\ge 1-\varepsilon$ は、この右裾の面積を $\varepsilon$ 以下に抑える定式化。
 
 ---
 

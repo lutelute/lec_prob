@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 6 不確実性下の最適化"
+title: "演習（初級）— 第6章 不確実性下の最適化"
 module: 6
 level: basic
 prerequisites: ["notes/06_optimization_under_uncertainty.md", "apps/stochastic_optimization_comparator"]
@@ -7,7 +7,7 @@ estimated_time: 25–35 分
 solutions: "../solutions/06_optimization_under_uncertainty_solutions.md"
 ---
 
-# 演習（初級）★ — Module 6
+# 演習（初級）★ — 第6章
 
 > 学習目標：3形式の要約、非対称コストが決定を動かすこと、ε と決定の関係を使う。
 

@@ -1,5 +1,5 @@
 ---
-title: "演習（中級）— Module 6b 二段階確率計画（VSS・EVPI）"
+title: "演習（中級）— 第6b章 二段階確率計画（VSS・EVPI）"
 module: 6.5
 level: intermediate
 prerequisites: ["notes/06b_two_stage_stochastic_programming.md"]
@@ -7,7 +7,7 @@ estimated_time: 35–50 分
 solutions: "../solutions/06b_two_stage_solutions.md"
 ---
 
-# 演習（中級）★★ — Module 6b
+# 演習（中級）★★ — 第6b章
 
 > 学習目標：VSS が変わる条件、non-anticipativity、リスク中立 vs リスク回避を説明する。
 

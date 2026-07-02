@@ -1,5 +1,5 @@
 ---
-title: "演習（発展）— Module 6 不確実性下の最適化"
+title: "演習（発展）— 第6章 不確実性下の最適化"
 module: 6
 level: advanced
 prerequisites: ["notes/06_optimization_under_uncertainty.md", "notes/06b_two_stage_stochastic_programming.md"]
@@ -7,7 +7,7 @@ estimated_time: 45–70 分
 solutions: "../solutions/06_optimization_under_uncertainty_solutions.md"
 ---
 
-# 演習（発展）★★★ — Module 6
+# 演習（発展）★★★ — 第6章
 
 > 学習目標：形式選択を状況から論じ、二段階＋リスク回避を定式化する（本教材の到達点）。
 

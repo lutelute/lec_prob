@@ -2,7 +2,7 @@
 
 多時間帯の**蓄電池アービトラージ**（安いとき充電・高いとき放電）を SoC ダイナミクスとともに可視化し、
 価格が不確実なとき**「予測で計画する（決定論）」と「完全予測」の差**を見せるツールです。
-Module 6b（二段階・VSS/EVPI）の**多時間帯版の直感**を与えます。
+第6b章（二段階・VSS/EVPI）の**多時間帯版の直感**を与えます。
 
 関連ノート：[`notes/06b_two_stage_stochastic_programming.md`](../../notes/06b_two_stage_stochastic_programming.md)。
 

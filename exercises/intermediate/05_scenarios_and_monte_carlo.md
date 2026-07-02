@@ -1,5 +1,5 @@
 ---
-title: "演習（中級）— Module 5 シナリオとモンテカルロ"
+title: "演習（中級）— 第5章 シナリオとモンテカルロ"
 module: 5
 level: intermediate
 prerequisites: ["notes/05_scenarios_and_monte_carlo.md"]
@@ -7,7 +7,7 @@ estimated_time: 30–45 分
 solutions: "../solutions/05_scenarios_and_monte_carlo_solutions.md"
 ---
 
-# 演習（中級）★★ — Module 5
+# 演習（中級）★★ — 第5章
 
 > 学習目標：希少事象の難しさ、SAA の収束、CI を添える理由を説明する。
 

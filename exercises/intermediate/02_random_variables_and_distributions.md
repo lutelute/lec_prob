@@ -1,5 +1,5 @@
 ---
-title: "演習（中級）— Module 2 確率変数と分布"
+title: "演習（中級）— 第2章 確率変数と分布"
 module: 2
 level: intermediate
 prerequisites: ["notes/02_random_variables_and_distributions.md"]
@@ -7,7 +7,7 @@ estimated_time: 30–40 分
 solutions: "../solutions/02_random_variables_and_distributions_solutions.md"
 ---
 
-# 演習（中級）★★ — Module 2
+# 演習（中級）★★ — 第2章
 
 > 学習目標：正規の裾の確率を計算・解釈し、「密度は確率でない」を数値で示す。
 

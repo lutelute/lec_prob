@@ -1,6 +1,6 @@
 # モンテカルロ収束ビジュアライザ
 
-Module 5 の核心——**平均は $1/\sqrt N$ で速く収束、希少事象（尾）は遅い、SAA はシナリオ数で収束**——を
+第5章の核心——**平均は $1/\sqrt N$ で速く収束、希少事象（尾）は遅い、SAA はシナリオ数で収束**——を
 対話的に体感するツールです。
 
 関連ノート：[`notes/05_scenarios_and_monte_carlo.md`](../../notes/05_scenarios_and_monte_carlo.md)。

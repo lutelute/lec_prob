@@ -1,5 +1,5 @@
 ---
-title: "演習（初級）— Module 0 なぜ確率が必要か"
+title: "演習（初級）— 第0章 なぜ確率が必要か"
 module: 0
 level: basic
 prerequisites: ["notes/00_why_probability.md"]
@@ -7,7 +7,7 @@ estimated_time: 20–30 分
 solutions: "../solutions/00_why_probability_solutions.md"
 ---
 
-# 演習（初級）★ — Module 0
+# 演習（初級）★ — 第0章
 
 > 学習目標：不確実性の表し方（観測値・予測値・分布・シナリオ）と、決定論が壊れる条件を**用語として**使えるようにする。
 

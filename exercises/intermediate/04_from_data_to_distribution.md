@@ -1,5 +1,5 @@
 ---
-title: "演習（中級）— Module 4 データから分布へ"
+title: "演習（中級）— 第4章 データから分布へ"
 module: 4
 level: intermediate
 prerequisites: ["notes/04_from_data_to_distribution.md"]
@@ -7,7 +7,7 @@ estimated_time: 30–45 分
 solutions: "../solutions/04_from_data_to_distribution_solutions.md"
 ---
 
-# 演習（中級）★★ — Module 4
+# 演習（中級）★★ — 第4章
 
 > 学習目標：iid の限界（季節性・非定常）、n−1 補正、値域・歪みの観点で分布選択を判断する。
 
