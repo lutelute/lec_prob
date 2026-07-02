@@ -161,18 +161,31 @@ const STEPS=[
 ];
 
 function renderMetrics(V){
-  $('metrics').innerHTML=
-    `<div class="metric"><div class="k">${V.label}</div><div class="v">${fmt(V.prob,4)}</div></div>`+
-    `<div class="metric"><div class="k">同じ確率（PDFの面積を数値積分）</div><div class="v">${fmt(V.area,4)}</div></div>`+
-    `<div class="metric"><div class="k">|CDF差 − 面積|（一致の検証）</div><div class="v ok">${Math.abs(V.prob-V.area).toExponential(1)}</div></div>`;
-  const showProbe = (wiz.key()==='vary' || wiz.key()==='result');
-  $('probeMetrics').style.display = showProbe ? 'flex' : 'none';
-  if(showProbe){
+  // ステップの焦点にメトリクスを絞る：①〜③は区間確率、④⑤はεプローブだけ
+  const probeMode = (wiz.key()==='vary' || wiz.key()==='result');
+  $('metrics').style.display = probeMode ? 'none' : 'flex';
+  if(!probeMode){
+    $('metrics').innerHTML=
+      `<div class="metric"><div class="k">${V.label}</div><div class="v">${fmt(V.prob,4)}</div></div>`+
+      `<div class="metric"><div class="k">同じ確率（PDFの面積を数値積分）</div><div class="v">${fmt(V.area,4)}</div></div>`+
+      `<div class="metric"><div class="k">|CDF差 − 面積|（一致の検証）</div><div class="v ok">${Math.abs(V.prob-V.area).toExponential(1)}</div></div>`;
+  }
+  $('probeMetrics').style.display = probeMode ? 'flex' : 'none';
+  if(probeMode){
     $('probeMetrics').innerHTML=
       `<div class="metric"><div class="k">密度の高さ f(x₀)（確率ではない）</div><div class="v">${fmt(V.f0,4)}</div></div>`+
       `<div class="metric"><div class="k">P(x₀−ε ≤ X ≤ x₀+ε)</div><div class="v">${fmt(V.pInt,5)}</div></div>`+
       `<div class="metric"><div class="k">近似 f(x₀)·2ε</div><div class="v">${fmt(V.approx,5)}</div></div>`;
   }
+}
+
+// ステップに関係するスライダーだけを見せる（①〜③=区間、④⑤=プローブ）
+function showControls(key){
+  const probeMode = (key==='vary' || key==='result');
+  const disp=(el,on)=>{ if(el) el.closest('.ctl') ? el.closest('.ctl').style.display=(on?'':'none') : 0; };
+  disp($('a'),!probeMode); disp($('b'),!probeMode);
+  disp($('x0'),probeMode); disp($('eps'),probeMode);
+  $('query').style.display = probeMode ? 'none' : 'flex';
 }
 
 function renderExplain(key,V){
@@ -201,36 +214,44 @@ function renderExplain(key,V){
   $('explain').innerHTML=h;
 }
 
-function draw(V){
+function draw(key,V){
+  // ④⑤では主役をεプローブ区間に切り替える——狭まる帯が図で見える
+  const probeMode = (key==='vary' || key==='result');
+  const region = probeMode ? [state.x0-state.eps, state.x0+state.eps] : V.region;
+  const areaName = probeMode ? 'P(x₀−ε ≤ X ≤ x₀+ε)' : '面積＝区間の確率';
+  const areaColor = probeMode ? 'rgba(216,160,77,.55)' : C.area;
+  const regProb = probeMode ? V.pInt : V.prob;
+
   const xs=L.linspace(V.lo,V.hi,400), pdf=xs.map(V.d.pdf);
-  const mask=xs.map(x=> x>=V.region[0] && x<=V.region[1]);
+  const mask=xs.map(x=> x>=region[0] && x<=region[1]);
   const xr=xs.filter((x,i)=>mask[i]), yr=pdf.filter((y,i)=>mask[i]);
+  // 塗り領域が痩せても見えるよう、境界線も引く
   Plotly.react('pdfPlot',[
     {x:xs,y:pdf,mode:'lines',line:{color:C.pdf,width:3},name:'密度 f(x)'},
-    {x:xr,y:yr,fill:'tozeroy',mode:'none',fillcolor:C.area,name:'面積='+V.label},
+    {x:xr,y:yr,fill:'tozeroy',mode:'none',fillcolor:areaColor,name:areaName},
     {x:[state.x0,state.x0],y:[0,V.f0],mode:'lines+markers',line:{color:C.probe,width:2,dash:'dot'},
-      marker:{size:7},name:`高さ f(x₀)=${fmt(V.f0,4)}`}
-  ],{margin:{t:30,r:10,b:35,l:45},title:{text:'PDF：確率は「面積」',font:{size:13}},
-     xaxis:{title:'x'},yaxis:{title:'密度 f(x)',rangemode:'tozero'},
-     legend:{orientation:'h',y:-0.25},showlegend:true},{displayModeBar:false,responsive:true});
+      marker:{size:7},name:'高さ f(x₀)'}
+  ],{margin:{t:30,r:10,b:30,l:45},title:{text:probeMode?`PDF：幅2ε=${fmt(2*state.eps,3)} の帯だけが確率`:'PDF：確率は「面積」',font:{size:13}},
+     xaxis:{}, yaxis:{title:'密度 f(x)',rangemode:'tozero'},
+     legend:{orientation:'h',y:-0.16,font:{size:10}},showlegend:true},{displayModeBar:false,responsive:true});
 
-  const cdf=xs.map(V.d.cdf), Fa=V.d.cdf(V.region[0]), Fb=V.d.cdf(V.region[1]);
+  const cdf=xs.map(V.d.cdf), Fa=V.d.cdf(region[0]), Fb=V.d.cdf(region[1]);
   Plotly.react('cdfPlot',[
     {x:xs,y:cdf,mode:'lines',line:{color:C.cdf,width:3},name:'累積 F(x)'},
-    {x:[V.lo,V.region[0]],y:[Fa,Fa],mode:'lines',line:{color:'#9a9a9a',dash:'dot',width:1},showlegend:false},
-    {x:[V.lo,V.region[1]],y:[Fb,Fb],mode:'lines',line:{color:'#9a9a9a',dash:'dot',width:1},showlegend:false},
-    {x:[V.region[0],V.region[1]],y:[Fa,Fb],mode:'markers',marker:{color:C.cdf,size:9},name:`F(b)−F(a)=${fmt(V.prob,3)}`},
+    {x:[V.lo,region[0]],y:[Fa,Fa],mode:'lines',line:{color:'#9a9a9a',dash:'dot',width:1},showlegend:false},
+    {x:[V.lo,region[1]],y:[Fb,Fb],mode:'lines',line:{color:'#9a9a9a',dash:'dot',width:1},showlegend:false},
+    {x:[region[0],region[1]],y:[Fa,Fb],mode:'markers',marker:{color:C.cdf,size:9},name:`F(b)−F(a)=${fmt(regProb,probeMode?5:3)}`},
     {x:[V.lo+(V.hi-V.lo)*0.02,V.lo+(V.hi-V.lo)*0.02],y:[Fa,Fb],mode:'lines',line:{color:C.areaLine,width:6},name:'差'}
-  ],{margin:{t:30,r:10,b:35,l:45},title:{text:'CDF：同じ確率が「縦の差」',font:{size:13}},
-     xaxis:{title:'x'},yaxis:{title:'累積確率 F(x)',range:[-0.03,1.03]},
-     legend:{orientation:'h',y:-0.25}},{displayModeBar:false,responsive:true});
+  ],{margin:{t:30,r:10,b:30,l:45},title:{text:probeMode?'CDF：縦の差も0へ近づく':'CDF：同じ確率が「縦の差」',font:{size:13}},
+     xaxis:{}, yaxis:{title:'累積確率 F(x)',range:[-0.03,1.03]},
+     legend:{orientation:'h',y:-0.16,font:{size:10}}},{displayModeBar:false,responsive:true});
 }
 
 function renderAll(key){
   $('aval').textContent=fmt(state.a,1); $('bval').textContent=fmt(state.b,1);
   $('x0val').textContent=fmt(state.x0,1); $('epsval').textContent=fmt(state.eps,3);
   const V=computeAll();
-  renderMetrics(V); renderExplain(key,V); draw(V);
+  renderMetrics(V); renderExplain(key,V); showControls(key); draw(key,V);
 }
 
 let autoEpsIdx=3, autoDir=1;

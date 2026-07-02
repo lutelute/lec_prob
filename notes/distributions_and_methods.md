@@ -59,7 +59,7 @@ $$ P(D\le 100)=0.3+0.5=0.8,\qquad P(D\ge 120)=0.2. $$
 
 下のツールで、同じ分布に**確率（面積）・平均・分位点**を当ててみてください。どれも分布から**1つの数**が出ます。
 
-<iframe id="d2nframe" src="../../interactive/dist_to_number.html" title="分布→数値" style="width:100%;height:600px;border:1px solid #dadce0;border-radius:10px"></iframe>
+<iframe id="d2nframe" src="../../interactive/dist_to_number.html" title="分布→数値" style="width:100%;height:600px;border:1px solid #111"></iframe>
 
 <script>
 (function(){

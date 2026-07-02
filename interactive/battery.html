@@ -90,17 +90,29 @@ function dispatch(price,eff){
 function profitOf(price,c,d){ return price.reduce((a,p,t)=>a+p*(d[t]-c[t]),0); }
 function profitAtEff(eff){ const price=priceProfile(); const {c,d}=dispatch(price,eff); return profitOf(price,c,d); }
 
-function forecastValue(meanPrice){
-  const n=40, g=L.gaussianGen(L.mulberry32('bat'+S.sigma));
+function forecastValueAt(meanPrice,sigma){
+  const n=40, g=L.gaussianGen(L.mulberry32('bat42'));
   const plan=dispatch(meanPrice);
   let det=0, ws=0;
   for(let s=0;s<n;s++){
-    const real=meanPrice.map(v=>Math.max(0, v+S.sigma*g()));
+    const real=meanPrice.map(v=>Math.max(0, v+sigma*g()));
     det += real.reduce((a,p,t)=>a+p*(plan.d[t]-plan.c[t]),0);
     const adapt=dispatch(real);
     ws  += real.reduce((a,p,t)=>a+p*(adapt.d[t]-adapt.c[t]),0);
   }
   return {det:det/n, ws:ws/n, gap:(ws-det)/n};
+}
+function forecastValue(meanPrice){ return forecastValueAt(meanPrice,S.sigma); }
+
+// σ=0..15 の「固定計画 vs 完全予測」カーブ（σ以外の設定でメモ化）
+let sweepCache={key:null,val:null};
+function sweepSigma(meanPrice){
+  const key=JSON.stringify([S.cap,S.pmax,S.eff,S.base,S.day,S.eve,S.cpct,S.dpct]);
+  if(sweepCache.key===key) return sweepCache.val;
+  const sig=[],det=[],ws=[];
+  for(let s2=0;s2<=15;s2++){ const fv=forecastValueAt(meanPrice,s2); sig.push(s2); det.push(fv.det); ws.push(fv.ws); }
+  sweepCache={key,val:{sig,det,ws}};
+  return sweepCache.val;
 }
 
 const STEPS=[
@@ -121,11 +133,16 @@ function computeAll(){
 }
 
 function renderMetrics(V){
-  $('metrics').innerHTML=
-    `<div class="metric"><div class="k">アービトラージ利益</div><div class="v">${V.profit.toFixed(1)}</div></div>`+
-    `<div class="metric"><div class="k">平均充電価格</div><div class="v">${V.avgC.toFixed(1)}</div></div>`+
-    `<div class="metric"><div class="k">平均放電価格</div><div class="v ok">${V.avgD.toFixed(1)}</div></div>`;
-  const showFc = S.sigma>0 && (wiz.key()==='vary'||wiz.key()==='result');
+  // ④⑤の焦点はσ：ディスパッチ系の指標は①〜③でだけ見せる
+  const fcMode = (wiz.key()==='vary'||wiz.key()==='result');
+  $('metrics').style.display = fcMode?'none':'flex';
+  if(!fcMode){
+    $('metrics').innerHTML=
+      `<div class="metric"><div class="k">アービトラージ利益</div><div class="v">${V.profit.toFixed(1)}</div></div>`+
+      `<div class="metric"><div class="k">平均充電価格</div><div class="v">${V.avgC.toFixed(1)}</div></div>`+
+      `<div class="metric"><div class="k">平均放電価格</div><div class="v ok">${V.avgD.toFixed(1)}</div></div>`;
+  }
+  const showFc = S.sigma>0 && fcMode;
   $('fcMetrics').style.display = showFc?'flex':'none';
   if(showFc){
     const fv=forecastValue(V.price);
@@ -153,37 +170,63 @@ function renderExplain(key,V){
     <p>これは<b>近視眼的なルール</b>：価格が閾値を超えた瞬間に放電するため、後でもっと高い夕方ピークが来ても先に売り切ってしまうことがある。先読みする最適LPなら高値に温存できる（第6b章へ）。</p>`;
   }else if(key==='vary'){
     h+=`<h3>④ 価格予測誤差 σ を動かす</h3>
-    <p>σ を自動で動かしています。σ=0（予測誤差なし）では固定計画と完全予測は一致しますが、σ が上がるほど両者の差＝「予測の価値」が開きます。</p>
-    <p>今 σ=${S.sigma}。スライダーに触れると自動は止まります。</p>`;
+    <p>σ を自動で動かしています。σ=0（予測誤差なし）では固定計画と完全予測は一致しますが、σ が上がるほど両者の差＝「予測の価値」（図の帯の幅）が開きます。</p>
+    <p>今 σ=${S.sigma.toFixed(1)}。スライダーに触れると自動は止まります。</p>`;
   }else{
     const fv=forecastValue(V.price);
     h+=`<h3>⑤ 結果：予測誤差のコスト＝予測の価値</h3>
-    <p>σ=${S.sigma} の予測誤差があると、平均価格で立てた<b>固定計画（${fv.det.toFixed(0)}）</b>は<b>完全予測（${fv.ws.toFixed(0)}）</b>に<b>${fv.gap.toFixed(0)}</b>及ばない。</p>
+    <p>σ=${S.sigma.toFixed(1)} の予測誤差があると、平均価格で立てた<b>固定計画（${fv.det.toFixed(0)}）</b>は<b>完全予測（${fv.ws.toFixed(0)}）</b>に<b>${fv.gap.toFixed(0)}</b>及ばない。</p>
     <div class="eq"><b>要点</b><br>・往復効率ηが低いほど利益は目減りする<br>・単純な閾値ルールは近視眼的——先読みする最適化には劣る<br>・予測誤差のコスト＝予測の価値（教材6bのWS−EEVギャップ＝EVPIの直感）。実運用は再最適化(recourse)するので両者の中間になる</div>`;
   }
   $('explain').innerHTML=h;
 }
 
-function draw(V){
+function draw(key,V){
+  if(key==='vary'||key==='result'){
+    // ④⑤の主役はσ：固定計画と完全予測の利益カーブ、差の帯＝予測の価値
+    const sw=sweepSigma(V.price);
+    Plotly.react('plot',[
+      {x:sw.sig,y:sw.ws,mode:'lines',line:{color:C.discharge,width:2.5},name:'完全予測（実価格で立て直す）'},
+      {x:sw.sig,y:sw.det,mode:'lines',line:{color:C.charge,width:2.5},fill:'tonexty',fillcolor:'rgba(216,160,77,.3)',name:'固定計画（予測=平均）'},
+      {x:[S.sigma,S.sigma],y:[Math.min(...sw.det)-5,Math.max(...sw.ws)+5],mode:'lines',
+       line:{color:'#111',width:1.5,dash:'dot'},name:'今の σ'}
+    ],{margin:{t:30,r:10,b:60,l:48},
+       title:{text:'σが上がるほど差＝「予測の価値」（帯の幅）が開く',font:{size:12}},
+       xaxis:{title:'価格予測誤差 σ'},yaxis:{title:'期待利益'},
+       legend:{orientation:"h",y:-0.3,font:{size:10}}},{displayModeBar:false,responsive:true});
+    return;
+  }
   const hours=Array.from({length:T},(_,i)=>i);
   Plotly.react('plot',[
     {x:hours,y:V.price,mode:'lines',line:{color:C.price,width:2.5},name:'価格',yaxis:'y'},
     {x:hours,y:V.c,type:'bar',marker:{color:C.charge},opacity:0.6,name:'充電',yaxis:'y2'},
     {x:hours,y:V.d.map(v=>-v),type:'bar',marker:{color:C.discharge},opacity:0.6,name:'放電',yaxis:'y2'},
     {x:Array.from({length:T+1},(_,i)=>i),y:V.soc,mode:'lines',line:{color:C.soc,width:2,dash:'dot'},name:'SoC [MWh]',yaxis:'y2'}
-  ],{margin:{t:30,r:48,b:40,l:45},barmode:'relative',
+  ],{margin:{t:30,r:48,b:60,l:45},barmode:'relative',
      title:{text:`閾値ディスパッチ（利益 ${V.profit.toFixed(1)}）：安い時間に充電・高い時間に放電`,font:{size:12}},
      xaxis:{title:'時刻 [h]',dtick:3},
      yaxis:{title:'価格'},yaxis2:{title:'充放電[MW]/SoC[MWh]',overlaying:'y',side:'right'},
-     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+     legend:{orientation:"h",y:-0.3,font:{size:10}}},{displayModeBar:false,responsive:true});
+}
+
+// ステップの焦点にスライダーを絞る（①電池 ②効率 ③価格と閾値 ④⑤予測誤差）
+const CTL_BY_STEP={
+  prob:['cap','pmax','eff'], trap:['cap','pmax','eff'],
+  formula:['base','day','eve','cpct','dpct'], vary:['sigma'], result:['sigma']
+};
+function showControls(key){
+  const show=CTL_BY_STEP[key]||[];
+  ['cap','pmax','eff','base','day','eve','cpct','dpct','sigma'].forEach(k=>{
+    const box=$(k).closest('.ctl'); if(box) box.style.display=show.includes(k)?'':'none';
+  });
 }
 
 function renderAll(key){
   for(const k of ['cap','pmax','eff','base','day','eve','cpct','dpct','sigma']){
-    const el=$(k+'val'); if(el) el.textContent=(k==='eff')?S[k].toFixed(2):(k==='pmax')?S[k].toFixed(1):S[k];
+    const el=$(k+'val'); if(el) el.textContent=(k==='eff')?S[k].toFixed(2):(k==='pmax')?S[k].toFixed(1):(k==='sigma')?S[k].toFixed(1):S[k];
   }
   const V=computeAll();
-  renderMetrics(V); renderExplain(key,V); draw(V);
+  renderMetrics(V); renderExplain(key,V); showControls(key); draw(key,V);
 }
 
 let autoDir=1;

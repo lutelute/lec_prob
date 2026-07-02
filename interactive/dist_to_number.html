@@ -93,9 +93,10 @@ function computeAndDraw(op){
     const P=L.normCdf(S.b,S.mu,S.sd)-L.normCdf(S.a,S.mu,S.sd);
     outk=`確率 P(${S.a} ≤ X ≤ ${S.b})`; outv=P.toFixed(3);
   } else if(op==='mean'){
+    // 平均＝分布の重心：密度を「板」とみなすと μ が支点（▲）でちょうど釣り合う
     traces.push({x:[S.mu,S.mu],y:[0,peak],type:'scatter',mode:'lines',line:{color:'#9a3a10',width:2,dash:'dot'},name:'E[X]=μ',hoverinfo:'skip'});
-    const xf=xs.map((x,i)=>x*pdf[i]); const sc=peak/Math.max(...xf);
-    traces.push({x:xs,y:xf.map(v=>v*sc),type:'scatter',mode:'lines',line:{color:'#d8a04d',width:1.5,dash:'dot'},name:'x·f(x)（重み）',hoverinfo:'skip'});
+    traces.push({x:[S.mu],y:[peak*0.045],type:'scatter',mode:'markers',
+      marker:{symbol:'triangle-up',size:18,color:'#9a3a10',line:{color:'#111',width:1}},name:'重心（支点）',hoverinfo:'skip'});
     outk='平均 E[X] = ∫ x·f(x) dx'; outv=S.mu.toFixed(1);
   } else if(op==='quant'){
     if($('pval')) $('pval').textContent=S.p.toFixed(2);
@@ -128,9 +129,9 @@ function renderExplain(key,out){
     <p>区間 [${S.a}, ${S.b}] の下の面積が確率 <b>${out.outv}</b>。区間を狭めると確率は0へ近づく（1点の確率は0）。密度の「高さ」ではなく「面積」が確率。</p>
     <p><b>同じ分布から、別の操作を当てるとどうなるでしょう？</b></p>`;
   }else if(key==='mean'){
-    h+=`<h3>② 平均を取り出す</h3>
-    <p>各値 x を「起こりやすさ f(x)」で重みづけて足す（橙＝x·f(x)）。離散の Σx·p(x) が連続で ∫x·f(x)dx になる。結果は <b>μ=${out.outv}</b>。</p>
-    <p>①では面積（確率）が出たが、②では重み付き和（平均）が出る——<b>同じ分布でも操作が違えば数も違う</b>。</p>`;
+    h+=`<h3>② 平均を取り出す＝重心を探す</h3>
+    <p>各値 x を「起こりやすさ f(x)」で重みづけて足す：離散の Σx·p(x)、連続の ∫x·f(x)dx。この操作は、分布を板とみなしたときの<b>重心</b>（▲＝支点で釣り合う点）を求めることと同じ。結果は <b>μ=${out.outv}</b>。</p>
+    <p>μ を動かすと支点も動くが、<b>σ を動かしても支点は動かない</b>——ばらつきと位置は別の数。①では面積（確率）、②では重心（平均）。<b>同じ分布でも操作が違えば数も違う</b>。</p>`;
   }else if(key==='quant'){
     h+=`<h3>③ 分位点を取り出す</h3>
     <p>下から ${(S.p*100).toFixed(0)}% の値、つまり左の面積が ${S.p.toFixed(2)} になる x を取り出す。結果は <b>${out.outv}</b>。</p>

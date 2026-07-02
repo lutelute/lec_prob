@@ -92,19 +92,52 @@ function buildModeCtl(){
     $('co').addEventListener('input',e=>{wiz.stopAuto();S.co=parseFloat(e.target.value);renderAll(wiz.key());}); }
 }
 
-function runMean(){
+function runMean(key){
   const Nmax=50000, s=gauss(Nmax);
   const cum=new Float64Array(Nmax+1); for(let i=0;i<Nmax;i++) cum[i+1]=cum[i]+s[i];
   const ns=logspace(1,Nmax,120);
-  const est=ns.map(n=>cum[n]/n), ciU=ns.map(n=>S.mu+1.96*S.sd/Math.sqrt(n)), ciL=ns.map(n=>S.mu-1.96*S.sd/Math.sqrt(n));
-  Plotly.react('plot',[
+  const est=ns.map(n=>cum[n]/n);
+
+  if(key==='formula'){
+    // ③「なぜ1/√Nか」：実測誤差と理論SEを両対数で重ねる——直線（傾き−1/2）が法則そのもの
+    const se=ns.map(n=>S.sd/Math.sqrt(n));
+    const err=ns.map((n,i)=>Math.max(Math.abs(est[i]-S.mu),1e-4));
+    const mark=[100,10000].map(n=>({n,se:S.sd/Math.sqrt(n)}));
+    Plotly.react('plot',[
+      {x:ns,y:err,mode:'markers',marker:{color:C.blue,size:4},name:'実測誤差 |θ̂_N−μ|'},
+      {x:ns,y:se,mode:'lines',line:{color:C.red,width:2},name:'理論 SE=σ/√N'},
+      {x:mark.map(m=>m.n),y:mark.map(m=>m.se),mode:'markers+text',marker:{color:C.red,size:9},
+       text:mark.map(m=>`N=${m.n}: ${m.se.toFixed(2)}`),textposition:['top right','top left'],
+       textfont:{size:10},showlegend:false}
+    ],{margin:{t:30,r:10,b:60,l:55},xaxis:{type:'log',title:'サンプル数 N（対数）'},
+       yaxis:{type:'log',title:'誤差（対数）'},title:{text:'両対数で直線＝誤差∝1/√N（N100倍→誤差1/10）',font:{size:13}},
+       legend:{orientation:"h",y:-0.3,font:{size:10}}},{displayModeBar:false,responsive:true});
+    $('metrics').innerHTML=metric('SE（N=100）',(S.sd/Math.sqrt(100)).toFixed(2))+
+      metric('SE（N=10000）',(S.sd/Math.sqrt(10000)).toFixed(2),'ok')+
+      metric('比（N×100 で）','1/10');
+    return;
+  }
+
+  const ciU=ns.map(n=>S.mu+1.96*S.sd/Math.sqrt(n)), ciL=ns.map(n=>S.mu-1.96*S.sd/Math.sqrt(n));
+  const traces=[
     {x:ns,y:ciU,mode:'lines',line:{width:0},showlegend:false,hoverinfo:'skip'},
     {x:ns,y:ciL,mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(122,167,232,.18)',name:'95%CI'},
     {x:ns,y:est,mode:'lines',line:{color:C.blue,width:1.5},name:'逐次推定 θ̂_N'},
     {x:[1,Nmax],y:[S.mu,S.mu],mode:'lines',line:{color:C.red,dash:'dash'},name:'真値 '+S.mu}
-  ],{margin:{t:30,r:10,b:42,l:48},xaxis:{type:'log',title:'サンプル数 N（対数）'},
-     yaxis:{title:'E[X] の推定',range:[S.mu-8,S.mu+8]},title:{text:'平均は 1/√N で速く収束',font:{size:13}},
-     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+  ];
+  if(key==='trap'){
+    // ②「精度10倍にはN100倍」：N=100とN=10000のCI幅を実寸で見せる
+    [100,10000].forEach((n,i)=>{
+      const hw=1.96*S.sd/Math.sqrt(n);
+      traces.push({x:[n,n],y:[S.mu-hw,S.mu+hw],mode:'lines+text',line:{color:C.red,width:4},
+        text:['',`N=${n}: ±${hw.toFixed(2)}`],textposition:'top center',textfont:{size:10,color:C.red},showlegend:false});
+    });
+  }
+  Plotly.react('plot',traces,
+    {margin:{t:30,r:10,b:60,l:48},xaxis:{type:'log',title:'サンプル数 N（対数）'},
+     yaxis:{title:'E[X] の推定',range:[S.mu-8,S.mu+8]},
+     title:{text:key==='trap'?'CI幅：N=100 と N=10000（100倍）を見比べる':'平均は 1/√N で速く収束',font:{size:13}},
+     legend:{orientation:"h",y:-0.3,font:{size:10}}},{displayModeBar:false,responsive:true});
   const ciFull=1.96*S.sd/Math.sqrt(Nmax);
   $('metrics').innerHTML=metric('最終推定値（N=5万）',fmt(est[est.length-1],3))+metric('真値',S.mu)+metric('95%CI半幅',`±${fmt(ciFull,3)}`,'ok');
 }
@@ -118,9 +151,9 @@ function runRare(){
   Plotly.react('plot',[
     {x:Ns,y:est,mode:'lines+markers',line:{color:C.purple,width:2},name:'MC推定'},
     {x:[Ns[0],Nmax],y:[ptrue,ptrue],mode:'lines',line:{color:C.red,dash:'dash'},name:'真値 '+ptrue.toExponential(2)}
-  ],{margin:{t:30,r:10,b:42,l:55},xaxis:{type:'log',title:'サンプル数 N（対数）'},
+  ],{margin:{t:30,r:10,b:60,l:55},xaxis:{type:'log',title:'サンプル数 N（対数）'},
      yaxis:{title:`P(X>${S.c}) の推定`},title:{text:'希少事象は小Nで不安定（0ヒットも）',font:{size:13}},
-     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+     legend:{orientation:"h",y:-0.3,font:{size:10}}},{displayModeBar:false,responsive:true});
   const need=Math.round(30/Math.max(ptrue,1e-9));
   $('metrics').innerHTML=metric(`真の確率 P(X>${S.c})`,ptrue.toExponential(2))+
     metric('N=300 のヒット数',hits[0],hits[0]<3?'warn':'')+metric('安定推定に必要なN目安',need.toLocaleString());
@@ -136,14 +169,14 @@ function runSAA(){
   Plotly.react('plot',[
     {x:Ns,y:qhat,mode:'lines+markers',line:{color:C.green,width:2},name:'SAA q̂'},
     {x:[Ns[0],Nmax],y:[qtrue,qtrue],mode:'lines',line:{color:C.red,dash:'dash'},name:'真の最適 '+fmt(qtrue,1)}
-  ],{margin:{t:30,r:10,b:42,l:48},xaxis:{type:'log',title:'シナリオ数 N（対数）'},
+  ],{margin:{t:30,r:10,b:60,l:48},xaxis:{type:'log',title:'シナリオ数 N（対数）'},
      yaxis:{title:'SAA 最適容量 q̂'},title:{text:'SAA：シナリオ数で最適解が臨界分位点へ収束',font:{size:13}},
-     legend:{orientation:'h',y:-0.2}},{displayModeBar:false,responsive:true});
+     legend:{orientation:"h",y:-0.3,font:{size:10}}},{displayModeBar:false,responsive:true});
   $('metrics').innerHTML=metric('臨界比',(S.cs/(S.cs+S.co)).toFixed(3))+metric('真の最適 q*',fmt(qtrue,2))+metric('SAA q̂（N=1万）',fmt(qhat[qhat.length-1],2),'ok');
 }
 
-function runCurrent(){
-  if(S.mode==='mean') runMean(); else if(S.mode==='rare') runRare(); else runSAA();
+function runCurrent(key){
+  if(S.mode==='mean') runMean(key); else if(S.mode==='rare') runRare(); else runSAA();
 }
 
 function renderExplain(key){
@@ -176,7 +209,7 @@ function renderExplain(key){
 function renderAll(key){
   $('muval').textContent=S.mu; $('sdval').textContent=S.sd; $('seedval').textContent=S.seed;
   document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on', b.dataset.m===S.mode));
-  runCurrent(); renderExplain(key);
+  runCurrent(key); renderExplain(key);
 }
 
 let autoFrame=0;

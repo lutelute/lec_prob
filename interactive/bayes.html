@@ -133,14 +133,14 @@ function draw(key,V){
     Plotly.react('plot',[
       {x:bs,y:ys,mode:'lines',line:{color:C.blue,width:3},name:'P(F|警報)'},
       {x:[V.p],y:[V.pp],mode:'markers',marker:{color:C.red,size:12},name:'現在'}
-    ],{margin:{t:36,r:8,b:40,l:45},title:{text:'事後確率は基準率に強く依存',font:{size:12}},
+    ],{margin:{t:36,r:8,b:58,l:45},title:{text:'事後確率は基準率に強く依存',font:{size:12}},
        xaxis:{title:'基準率 P(F)'},yaxis:{title:'P(F|警報)',range:[0,1]},
        shapes:[{type:'line',x0:0,x1:0.5,y0:0.5,y1:0.5,line:{color:'#9a9a9a',dash:'dot',width:1}}],
-       legend:{orientation:'h',y:-0.25}},{displayModeBar:false,responsive:true});
+       legend:{orientation:"h",y:-0.34,font:{size:10}}},{displayModeBar:false,responsive:true});
   }else if(key==='seq'){
     Plotly.react('plot',[{x:V.xs,y:V.ps,mode:'lines+markers+text',line:{color:C.purple,width:3},
        marker:{size:9}, text:V.ps.map(fmtpct), textposition:'top center'}],
-      {margin:{t:30,r:8,b:40,l:45},title:{text:'独立な警報を重ねると事後が更新（今日の事後＝明日の事前）',font:{size:12}},
+      {margin:{t:30,r:8,b:58,l:45},title:{text:'独立な警報を重ねると事後が更新（今日の事後＝明日の事前）',font:{size:12}},
        xaxis:{title:'観測した警報の回数',dtick:1},yaxis:{title:'事後 P(F)',range:[0,1]},
        shapes:[{type:'line',x0:0,x1:V.nseq,y0:0.5,y1:0.5,line:{color:'#9a9a9a',dash:'dot',width:1}}]},
       {displayModeBar:false,responsive:true});

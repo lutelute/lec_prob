@@ -22,7 +22,7 @@ type: guide
 「ばらつき」のケース——明日のピーク需要 $D\approx100\pm15$ に、容量をどれだけ確保するか。
 **スライダーを動かす**と供給不足の確率とコストが変わります。立場のボタンも押してみてください。
 
-<iframe id="decideframe" src="../../interactive/decide.html" title="触って学ぶ：確率→決定" style="width:100%;height:640px;border:1px solid #dadce0;border-radius:10px"></iframe>
+<iframe id="decideframe" src="../../interactive/decide.html" title="触って学ぶ：確率→決定" style="width:100%;height:640px;border:1px solid #111"></iframe>
 
 <script>
 (function(){
