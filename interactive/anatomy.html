@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6形式の解剖 — 数式のどこが、図のどこか</title>
+<link rel="stylesheet" href="lib/blueprint.css">
+<link rel="stylesheet" href="lib/tool.css">
+<link rel="stylesheet" href="lib/steps.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="lib/stats.js"></script>
+<style>
+  .fxbox{font-family:var(--mono);font-size:19px;line-height:2.1;background:var(--soft);
+    border:1px solid var(--line);padding:12px 15px;margin:8px 0 10px;overflow-x:auto}
+  .fxbox .sol{font-size:15px;color:var(--ink-2);border-top:1px dashed var(--line);margin-top:6px;padding-top:6px}
+  .fxbox .sol b{color:var(--ink);font-size:17px}
+  .term{border-bottom:2px dotted var(--ink-3);cursor:pointer;padding:0 2px}
+  .term:hover,.term.on{background:var(--opbg);border-bottom:2px solid var(--op);color:var(--op)}
+  .termhint{font-family:var(--jp);font-size:.82rem;line-height:1.65;color:var(--ink-2);min-height:3.4em;
+    border-left:3px solid var(--opbd);padding:5px 10px;background:var(--card);margin-bottom:10px}
+  .m3 .row{display:flex;gap:10px;border-top:1px dashed var(--line);padding:6px 0;font-size:.84rem;line-height:1.6}
+  .m3 .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ink-3);min-width:92px;padding-top:4px}
+  .stp .t{font-size:10.5px}
+  @media(max-width:760px){ .fxbox{font-size:16px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>6形式の解剖 — 数式のどこが、図のどこか</h1>
+  <div class="sub">同じ問題（需要 ξ〜N(μ,σ²) に対し確保量 x を決める、不足単価 c_s ≫ 余剰単価 c_o）を、6つの形式で書く。
+    <b>数式の下線の項に触れると、図の対応する場所が光ります。</b>スライダーを動かすと数式の数値と最適解 x* も動きます。
+    <a href="../notes/06_optimization_under_uncertainty/">第6章のノート →</a></div>
+
+  <div class="stage">
+    <div class="stepper" id="tabs" role="tablist" aria-label="形式の切替"></div>
+    <div class="stagebody">
+      <div class="stagevis">
+        <div id="plot" class="plot" style="height:280px"></div>
+        <div id="axis" class="plot" style="height:110px;margin-top:8px"></div>
+      </div>
+      <div class="stageexplain">
+        <span class="lbl" id="formlbl"></span>
+        <h3 id="formtitle" style="margin:.3rem 0 .2rem"></h3>
+        <div class="fxbox" id="fx"></div>
+        <div class="termhint" id="termhint"></div>
+        <div class="m3" id="m3"></div>
+      </div>
+    </div>
+    <div class="stagebar">
+      <div class="ctlrow">
+        <div class="ctl"><label>不足の単価 c_s<span class="val" id="csval">10</span></label>
+          <input type="range" id="cs" min="1" max="20" step="0.5" value="10"></div>
+        <div class="ctl"><label>余剰の単価 c_o<span class="val" id="coval">1</span></label>
+          <input type="range" id="co" min="1" max="20" step="0.5" value="1"></div>
+        <div class="ctl"><label>ばらつき σ<span class="val" id="sdval">15</span></label>
+          <input type="range" id="sd" min="5" max="30" step="1" value="15"></div>
+        <div class="ctl" id="ctl_eps"><label>許容不足率 ε<span class="val" id="epsval">0.10</span></label>
+          <input type="range" id="eps" min="0.01" max="0.5" step="0.01" value="0.1"></div>
+        <div class="ctl" id="ctl_alpha"><label>CVaR 信頼水準 α<span class="val" id="alphaval">0.90</span></label>
+          <input type="range" id="alpha" min="0.7" max="0.99" step="0.01" value="0.9"></div>
+        <div class="ctl" id="ctl_k"><label>ロバスト幅 k<span class="val" id="kval">3.0</span></label>
+          <input type="range" id="k" min="1" max="4" step="0.5" value="3"></div>
+      </div>
+    </div>
+  </div>
+
+  <details style="margin-top:14px">
+    <summary style="cursor:pointer;font-weight:700;font-size:.92rem">6形式の使い分け（早見）</summary>
+    <table class="mini" style="margin:10px 0;width:100%">
+      <tr><th>形式</th><th>選ぶ理由（価値判断）</th><th>気をつけること</th></tr>
+      <tr><td class="jp">①決定論</td><td class="jp" style="text-align:left">とにかく単純に</td><td class="jp" style="text-align:left">非対称コストで大損（平均の罠）</td></tr>
+      <tr><td class="jp">②期待値</td><td class="jp" style="text-align:left">回数を重ねる定常業務</td><td class="jp" style="text-align:left">一発の大損には無頓着</td></tr>
+      <tr><td class="jp">③ロバスト</td><td class="jp" style="text-align:left">確率が信じられない・絶対に外せない</td><td class="jp" style="text-align:left">保守的すぎて高コスト</td></tr>
+      <tr><td class="jp">④チャンス制約</td><td class="jp" style="text-align:left">「失敗は5%まで」と言える規定がある</td><td class="jp" style="text-align:left">失敗の深さは見ない</td></tr>
+      <tr><td class="jp">⑤CVaR</td><td class="jp" style="text-align:left">大損の「深さ」まで管理したい</td><td class="jp" style="text-align:left">αの選択自体が価値判断</td></tr>
+      <tr><td class="jp">⑥分布ロバスト</td><td class="jp" style="text-align:left">分布の形まで信じない（データ少）</td><td class="jp" style="text-align:left">平均・分散の推定は必要</td></tr>
+    </table>
+  </details>
+  <div class="foot">同じ計算ロジックを <a href="comparator.html">6形式コンパレータ</a> と共有（数値は一致）。x* の式：②=F⁻¹(c_s/(c_s+c_o))、③=(c_s·ub+c_o·lb)/(c_s+c_o)、④=F⁻¹(1−ε)、⑤=標本近似(Rockafellar–Uryasev)、⑥=Scarf閉形式。Plotly.js で描画。</div>
+</div>
+
+<script>
+const L=window.LP, $=id=>document.getElementById(id);
+let S={mu:100,sd:15,cs:10,co:1,eps:0.1,alpha:0.9,k:3};
+const COL={det:'#9a9a9a',exp:'#1e40af',rob:'#9a3a10',chance:'#1f6b2e',cvar:'#d8a04d',dro:'#5b2a94'};
+const NAMES={det:'① 決定論',exp:'② 期待値',rob:'③ ロバスト',chance:'④ チャンス制約',cvar:'⑤ CVaR',dro:'⑥ 分布ロバスト'};
+const ORDER=['det','exp','rob','chance','cvar','dro'];
+let cur='det', hl=null, stickyHl=null;
+
+const cost=(x,d)=>S.cs*Math.max(d-x,0)+S.co*Math.max(x-d,0);
+function gauss(n,seed){const g=L.gaussianGen(L.mulberry32(seed));const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=S.mu+S.sd*g();return a;}
+function cvarMin(){
+  const sOpt=gauss(3000,'opt');
+  const xs=L.linspace(S.mu-3.5*S.sd,S.mu+3.5*S.sd,141); let best=xs[0],bv=Infinity;
+  for(const x of xs){ const c=Array.from(sOpt,d=>cost(x,d)).sort((a,b)=>a-b);
+    const kk=Math.ceil(S.alpha*c.length); let s=0; for(let i=kk;i<c.length;i++)s+=c[i];
+    const v=s/(c.length-kk); if(v<bv){bv=v;best=x;} }
+  return best;
+}
+// comparator と同一の解（数値一致を保証）
+function xstars(){
+  return {
+    det:S.mu,
+    exp:L.normPpf(S.cs/(S.cs+S.co),S.mu,S.sd),
+    rob:(S.cs*(S.mu+S.k*S.sd)+S.co*(S.mu-S.k*S.sd))/(S.cs+S.co),
+    chance:L.normPpf(1-S.eps,S.mu,S.sd),
+    cvar:cvarMin(),
+    dro:S.mu+S.sd/2*(Math.sqrt(S.cs/S.co)-Math.sqrt(S.co/S.cs)),
+  };
+}
+const T=(k,txt)=>`<span class="term" data-hl="${k}">${txt}</span>`;
+const crit=()=>S.cs/(S.cs+S.co);
+
+// 形式定義：数式（項つき）・項の説明・意味3行・使うスライダー
+const FORMS={
+ det:{
+  title:'分布を1点に潰して、ふつうに解く',
+  fx:X=>`min<sub>x</sub>&nbsp; C(x, ${T('mean','μ')})
+    <div class="sol">x* = μ = <b>${X.det.toFixed(1)}</b></div>`,
+  terms:{
+    mean:`μ＝分布を「平均1点」に潰す。図：山（分布）は式に出てこないので薄く消え、平均の線だけが残る。`,
+    cost:`C(x,ξ)＝不足1単位に c_s=${S.cs}、余剰1単位に c_o=${S.co} の損。`,
+  },
+  m3:[['大事にするもの','計算の単純さ。代表値1つで話が済む'],
+      ['見ないもの','ばらつきと非対称コスト——式のどこにも分布 f(ξ) が無い'],
+      ['試すと分かる','c_s をいくら上げても x* は 100 のまま動かない（それが罠）']],
+  sliders:[],
+ },
+ exp:{
+  title:'起こりやすさで重みづけて、平均の損を最小に',
+  fx:X=>`min<sub>x</sub>&nbsp; ${T('weight','E')}[ ${T('cost','C(x, ξ)')} ]
+    <div class="sol">x* = F⁻¹( ${T('quantile',`c_s/(c_s+c_o) = ${crit().toFixed(3)}`)} ) = <b>${X.exp.toFixed(1)}</b></div>`,
+  terms:{
+    weight:`E[·]＝すべての ξ を「起こりやすさ f(ξ)」で重みづけて足す。図：山全体が重みとして塗られる——裾も薄く効いている。`,
+    cost:`C(x,ξ)＝x で決めたときの損。図：x* の右側＝不足（c_s=${S.cs} で痛い、濃い塗り）、左側＝余剰（c_o=${S.co}、淡い塗り）。`,
+    quantile:`臨界比 c_s/(c_s+c_o)=${crit().toFixed(3)}。「その割合まで左裾を確保した分位点」が最適——不足が痛いほど右へ動く。図：x* の線。`,
+  },
+  m3:[['大事にするもの','長期・多数回の平均的な損'],
+      ['見ないもの','1回ごとの大外れ（平均に薄まって消える）'],
+      ['試すと分かる','c_s↑ → 臨界比↑ → x*が右へ。σ↑でも臨界比は不変、分位点だけ広がる']],
+  sliders:[],
+ },
+ rob:{
+  title:'確率を捨てて、区間内の最悪だけを見る',
+  fx:X=>`min<sub>x</sub>&nbsp; ${T('worst','max')}<sub>ξ∈${T('band',`[μ−kσ, μ+kσ]`)}</sub>&nbsp; C(x, ξ)
+    <div class="sol">x* = (c_s·ub + c_o·lb)/(c_s+c_o) = <b>${X.rob.toFixed(1)}</b>　（ub=${(S.mu+S.k*S.sd).toFixed(0)}, lb=${(S.mu-S.k*S.sd).toFixed(0)}）</div>`,
+  terms:{
+    worst:`max＝区間の中で一番痛い ξ だけを見る。図：両端の▼。x* は「右端の不足の痛み」と「左端の余剰の痛み」が釣り合う点。`,
+    band:`[μ−kσ, μ+kσ]＝[${(S.mu-S.k*S.sd).toFixed(0)}, ${(S.mu+S.k*S.sd).toFixed(0)}]。この中は「どれも起こりうる」、外は「起こらない」扱い。図：帯の外の山は消える——確率の重みは使わない。`,
+  },
+  m3:[['大事にするもの','区間内の最悪ケース。確率がなくても使える'],
+      ['見ないもの','起こりやすさ。端の1点も中央も同じ重み'],
+      ['試すと分かる','k↑ → 区間が広がり x* が跳ね上がる（保守性の値段）']],
+  sliders:['k'],
+ },
+ chance:{
+  title:'失敗の「確率」だけを縛る',
+  fx:X=>`min&nbsp;x&nbsp;&nbsp; s.t.&nbsp; ${T('tail','P( ξ &gt; x )')} ≤ ${T('eps','ε')}
+    <div class="sol">x* = F⁻¹(1−ε) = F⁻¹(${(1-S.eps).toFixed(2)}) = <b>${X.chance.toFixed(1)}</b></div>`,
+  terms:{
+    tail:`P(ξ&gt;x)＝x を超える右裾の面積＝供給不足になる確率。図：塗られた裾がちょうど ε=${S.eps.toFixed(2)}。`,
+    eps:`ε＝許す失敗確率。ε を小さくするほど x* は右へ。図：裾の面積が ε になるところで x* が決まる。`,
+  },
+  m3:[['大事にするもの','失敗する「確率」。規定・基準に書きやすい'],
+      ['見ないもの','失敗の深さとコスト——<b>式に c_s が無い</b>'],
+      ['試すと分かる','c_s を動かしても x* は不動（εだけで決まる）。ε=0.10→0.05 で x* が跳ぶ']],
+  sliders:['eps'],
+ },
+ cvar:{
+  title:'悪い側に入ったときの「平均の深さ」を抑える',
+  fx:X=>`min<sub>x</sub>&nbsp; ${T('cvartail',`CVaR<sub>α</sub>`)}[ C(x, ξ) ]　α=${T('alpha',S.alpha.toFixed(2))}
+    <div class="sol">x* ≈ <b>${X.cvar.toFixed(1)}</b>　（3000標本のRockafellar–Uryasev近似）</div>`,
+  terms:{
+    cvartail:`CVaR_α＝損失が悪い側 (1−α)=${((1-S.alpha)*100).toFixed(0)}% に入ったときの<b>平均</b>。最悪1点（ロバスト）と平均全体（期待値）の中間。図：裾の塗りと、その重心（点線）。`,
+    alpha:`α=${S.alpha.toFixed(2)}＝上位 ${((1-S.alpha)*100).toFixed(0)}% の悪さだけを平均する。α↑ → 裾の奥だけを見る → x*↑。`,
+  },
+  m3:[['大事にするもの','大損の「深さ」の平均。境界だけのVaRより情報が多い'],
+      ['見ないもの','良い側 α の細部（そこは何でもよい）'],
+      ['試すと分かる','α: 0.90→0.99 で x* が上がる。c_s↑ でも上がる（コストも見ている＝④との違い）']],
+  sliders:['alpha'],
+ },
+ dro:{
+  title:'「分布の形」さえ信じずに、最悪の分布に備える',
+  fx:X=>`min<sub>x</sub>&nbsp; ${T('family','max')}<sub>P∈${T('moments','𝒫(μ, σ²)')}</sub>&nbsp; E<sub>P</sub>[ C(x, ξ) ]
+    <div class="sol">x* = μ + (σ/2)(√(c_s/c_o) − √(c_o/c_s)) = <b>${X.dro.toFixed(1)}</b>　（Scarf 閉形式）</div>`,
+  terms:{
+    family:`max_P＝「μ と σ² が同じ、あらゆる分布」の中の最悪。図：形の違う3本（正規・一様・ラプラス）はどれも平均${S.mu}・σ${S.sd}——全部候補。`,
+    moments:`𝒫(μ,σ²)＝分かっているのは平均と分散だけ、という控えめな仮定。正規分布と信じた②より少しだけ保守的になる。`,
+  },
+  m3:[['大事にするもの','分布仮定そのものの誤り（データが少ないとき）'],
+      ['見ないもの','「正規分布である」という形の情報'],
+      ['試すと分かる','②期待値との差＝「形を知らないことの保険料」。σ↑ で差も広がる']],
+  sliders:[],
+ },
+};
+
+// ---------- 図 ----------
+function draw(){
+  const X=xstars(), x=X[cur];
+  const lo=S.mu-3.9*S.sd, hi=Math.max(S.mu+3.9*S.sd, x+8);
+  const xs=L.linspace(lo,hi,320), pdf=xs.map(v=>L.normPdf(v,S.mu,S.sd));
+  const peak=L.normPdf(S.mu,S.mu,S.sd);
+  const H=stickyHl||hl;
+  const tr=[];
+  const seg=(a,b)=>{const sx=xs.filter(v=>v>=a&&v<=b);return {x:sx,y:sx.map(v=>L.normPdf(v,S.mu,S.sd))};};
+
+  // 分布カーブ（det/rob では「見ていない」ことを薄さで表現）
+  let pdfOp=1;
+  if(cur==='det') pdfOp=(H==='mean')?0.15:0.35;
+  if(cur==='rob') pdfOp=(H==='band')?0.12:0.3;
+  tr.push({x:xs,y:pdf,mode:'lines',line:{color:'#1e40af',width:2.5},opacity:pdfOp,name:'需要の分布 f(ξ)'});
+
+  if(cur==='det'){
+    tr.push({x:[S.mu,S.mu],y:[0,peak*1.05],mode:'lines',
+      line:{color:COL.det,width:(H==='mean')?5:3},name:'μ（これしか見ない）'});
+  }
+  if(cur==='exp'){
+    if(H==='weight'){
+      const s=seg(lo,hi);
+      tr.push({x:s.x,y:s.y,fill:'tozeroy',mode:'none',fillcolor:'rgba(111,191,111,.45)',name:'重み f(ξ)（全体）'});
+    }else{
+      const sl=seg(lo,x), sr=seg(x,hi);
+      tr.push({x:sl.x,y:sl.y,fill:'tozeroy',mode:'none',fillcolor:'rgba(122,167,232,.25)',name:`余剰側 ×c_o=${S.co}`});
+      tr.push({x:sr.x,y:sr.y,fill:'tozeroy',mode:'none',fillcolor:'rgba(224,122,74,.5)',name:`不足側 ×c_s=${S.cs}`});
+    }
+  }
+  if(cur==='rob'){
+    const lb=S.mu-S.k*S.sd, ub=S.mu+S.k*S.sd;
+    tr.push({x:[lb,lb,ub,ub],y:[0,peak*1.06,peak*1.06,0],fill:'toself',mode:'lines',
+      line:{color:'#9a9a9a',width:1,dash:'dot'},fillcolor:(H==='band')?'rgba(154,154,154,.3)':'rgba(154,154,154,.16)',name:'不確実性集合 [μ±kσ]'});
+    tr.push({x:[lb,ub],y:[peak*0.035,peak*0.035],mode:'markers',
+      marker:{symbol:'triangle-down',size:(H==='worst')?16:11,color:COL.rob},name:'最悪の候補（両端）'});
+  }
+  if(cur==='chance'){
+    const s=seg(x,hi);
+    tr.push({x:s.x,y:s.y,fill:'tozeroy',mode:'none',
+      fillcolor:(H==='tail'||H==='eps')?'rgba(111,191,111,.6)':'rgba(111,191,111,.4)',name:`P(ξ>x*) = ε = ${S.eps.toFixed(2)}`});
+  }
+  if(cur==='cvar'){
+    const s=seg(x,hi);
+    tr.push({x:s.x,y:s.y,fill:'tozeroy',mode:'none',
+      fillcolor:(H==='cvartail'||H==='alpha')?'rgba(216,160,77,.6)':'rgba(216,160,77,.4)',name:'損失が大きい側（不足）'});
+    const z=(x-S.mu)/S.sd, tailP=1-L.normCdf(x,S.mu,S.sd);
+    if(tailP>1e-6){
+      const condMean=S.mu+S.sd*L.normSPdf(z)/tailP;
+      tr.push({x:[condMean,condMean],y:[0,L.normPdf(condMean,S.mu,S.sd)*1.6],mode:'lines',
+        line:{color:COL.cvar,width:(H==='cvartail')?4:2,dash:'dot'},name:'裾に入ったときの平均的な深さ'});
+    }
+  }
+  if(cur==='dro'){
+    const emph=(H==='family'||H==='moments');
+    const b=S.sd/Math.SQRT2, w=Math.sqrt(3)*S.sd;
+    tr.push({x:xs,y:xs.map(v=>Math.exp(-Math.abs(v-S.mu)/b)/(2*b)),mode:'lines',
+      line:{color:'#5b2a94',width:emph?2.5:1.5,dash:'dash'},opacity:emph?0.95:0.55,name:'ラプラス（μ,σ²同じ）'});
+    tr.push({x:xs,y:xs.map(v=>(Math.abs(v-S.mu)<=w?1/(2*w):0)),mode:'lines',
+      line:{color:'#a07bd3',width:emph?2.5:1.5,dash:'dot'},opacity:emph?0.95:0.55,name:'一様（μ,σ²同じ）'});
+  }
+  // x* 縦線（常に主役）
+  tr.push({x:[x,x],y:[0,peak*1.12],mode:'lines+text',line:{color:COL[cur],width:4},
+    text:['',`x*=${x.toFixed(1)}`],textposition:'top center',textfont:{size:12,color:COL[cur]},name:'最適 x*'});
+
+  Plotly.react('plot',tr,{margin:{t:26,r:10,b:56,l:46},
+    xaxis:{title:'需要 ξ ／ 確保量 x',range:[lo,hi]},
+    yaxis:{title:'確率密度',rangemode:'tozero',showticklabels:false},
+    legend:{orientation:'h',y:-0.28,font:{size:10}},showlegend:true},
+    {displayModeBar:false,responsive:true});
+}
+
+function drawAxis(){
+  const X=xstars();
+  const vals=ORDER.map(k=>X[k]);
+  const labs=['①','②','③','④','⑤','⑥'];
+  const lo=Math.min(...vals)-6, hi=Math.max(...vals)+6;
+  Plotly.react('axis',[
+    {x:vals,y:vals.map(()=>0),mode:'markers+text',
+     marker:{color:ORDER.map(k=>COL[k]),size:ORDER.map(k=>k===cur?18:10),
+       line:{color:'#111',width:ORDER.map(k=>k===cur?1.5:0)}},
+     text:labs,textposition:'top center',textfont:{size:11},
+     hovertext:ORDER.map(k=>`${NAMES[k]}: ${X[k].toFixed(1)}`),hoverinfo:'text'},
+    {x:[X[cur]],y:[-0.5],mode:'text',text:[`${NAMES[cur]} → ${X[cur].toFixed(1)}`],
+     textfont:{size:11,color:COL[cur]},hoverinfo:'skip'}
+  ],{margin:{t:6,r:10,b:26,l:46},
+    xaxis:{title:{text:'6形式の最適 x*（同じ問題、違う価値判断）',font:{size:10}},range:[lo,hi]},
+    yaxis:{visible:false,range:[-1,1.2]},showlegend:false},
+    {displayModeBar:false,responsive:true,staticPlot:false});
+}
+
+// ---------- 右パネル ----------
+function renderForm(){
+  const F=FORMS[cur], X=xstars();
+  $('formlbl').textContent=`FORM ${ORDER.indexOf(cur)+1} / 6`;
+  $('formtitle').textContent=`${NAMES[cur]}：${F.title}`;
+  $('fx').innerHTML=F.fx(X);
+  $('m3').innerHTML=F.m3.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span>${v}</span></div>`).join('');
+  $('termhint').innerHTML='<b>数式の下線の項に触れる</b>と、図の対応する場所が光り、ここに意味が出ます。';
+  // 項イベント
+  document.querySelectorAll('#fx .term').forEach(el=>{
+    const key=el.dataset.hl;
+    el.addEventListener('mouseenter',()=>{ hl=key; showHint(key); draw(); });
+    el.addEventListener('mouseleave',()=>{ hl=null; if(!stickyHl){resetHint();} else showHint(stickyHl); draw(); });
+    el.addEventListener('click',()=>{ stickyHl=(stickyHl===key)?null:key;
+      document.querySelectorAll('#fx .term').forEach(t=>t.classList.toggle('on', t.dataset.hl===stickyHl));
+      stickyHl?showHint(stickyHl):resetHint(); draw(); });
+  });
+  // スライダー表示（共通 cs/co/σ ＋ 形式固有）
+  $('ctl_eps').style.display = F.sliders.includes('eps')?'':'none';
+  $('ctl_alpha').style.display = F.sliders.includes('alpha')?'':'none';
+  $('ctl_k').style.display = F.sliders.includes('k')?'':'none';
+}
+function showHint(key){ const t=FORMS[cur].terms[key]; if(t) $('termhint').innerHTML=t; }
+function resetHint(){ $('termhint').innerHTML='<b>数式の下線の項に触れる</b>と、図の対応する場所が光り、ここに意味が出ます。'; }
+
+function renderTabs(){
+  $('tabs').innerHTML=ORDER.map((k,i)=>
+    `<button class="stp${k===cur?' active':''}" role="tab" aria-selected="${k===cur}" data-f="${k}">
+      <span class="n">${i+1}</span><span class="t">${NAMES[k].replace(/^[①-⑥] /,'')}</span></button>`).join('');
+  document.querySelectorAll('#tabs .stp').forEach(b=>b.addEventListener('click',()=>{
+    cur=b.dataset.f; stickyHl=null; hl=null; renderTabs(); renderForm(); draw(); drawAxis();
+  }));
+}
+
+function renderAll(){
+  $('csval').textContent=S.cs; $('coval').textContent=S.co; $('sdval').textContent=S.sd;
+  $('epsval').textContent=S.eps.toFixed(2); $('alphaval').textContent=S.alpha.toFixed(2); $('kval').textContent=S.k.toFixed(1);
+  renderForm(); draw(); drawAxis();
+}
+['cs','co','sd','eps','alpha','k'].forEach(id=>$(id).addEventListener('input',e=>{
+  S[id==='sd'?'sd':id]=parseFloat(e.target.value); renderAll();
+}));
+
+renderTabs(); renderAll();
+</script>
+  <script src="lib/a11y.js"></script>
+</body>
+</html>

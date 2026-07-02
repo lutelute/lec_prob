@@ -31,7 +31,8 @@ related:
 !!! abstract "30秒まとめ"
     - **何の話か**：同じ問題を6形式（決定論／期待値／ロバスト／チャンス制約／CVaR／分布ロバスト）で解く。
     - **分かること**：「何を大事にするか」で最適決定が 100〜137 と変わる。技術でなく価値判断。
-    - **使う場面**：不確実下で「どの基準で決めるか」を選ぶとき。 → [▶ 6形式コンパレータ](../interactive/index.md) で6つを並べて比べる。
+    - **使う場面**：不確実下で「どの基準で決めるか」を選ぶとき。
+    - **触る**：この下の [▶ 6形式の解剖](#anatomy)（数式の項⇔図が光って対応）→ [▶ 6形式コンパレータ](../interactive/index.md)（6つを並べて比べる）。
 
 > **5つの問い**（この章で全部に答える）：①何が不確実か ②どの言語で表すか ③何を良しとするか ④式のどこに出るか ⑤代償は何か。
 
@@ -64,6 +65,20 @@ $$
 | ロバスト ($[55,145]$) | 136.8 | 区間内の最悪需要に必ず備える |
 
 > 決定論の100からロバストの137まで、**同じ問題で決定が37%も違う**。違いは「何を不確実とし、何を守るか」だけ。以下、1つずつ。
+
+### 触って解剖：数式のどこが、図のどこか {#anatomy}
+
+上の表の6行を、**数式・図・意味を結びながら**動かせます。形式を切り替え、**数式の下線の項に触れると図の対応する場所が光ります**。スライダー（c_s・σ・ε・α・k）で数式内の数値と x* が即座に動きます。
+
+<iframe id="anatomyframe" src="../../interactive/anatomy.html" title="6形式の解剖 — 数式のどこが、図のどこか" style="width:100%;height:980px;border:1px solid #111"></iframe>
+
+<script>
+(function(){var f=document.getElementById('anatomyframe');if(!f)return;
+f.addEventListener('load',function(){function fit(){try{var h=f.contentDocument.body.scrollHeight;if(h>300)f.style.height=(h+16)+'px';}catch(e){}}
+[400,1200,2400].forEach(function(d){setTimeout(fit,d);});});})();
+</script>
+
+[▶ 全画面で開く](../interactive/anatomy.html){target=_blank} ／ 6形式を横並びで比べるのは [▶ 6形式コンパレータ](../interactive/comparator.html){target=_blank}
 
 ---
 

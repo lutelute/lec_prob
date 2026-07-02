@@ -106,6 +106,7 @@ const M=[
   {n:'ロバスト最適化',h:'../notes/06_optimization_under_uncertainty/',c:'rob',x:0.78,y:0.14,mo:'interval'},
   {n:'分布ロバスト',h:'../notes/06_optimization_under_uncertainty/',c:'dro',x:0.94,y:0.86,mo:'fambell'},
   {n:'6形式コンパレータ',h:'comparator.html',c:'exp',x:0.62,y:0.52,mo:'bars',tool:1},
+  {n:'6形式の解剖',h:'anatomy.html',c:'exp',x:0.55,y:0.42,mo:'formula',tool:1},
   {n:'シナリオベース確率計画',h:'../notes/05_scenarios_and_monte_carlo/',c:'scenario',x:0.20,y:0.98,mo:'dots'},
   {n:'モンテカルロ／SAA',h:'montecarlo.html',c:'scenario',x:0.30,y:0.98,mo:'converge',tool:1},
   {n:'二段階(VSS/EVPI)',h:'../notes/06b_two_stage_stochastic_programming/',c:'scenario',x:0.56,y:0.92,mo:'tree'},
@@ -136,6 +137,7 @@ const EDGES=[
   ['期待値最小化','6形式コンパレータ'],
   ['期待値最小化','二段階(VSS/EVPI)'],['二段階(VSS/EVPI)','蓄電池運用'],
   ['期待値最小化','決定計算機'],['期待値最小化','やる/やらない'],
+  ['期待値最小化','6形式の解剖'],['6形式の解剖','6形式コンパレータ'],
   // ---- 発展手法の前提関係 ----
   ['期待値最小化','平均分散'],['期待値最小化','期待効用'],
   ['チャンス制約','VaR'],['VaR','CVaR最小化'],
@@ -213,6 +215,10 @@ const MOT={
     for(let i=0;i<=24;i++){const t=i/24,px=x+w*(0.14+0.76*t),py=y+h*(0.85-0.68*Math.sqrt(t));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
     ctx.stroke();
     ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+w*(0.14+0.76*0.35),y+h*(0.85-0.68*Math.sqrt(0.35)),2.6,0,7);ctx.fill();},
+  formula(x,y,w,h,c){ // 数式×図：Σ と小さなベル
+    ctx.fillStyle=c;ctx.font='700 '+Math.round(Math.min(w,h)*0.62)+'px '+getCSS('--mono');
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Σ',x+w*0.28,y+h*0.52);ctx.textBaseline='alphabetic';
+    bellPath(x+w*0.48,y+h*0.22,w*0.44,h*0.6);ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.stroke();},
   concave(x,y,w,h,c){ // 凹効用：u(w)と弦（リスク回避）
     ctx.strokeStyle=c;ctx.lineWidth=1.6;ctx.beginPath();
     for(let i=0;i<=24;i++){const t=i/24,px=x+w*(0.1+0.8*t),py=y+h*(0.85-0.72*Math.log1p(9*t)/Math.log(10));i?ctx.lineTo(px,py):ctx.moveTo(px,py);}

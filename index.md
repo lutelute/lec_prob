@@ -40,7 +40,7 @@ hide:
 <div class="cards c4">
   <a class="card" href="interactive/" >
     <span class="ch"><span class="nm">動かす</span><span class="kd">TOOLS</span></span>
-    <span class="use">ブラウザ内で動くツール8本。スライダーで図と数値が即応。</span>
+    <span class="use">ブラウザ内で動くツール9本。スライダーで図と数値が即応。</span>
     <span class="where" style="color:var(--ev)">▶ 一覧へ</span>
   </a>
   <a class="card" href="interactive/map.html" target="_blank" rel="noopener">

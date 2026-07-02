@@ -16,9 +16,10 @@ title: ブラウザで動かす（インタラクティブ・ツール）
   <a class="card" href="#t1"><span class="ch"><span class="nm">① PDF・CDF・区間確率</span><span class="kd">第2章</span></span><span class="tags"><span class="tag t-sp">連続分布</span><span class="tag t-sp">面積＝確率</span></span><span class="use">密度≠確率・面積＝CDF差</span></a>
   <a class="card" href="#t2"><span class="ch"><span class="nm">② ベイズ更新</span><span class="kd">第1章</span></span><span class="tags"><span class="tag t-ev">事象</span><span class="tag t-ev">条件付き</span></span><span class="use">基準率の誤謬</span></a>
   <a class="card" href="#t3"><span class="ch"><span class="nm">③ モンテカルロ収束</span><span class="kd">第5章</span></span><span class="tags"><span class="tag t-me">1/√N</span><span class="tag t-me">SAA</span></span><span class="use">収束・希少事象</span></a>
-  <a class="card" href="#t4"><span class="ch"><span class="nm">④ 6形式コンパレータ</span><span class="kd">第6章 · 到達点</span></span><span class="tags"><span class="tag t-op">最適化</span><span class="tag t-op">x*=100〜137</span></span><span class="use">形式の選択で決定が変わる</span></a>
-  <a class="card" href="#t5"><span class="ch"><span class="nm">⑤ 蓄電池運用</span><span class="kd">第6b章</span></span><span class="tags"><span class="tag t-to">SoC</span><span class="tag t-to">予測の価値</span></span><span class="use">アービトラージ・EVPI直感</span></a>
-  <a class="card" href="#t6"><span class="ch"><span class="nm">⑥ 理解度チェック</span><span class="kd">ALL</span></span><span class="tags"><span class="tag t-er">10問</span></span><span class="use">どこを復習すべきかが分かる</span></a>
+  <a class="card" href="#t4"><span class="ch"><span class="nm">④ 6形式の解剖</span><span class="kd">第6章 · 数式×図</span></span><span class="tags"><span class="tag t-op">項⇔図が光る</span><span class="tag t-op">意味の結合</span></span><span class="use">数式のどこが図のどこか</span></a>
+  <a class="card" href="#t5"><span class="ch"><span class="nm">⑤ 6形式コンパレータ</span><span class="kd">第6章 · 到達点</span></span><span class="tags"><span class="tag t-op">最適化</span><span class="tag t-op">x*=100〜137</span></span><span class="use">形式の選択で決定が変わる</span></a>
+  <a class="card" href="#t6"><span class="ch"><span class="nm">⑥ 蓄電池運用</span><span class="kd">第6b章</span></span><span class="tags"><span class="tag t-to">SoC</span><span class="tag t-to">予測の価値</span></span><span class="use">アービトラージ・EVPI直感</span></a>
+  <a class="card" href="#t7"><span class="ch"><span class="nm">⑦ 理解度チェック</span><span class="kd">ALL</span></span><span class="tags"><span class="tag t-er">10問</span></span><span class="use">どこを復習すべきかが分かる</span></a>
 </div>
 
 ---
@@ -56,7 +57,19 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-## 4. 確率的最適化コンパレータ — 6形式（第6章・到達点） {#t4}
+## 4. 6形式の解剖 — 数式のどこが、図のどこか（第6章） {#t4}
+
+6形式の**数式・図・意味を強く結ぶ**。形式を切り替えると数式と図が同時に変わり、
+**数式の下線の項に触れると、図の対応する場所が光る**。スライダーで数式内の数値と最適解 x* が即応。
+コンパレータの**前に**触ると、6本のバーの意味が数式から読めるようになる。
+
+[▶ 全画面で開く](anatomy.html){target=_blank} ／ [第6章のノート](../notes/06_optimization_under_uncertainty.md)
+
+<div class="tool-embed" data-src="anatomy.html" data-h="1000"></div>
+
+---
+
+## 5. 確率的最適化コンパレータ — 6形式（第6章・到達点） {#t5}
 
 同じ容量調達問題を **決定論／期待値／ロバスト／チャンス制約／CVaR／分布ロバスト** の6形式で解き、
 最適決定 x* が **100〜137** と変わるのを体感する。コスト非対称性・ε・α・k を動かす。
@@ -67,7 +80,7 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-## 5. 蓄電池運用ビジュアライザ — アービトラージと SoC（第6b章） {#t5}
+## 6. 蓄電池運用ビジュアライザ — アービトラージと SoC（第6b章） {#t6}
 
 安いとき充電・高いとき放電。SoC ダイナミクスを可視化し、価格・容量・効率・閾値を動かす。
 価格予測誤差 σ を上げると「予測の価値（EVPI 直感）」も現れる。
@@ -78,7 +91,7 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-## 6. 理解度チェック — 触って確かめる10問（全章） {#t6}
+## 7. 理解度チェック — 触って確かめる10問（全章） {#t7}
 
 学んだことが身についたか、10問で確かめる。選ぶと正誤と解説が出て、**どこを復習すればよいか**が分かる。
 密度≠確率・基準率の誤謬・形式選択・平均の罠・1/√N・偶然/認識・CVaR・EVPI を横断。
@@ -89,7 +102,7 @@ title: ブラウザで動かす（インタラクティブ・ツール）
 
 ---
 
-> **8本すべてブラウザ内で動作**します（インストール不要）。Streamlit版（ローカル実行）の解説は各 `apps/*/` を参照。
+> **9本すべてブラウザ内で動作**します（インストール不要）。Streamlit版（ローカル実行）の解説は各 `apps/*/` を参照。
 
 <style>
 .tool-embed{margin:10px 0}
