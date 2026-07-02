@@ -231,7 +231,7 @@ function draw(key,V){
     {x:xr,y:yr,fill:'tozeroy',mode:'none',fillcolor:areaColor,name:areaName},
     {x:[state.x0,state.x0],y:[0,V.f0],mode:'lines+markers',line:{color:C.probe,width:2,dash:'dot'},
       marker:{size:7},name:'高さ f(x₀)'}
-  ],{margin:{t:30,r:10,b:30,l:45},title:{text:probeMode?`PDF：幅2ε=${fmt(2*state.eps,3)} の帯だけが確率`:'PDF：確率は「面積」',font:{size:13}},
+  ],{margin:{t:30,r:10,b:30,l:45},title:{text:probeMode?`幅2ε=${fmt(2*state.eps,2)} の帯＝確率`:'PDF：確率は「面積」',font:{size:13}},
      xaxis:{}, yaxis:{title:'密度 f(x)',rangemode:'tozero'},
      legend:{orientation:'h',y:-0.16,font:{size:10}},showlegend:true},{displayModeBar:false,responsive:true});
 

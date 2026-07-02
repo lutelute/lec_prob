@@ -149,7 +149,7 @@ function draw(key,V){
       x:['真陽性<br>故障&警報','偽陽性<br>正常&警報','偽陰性<br>故障&無警報','真陰性<br>正常&無警報'],
       y:[V.tp,V.fp,V.fn,V.tn], type:'bar',
       marker:{color:[C.tp,C.fp,C.fn,C.tn]},
-      text:[V.tp,V.fp,V.fn,V.tn].map(v=>v.toFixed(1)), textposition:'outside'
+      text:[V.tp,V.fp,V.fn,V.tn].map(v=>v.toFixed(1)), textposition:'auto'
     }],{margin:{t:36,r:8,b:48,l:45},
        title:{text:`${V.n}件中：警報${V.alarms.toFixed(1)}件→本物${V.tp.toFixed(1)}件=${fmtpct(V.pp)}`,font:{size:12}},
        yaxis:{title:'件数 / '+V.n+'件'},xaxis:{tickfont:{size:9}}},{displayModeBar:false,responsive:true});
