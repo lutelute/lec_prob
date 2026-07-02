@@ -89,7 +89,7 @@
     </div>
     <div class="meta">
       <b>触って学ぶ入門</b><br>
-      8 interactive tools · 7 modules<br>
+      8 interactive tools · 全9章<br>
       <a href="../" style="color:var(--ev)">lutelute.github.io/lec_prob</a>
     </div>
   </header>
@@ -121,21 +121,21 @@
       <div class="one">起こる / 起こらない</div>
       <div class="use">故障・停電・N−1。数え上げで P(A) が出る。</div>
       <div class="tags"><span class="tag t-ev">離散</span><span class="tag t-ev">P(A)</span><span class="tag t-ev">信頼性</span></div>
-      <div class="where">→ <a href="../notes/01_events_and_probability/">Module 1</a> · <a href="bayes.html">▶ ベイズ</a></div>
+      <div class="where">→ <a href="../notes/01_events_and_probability/">第1章</a> · <a href="bayes.html">▶ ベイズ</a></div>
     </div>
     <div class="card">
       <div class="ch"><span class="nm">ばらつき</span><span class="kd">SPREAD · 偶然性</span></div>
       <div class="one">量が揺れる・減らせない</div>
       <div class="use">需要・PV・天候。何度も起きて分布になる（aleatory）。</div>
       <div class="tags"><span class="tag t-sp">連続</span><span class="tag t-sp">確率分布</span><span class="tag t-sp">aleatory</span></div>
-      <div class="where">→ <a href="../notes/02_random_variables_and_distributions/">Module 2</a> · <a href="pdf_cdf.html">▶ PDF/CDF</a></div>
+      <div class="where">→ <a href="../notes/02_random_variables_and_distributions/">第2章</a> · <a href="pdf_cdf.html">▶ PDF/CDF</a></div>
     </div>
     <div class="card">
       <div class="ch"><span class="nm">誤差</span><span class="kd">ERROR · 認識</span></div>
       <div class="one">知らない・情報で減る</div>
       <div class="use">測定・推定・予報の外れ（epistemic）。データで減る。</div>
       <div class="tags"><span class="tag t-er">区間</span><span class="tag t-er">ベイズ</span><span class="tag t-er">epistemic</span></div>
-      <div class="where">→ <a href="../notes/04_from_data_to_distribution/">Module 4</a></div>
+      <div class="where">→ <a href="../notes/04_from_data_to_distribution/">第4章</a></div>
     </div>
   </div>
 
@@ -165,7 +165,7 @@
       <div class="ch"><span class="nm">ストキャスティック</span><span class="kd">STOCHASTIC</span></div>
       <div class="use jp">分布のまま E[コスト] を計算して最小化。</div>
       <div class="tags"><span class="tag t-sp">q*=120</span><span class="tag t-sp">実コスト 22.0</span></div>
-      <div class="where jp">正確・分布が要る → <a href="../notes/06_optimization_under_uncertainty/">Module 6</a></div>
+      <div class="where jp">正確・分布が要る → <a href="../notes/06_optimization_under_uncertainty/">第6章</a></div>
     </div>
     <div class="card">
       <div class="ch"><span class="nm">シナリオベース</span><span class="kd">SCENARIO · MC/SAA</span></div>
@@ -187,17 +187,17 @@
     <tr><td class="jp b">⑤ CVaR</td><td class="jp">裾（大損）の平均</td><td class="jp">分布 / シナリオ</td><td class="jp">目的/制約</td><td class="num">129</td></tr>
     <tr><td class="jp b">⑥ 分布ロバスト</td><td class="jp">分布の不確かさ</td><td class="jp">分布の族</td><td>max_P</td><td class="num">121</td></tr>
   </table>
-  <p class="lead">並べて動かす → <a href="comparator.html" style="color:var(--ev);font-weight:700">▶ 6形式コンパレータ</a> ／ 二段階(VSS·EVPI) <a href="../notes/06b_two_stage_stochastic_programming/" style="color:var(--ev)">Module 6b</a> · <a href="battery.html">▶ 蓄電池</a></p>
+  <p class="lead">並べて動かす → <a href="comparator.html" style="color:var(--ev);font-weight:700">▶ 6形式コンパレータ</a> ／ 二段階(VSS·EVPI) <a href="../notes/06b_two_stage_stochastic_programming/" style="color:var(--ev)">第6b章</a> · <a href="battery.html">▶ 蓄電池</a></p>
 
   <!-- 06 NOTES -->
   <h2 class="section"><span class="n">06</span>KEY FACTS</h2>
   <div class="notes">
     <div class="row"><span class="k">密度≠確率</span><span class="v">確率は区間の面積。1点の確率は0、密度は1超可</span></div>
-    <div class="row"><span class="k">平均の罠</span><span class="v">非対称コストでは平均は最適でない（Module 0）</span></div>
+    <div class="row"><span class="k">平均の罠</span><span class="v">非対称コストでは平均は最適でない（第0章）</span></div>
     <div class="row"><span class="k">臨界比</span><span class="v">newsvendor 最適 = c_s/(c_s+c_o) 分位点</span></div>
     <div class="row"><span class="k">1/√N</span><span class="v">モンテカルロ誤差 = σ/√N。希少事象は遅い</span></div>
     <div class="row"><span class="k">基準率の誤謬</span><span class="v">稀な事象では陽性≠本物（ベイズ）</span></div>
-    <div class="row"><span class="k">VSS · EVPI</span><span class="v">確率化の価値 / 完全情報の価値（Module 6b）</span></div>
+    <div class="row"><span class="k">VSS · EVPI</span><span class="v">確率化の価値 / 完全情報の価値（第6b章）</span></div>
   </div>
 
   <!-- LEGEND -->
@@ -208,7 +208,7 @@
       <span class="sw" style="background:var(--erbd)"></span>誤差（認識）</div>
     <div><h4>カードの種類</h4>
       <span class="tag t-to" style="font-size:8px">TOOL</span> ▶ 触れるツール<br>
-      その他 = 概念 / モジュール<br>
+      その他 = 概念 / 章<br>
       <span class="mute">クリックで本文へ</span></div>
     <div><h4>INDEX</h4>
       ① 不確実性 ② 表す ③ 取り出す<br>④ 手法 ⑤ 最適化 ⑥ 決定<br>
@@ -216,16 +216,16 @@
   </section>
 
   <!-- 07 GLOSSARY -->
-  <h2 class="section"><span class="n">07</span>MODULES &amp; TOOLS</h2>
+  <h2 class="section"><span class="n">07</span>CHAPTERS &amp; TOOLS</h2>
   <div class="cards c4">
-    <div class="card"><div class="ch"><span class="nm">M0</span><span class="kd">WHY</span></div><div class="one jp">なぜ確率が要るか</div><div class="use">平均で計画する罠</div><div class="where"><a href="../notes/00_why_probability/">開く →</a></div></div>
-    <div class="card"><div class="ch"><span class="nm">M1</span><span class="kd">EVENTS</span></div><div class="one jp">事象と確率</div><div class="use">条件付き・ベイズ</div><div class="where"><a href="../notes/01_events_and_probability/">開く →</a></div></div>
-    <div class="card"><div class="ch"><span class="nm">M2</span><span class="kd">DIST</span></div><div class="one jp">確率変数と分布</div><div class="use">PMF/PDF/CDF</div><div class="where"><a href="../notes/02_random_variables_and_distributions/">開く →</a></div></div>
-    <div class="card"><div class="ch"><span class="nm">M3</span><span class="kd">MOMENTS</span></div><div class="one jp">期待値・分散・相関</div><div class="use">平均が同じでもリスク違う</div><div class="where"><a href="../notes/03_expectation_variance_covariance/">開く →</a></div></div>
-    <div class="card"><div class="ch"><span class="nm">M4</span><span class="kd">DATA</span></div><div class="one jp">データから分布へ</div><div class="use">標本≠真の分布</div><div class="where"><a href="../notes/04_from_data_to_distribution/">開く →</a></div></div>
-    <div class="card"><div class="ch"><span class="nm">M5</span><span class="kd">MONTE CARLO</span></div><div class="one jp">シナリオとMC</div><div class="use">1/√N・SAA</div><div class="where"><a href="../notes/05_scenarios_and_monte_carlo/">開く →</a></div></div>
-    <div class="card"><div class="ch"><span class="nm">M6 / 6b</span><span class="kd">OPTIMIZE</span></div><div class="one jp">不確実性下の最適化</div><div class="use">6形式・二段階</div><div class="where"><a href="../notes/06_optimization_under_uncertainty/">開く →</a></div></div>
-    <div class="card"><div class="ch"><span class="nm">M7</span><span class="kd">CASE</span></div><div class="one jp">実データ→決定</div><div class="use">730日データ・PV相関</div><div class="where"><a href="../notes/07_case_study/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第0章</span><span class="kd">WHY</span></div><div class="one jp">なぜ確率が要るか</div><div class="use">平均で計画する罠</div><div class="where"><a href="../notes/00_why_probability/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第1章</span><span class="kd">EVENTS</span></div><div class="one jp">事象と確率</div><div class="use">条件付き・ベイズ</div><div class="where"><a href="../notes/01_events_and_probability/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第2章</span><span class="kd">DIST</span></div><div class="one jp">確率変数と分布</div><div class="use">PMF/PDF/CDF</div><div class="where"><a href="../notes/02_random_variables_and_distributions/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第3章</span><span class="kd">MOMENTS</span></div><div class="one jp">期待値・分散・相関</div><div class="use">平均が同じでもリスク違う</div><div class="where"><a href="../notes/03_expectation_variance_covariance/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第4章</span><span class="kd">DATA</span></div><div class="one jp">データから分布へ</div><div class="use">標本≠真の分布</div><div class="where"><a href="../notes/04_from_data_to_distribution/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第5章</span><span class="kd">MONTE CARLO</span></div><div class="one jp">シナリオとMC</div><div class="use">1/√N・SAA</div><div class="where"><a href="../notes/05_scenarios_and_monte_carlo/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第6・6b章</span><span class="kd">OPTIMIZE</span></div><div class="one jp">不確実性下の最適化</div><div class="use">6形式・二段階</div><div class="where"><a href="../notes/06_optimization_under_uncertainty/">開く →</a></div></div>
+    <div class="card"><div class="ch"><span class="nm">第7章</span><span class="kd">CASE</span></div><div class="one jp">実データ→決定</div><div class="use">730日データ・PV相関</div><div class="where"><a href="../notes/07_case_study/">開く →</a></div></div>
     <div class="card"><div class="ch"><span class="nm">分布→数</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">操作で数を取り出す</div><div class="where"><a href="dist_to_number.html">▶ 触る</a></div></div>
     <div class="card"><div class="ch"><span class="nm">PDF/CDF</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">面積＝確率</div><div class="where"><a href="pdf_cdf.html">▶ 触る</a></div></div>
     <div class="card"><div class="ch"><span class="nm">モンテカルロ</span><span class="kd">TOOL</span></div><div class="tags"><span class="tag t-to">TOOL</span></div><div class="use jp">収束・希少事象</div><div class="where"><a href="montecarlo.html">▶ 触る</a></div></div>

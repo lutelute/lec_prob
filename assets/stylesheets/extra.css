@@ -1,81 +1,155 @@
-/* extra.css — ブランドの視覚的アイデンティティ（既定Materialからの脱却） */
+/* extra.css — Material for MkDocs をブループリント（紙の設計図）調に全面カスタム
+ * 依存：interactive/lib/blueprint.css（デザイントークン。mkdocs.yml で先に読み込む）
+ * 言語：紙 #f7f6f2 × インク #111、JetBrains Mono + Noto Sans JP、直角、細い罫線。
+ */
 
-:root {
-  --md-primary-fg-color:        #3457d5;   /* ブランドの青 */
-  --md-primary-fg-color--light: #5b7af0;
-  --md-primary-fg-color--dark:  #1a3a8f;
-  --md-accent-fg-color:         #c2410c;   /* 温かいアクセント（リンクhover） */
-  --lp-event:   #4285f4;   /* 事象 */
-  --lp-spread:  #34a853;   /* ばらつき */
-  --lp-error:   #ea4335;   /* 誤差 */
-  --lp-value:   #f9ab00;   /* 価値判断 */
-}
-[data-md-color-scheme="slate"] {
-  --md-primary-fg-color: #5b7af0;
-  --md-accent-fg-color:  #ffd54a;
-}
-
-/* タイポgrafi：日本語の詰めと見出しの締まり */
-.md-typeset { font-feature-settings: "palt" 1; }
-.md-typeset h1, .md-typeset h2 { letter-spacing: .01em; }
-.md-typeset h2 {
-  border-bottom: 2px solid var(--md-default-fg-color--lightest);
-  padding-bottom: .2em;
-}
-
-/* 「30秒まとめ」(abstract) を主役級に */
-.md-typeset .admonition.abstract,
-.md-typeset details.abstract {
-  border-left: .35rem solid var(--md-primary-fg-color);
-  border-radius: .3rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+/* ---- Material のカラー変数を紙とインクへ ---- */
+[data-md-color-scheme="default"]{
+  --md-default-bg-color:        var(--paper);
+  --md-default-fg-color:        var(--ink);
+  --md-default-fg-color--light: var(--ink-2);
+  --md-default-fg-color--lighter:#8a887f;
+  --md-default-fg-color--lightest:#e6e3da;
+  --md-primary-fg-color:        var(--ink);
+  --md-primary-fg-color--light: var(--ink-2);
+  --md-primary-fg-color--dark:  #000;
+  --md-accent-fg-color:         var(--ev);
+  --md-typeset-color:           var(--ink);
+  --md-typeset-a-color:         var(--ev);
+  --md-code-bg-color:           var(--soft);
+  --md-code-fg-color:           var(--ink);
+  --md-typeset-mark-color:      var(--evbg);
+  --md-footer-bg-color:         var(--paper);
+  --md-footer-bg-color--dark:   var(--paper);
+  --md-footer-fg-color:         var(--ink);
+  --md-footer-fg-color--light:  var(--ink-3);
+  --md-footer-fg-color--lighter:var(--ink-3);
 }
 
-/* 図(SVG/PNG)を上品に */
-.md-typeset img[src$=".svg"],
-.md-typeset img[src$=".png"] {
-  border-radius: 8px;
+/* ---- ヘッダー：紙地・インク文字・下罫線（図面の表題欄） ---- */
+.md-header{
+  background:var(--paper);color:var(--ink);
+  border-bottom:1px solid var(--ink);box-shadow:none;
 }
+.md-header__title{font-weight:700;letter-spacing:.04em}
+.md-header__button{color:var(--ink)}
+.md-search__form{background:#fff;border:1px solid var(--line);border-radius:0}
+.md-search__form:hover{background:#fff}
+.md-search__input{color:var(--ink)}
+.md-search__input::placeholder{color:var(--ink-3)}
+.md-search__input ~ .md-search__icon{color:var(--ink-3)}
+.md-search__output{border:1px solid var(--ink);border-radius:0;box-shadow:none}
+[dir=ltr] .md-search__output{margin-top:4px}
 
-/* テーブル：ヘッダにブランド色、行ホバー */
-.md-typeset table:not([class]) {
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
-}
-.md-typeset table:not([class]) th {
-  background: var(--md-primary-fg-color);
-  color: #fff;
-  font-weight: 700;
-}
-.md-typeset table:not([class]) tr:hover td {
-  background: var(--md-primary-fg-color--light);
-  filter: opacity(.08);
-}
+/* ---- サイドナビ：図面の索引らしく ---- */
+.md-nav{font-size:.68rem}
+.md-nav__title{font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;background:transparent!important;box-shadow:none!important}
+.md-nav__item--section>.md-nav__link{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.md-nav__link{color:var(--ink-2)}
+.md-nav__link:hover{color:var(--ev)}
+.md-nav__link--active,.md-nav__link--active code{color:var(--ev);font-weight:700}
+.md-sidebar__scrollwrap{scrollbar-color:var(--line) transparent}
 
-/* ハブのツールカード：ホバーで持ち上がる */
-a[href^="#t"] { transition: transform .12s ease, box-shadow .12s ease; }
-a[href^="#t"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(52,87,213,.18);
+/* ---- 本文タイポグラフィ ---- */
+.md-typeset{font-feature-settings:"palt" 1;line-height:1.85}
+.md-typeset h1{
+  color:var(--ink);font-weight:700;letter-spacing:.04em;
+  border-bottom:1px solid var(--ink);padding-bottom:.35em;margin-bottom:.8em;
 }
-
-/* iframe(埋め込みツール)を上品に */
-.md-typeset iframe { border-radius: 10px; }
-
-/* 引用を柔らかく */
-.md-typeset blockquote {
-  border-left: .25rem solid var(--md-primary-fg-color--light);
-  background: var(--md-default-fg-color--lightest);
-  border-radius: 0 .3rem .3rem 0;
+.md-typeset h2{
+  font-weight:700;letter-spacing:.03em;color:var(--ink);
+  border-bottom:1px solid var(--line);padding-bottom:.25em;
 }
+.md-typeset h3{font-weight:700;color:var(--ink)}
+.md-typeset a{color:var(--ev)}
+.md-typeset a:hover{color:var(--ev);text-decoration:underline}
+.md-content{background:transparent}
 
-/* 全ページ共通の俯瞰ナビ（モジュール↔地図/コースの統一導線） */
+/* ---- コード：白カード＋細罫線 ---- */
+.md-typeset code{background:var(--soft);border:1px solid var(--line);border-radius:0;padding:.1em .35em}
+.md-typeset pre>code{border:0;padding:.7em 1em}
+.md-typeset .highlight{border:1px solid var(--line);border-radius:0;background:#fff}
+.md-clipboard{color:var(--ink-3)}
+
+/* ---- admonition：直角・インク枠・意味色の左帯 ---- */
+.md-typeset .admonition,.md-typeset details{
+  border:1px solid var(--ink);border-radius:0;box-shadow:none;background:#fff;font-size:.72rem;
+}
+.md-typeset .admonition-title,.md-typeset summary{
+  background:var(--soft)!important;font-weight:700;
+  border-bottom:1px dashed var(--line);
+}
+.md-typeset .admonition.abstract,.md-typeset details.abstract,
+.md-typeset .admonition.note,.md-typeset details.note,
+.md-typeset .admonition.info,.md-typeset details.info{border-color:var(--ink);border-left:4px solid var(--evbd)}
+.md-typeset .admonition.tip,.md-typeset details.tip,
+.md-typeset .admonition.success,.md-typeset details.success{border-color:var(--ink);border-left:4px solid var(--spbd)}
+.md-typeset .admonition.warning,.md-typeset details.warning,
+.md-typeset .admonition.question,.md-typeset details.question{border-color:var(--ink);border-left:4px solid var(--opbd)}
+.md-typeset .admonition.danger,.md-typeset details.danger,
+.md-typeset .admonition.failure,.md-typeset details.failure{border-color:var(--ink);border-left:4px solid var(--erbd)}
+.md-typeset .admonition.example,.md-typeset details.example{border-color:var(--ink);border-left:4px solid var(--tobd)}
+/* admonition アイコンも意味色（マスク画像に background-color で着色） */
+.md-typeset .abstract>.admonition-title::before,.md-typeset .abstract>summary::before,
+.md-typeset .note>.admonition-title::before,.md-typeset .note>summary::before,
+.md-typeset .info>.admonition-title::before,.md-typeset .info>summary::before{background-color:var(--ev)}
+.md-typeset .tip>.admonition-title::before,.md-typeset .tip>summary::before,
+.md-typeset .success>.admonition-title::before,.md-typeset .success>summary::before{background-color:var(--sp)}
+.md-typeset .warning>.admonition-title::before,.md-typeset .warning>summary::before,
+.md-typeset .question>.admonition-title::before,.md-typeset .question>summary::before{background-color:var(--op)}
+.md-typeset .danger>.admonition-title::before,.md-typeset .danger>summary::before,
+.md-typeset .failure>.admonition-title::before,.md-typeset .failure>summary::before{background-color:var(--er)}
+.md-typeset .example>.admonition-title::before,.md-typeset .example>summary::before{background-color:var(--to)}
+
+/* ---- テーブル：仕様表（table.mx と同じ言語） ---- */
+.md-typeset table:not([class]){
+  border:1px solid var(--line);border-radius:0;box-shadow:none;background:#fff;font-size:.7rem;
+}
+.md-typeset table:not([class]) th{
+  background:var(--soft);color:var(--ink-3);font-weight:500;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;
+  border-bottom:1px solid var(--line);
+}
+.md-typeset table:not([class]) td{border-top:1px solid var(--line)}
+.md-typeset table:not([class]) tr:hover td{background:var(--soft)}
+
+/* ---- 図・引用・ボタン ---- */
+.md-typeset img[src$=".svg"],.md-typeset img[src$=".png"],.md-typeset img[src$=".gif"]{
+  border:1px solid var(--line);border-radius:0;background:#fff;
+}
+.md-typeset blockquote{
+  border-left:4px solid var(--mebd);background:#fff;color:var(--ink-2);
+  border-radius:0;
+}
+.md-typeset .md-button{border:1px solid var(--ink);border-radius:0;color:var(--ink)}
+.md-typeset .md-button--primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.md-typeset .md-button:hover{background:var(--mebg);border-color:var(--ink);color:var(--ink)}
+.md-typeset .md-button--primary:hover{background:#000;color:#fff}
+.md-typeset iframe{border:1px solid var(--ink);border-radius:0;background:#fff}
+.md-typeset hr{border-bottom:1px solid var(--line)}
+
+/* ---- フッター ---- */
+.md-footer{border-top:1px solid var(--ink)}
+.md-footer-meta{background:var(--paper)}
+.md-footer__inner{font-family:var(--mono);font-size:.6rem;letter-spacing:.06em}
+.md-copyright{font-family:var(--mono);font-size:.55rem;letter-spacing:.08em;color:var(--ink-3)}
+
+/* ---- 目次（右） ---- */
+.md-nav--secondary .md-nav__title{background:transparent;box-shadow:none}
+
+/* ---- blueprint.css のカードを .md-typeset 内でも意図通りに ---- */
+.md-typeset a.card{color:var(--ink)}
+.md-typeset a.card:hover{text-decoration:none}
+.md-typeset .card .where a,.md-typeset .card .where{text-decoration:none}
+
+/* ---- 全ページ共通の俯瞰ナビ（モジュール↔地図/コースの統一導線） ---- */
 .lp-strip{
-  max-width: 61rem; margin: 8px auto 0; padding: 10px 16px;
-  display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center;
-  font-size: .8rem; color: var(--md-default-fg-color--light);
-  border-top: 1px solid var(--md-default-fg-color--lightest);
+  max-width:61rem;margin:8px auto 0;padding:10px 16px;
+  display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;color:var(--ink-3);
+  border-top:1px solid var(--line);
 }
-.lp-strip a{ color: var(--md-primary-fg-color); text-decoration: none; font-weight: 600; }
-.lp-strip a:hover{ text-decoration: underline; }
+.lp-strip a{color:var(--ev);text-decoration:none;font-weight:500}
+.lp-strip a:hover{text-decoration:underline}

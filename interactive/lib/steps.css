@@ -1,36 +1,36 @@
-/* steps.css — 触って学ぶツール共通：5ステップ誘導UIのスタイル
- * 依存：tool.css の CSS変数（--blue, --green, --line, --ink, --muted, --bg, --soft）
- * 使い方：各ツールの<head>で tool.css の後に読み込む。
+/* steps.css — 触って学ぶツール共通：5ステップ誘導UIのスタイル（ブループリント調）
+ * 依存：lib/blueprint.css（デザイントークン）→ lib/tool.css の後に読み込む。
  */
-.stage{background:var(--bg);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:14px}
-.stepper{display:flex;background:var(--soft);border-bottom:1px solid var(--line)}
-.stp{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;
+.stage{background:var(--card);border:1px solid var(--ink);overflow:hidden;margin-top:14px}
+.stepper{display:flex;background:var(--soft);border-bottom:1px solid var(--ink)}
+.stp{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;cursor:pointer;
   border-right:1px solid var(--line);border-top:0;border-left:0;border-bottom:0;background:transparent;
-  font-family:inherit;transition:.15s}
+  font-family:var(--mono);transition:.12s}
 .stp:last-child{border-right:none}
-.stp .n{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:11px;background:#fff;color:var(--muted);border:1px solid var(--line)}
-.stp .t{font-size:11px;color:var(--muted)}
-.stp.done .n{background:#e6f4ea;color:var(--green);border-color:var(--green)}
-.stp.active{background:var(--bg)}
-.stp.active .n{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:700}
+.stp .n{width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;background:var(--card);color:var(--ink-3);border:1px solid var(--ink-3)}
+.stp .t{font-size:10px;letter-spacing:.04em;color:var(--ink-3)}
+.stp.done .n{background:var(--spbg);color:var(--sp);border-color:var(--spbd)}
+.stp.active{background:var(--card)}
+.stp.active .n{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
 .stp.active .t{color:var(--ink);font-weight:700}
 .stagebody{display:grid;grid-template-columns:1fr 1fr}
 .stagevis{padding:14px;border-right:1px solid var(--line)}
 .stageexplain{padding:16px}
-.stageexplain .lbl{display:inline-block;font-size:.72rem;letter-spacing:.05em;color:var(--muted);
-  border:1px solid var(--line);border-radius:5px;padding:2px 7px;margin-bottom:8px}
-.stageexplain h3{font-size:1.02rem;margin:.2rem 0 .5rem}
-.stageexplain p{font-size:.9rem;line-height:1.75;margin:.5rem 0}
-.stageexplain .eq{font-size:.85rem;background:var(--soft);border:1px solid var(--line);border-radius:8px;
-  padding:9px 11px;margin:8px 0;line-height:1.8}
-.stagebar{display:flex;align-items:flex-start;gap:14px;padding:10px 14px;border-top:1px solid var(--line);
+.stageexplain .lbl{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.2em;
+  color:var(--ink-3);border:1px solid var(--ink-3);padding:2px 7px;margin-bottom:8px}
+.stageexplain h3{font-size:1rem;margin:.2rem 0 .5rem}
+.stageexplain p{font-size:.88rem;line-height:1.75;margin:.5rem 0}
+.stageexplain .eq{font-family:var(--mono);font-size:.8rem;background:var(--soft);border:1px solid var(--line);
+  padding:9px 11px;margin:8px 0;line-height:1.9}
+.stagebar{display:flex;align-items:flex-start;gap:14px;padding:10px 14px;border-top:1px solid var(--ink);
   background:var(--soft);flex-wrap:wrap}
 .stagebar .navbtns{display:flex;gap:6px;flex-wrap:wrap}
-.stagebar button.navb{border:1px solid var(--line);background:#fff;color:var(--ink);font-size:.85rem;
-  padding:6px 12px;border-radius:7px;cursor:pointer}
-.stagebar button.navb.primary{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:700}
-.stagebar button.navb:disabled{opacity:.4;cursor:default}
+.stagebar button.navb{border:1px solid var(--ink);background:var(--card);color:var(--ink);
+  font-family:var(--jp);font-size:.82rem;padding:6px 12px;border-radius:0;cursor:pointer;transition:.12s}
+.stagebar button.navb:hover:not(:disabled){background:var(--mebg)}
+.stagebar button.navb.primary{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:700}
+.stagebar button.navb:disabled{opacity:.35;cursor:default}
 .stagebar .ctlrow{display:flex;gap:16px;flex-wrap:wrap;flex:1;align-items:flex-start}
 .stagebar .ctl{min-width:130px;margin:0}
 .stagebar .seg{margin-top:2px}

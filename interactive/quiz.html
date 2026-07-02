@@ -4,23 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>理解度チェック（触って学ぶ）</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <style>
   .q{font-size:1.05rem;font-weight:700;margin:8px 0 14px}
-  .opt{display:block;width:100%;text-align:left;padding:12px 16px;margin:8px 0;border:1.5px solid #dadce0;
-    border-radius:10px;background:#fff;cursor:pointer;font-size:.98rem;transition:.12s}
-  .opt:hover{border-color:#4285f4;background:#f6f9ff}
-  .opt.correct{border-color:#34a853;background:#e6f4ea}
-  .opt.wrong{border-color:#ea4335;background:#fce8e6}
+  .opt{display:block;width:100%;text-align:left;padding:12px 16px;margin:8px 0;border:1.5px solid #d8d5cc;
+    border-radius:0;background:#fff;cursor:pointer;font-size:.98rem;transition:.12s}
+  .opt:hover{border-color:#1e40af;background:#e8f1ff}
+  .opt.correct{border-color:#1f6b2e;background:#ecf7ec}
+  .opt.wrong{border-color:#9a3a10;background:#fff2ed}
   .opt:disabled{cursor:default}
-  .exp{margin:10px 0;padding:12px 14px;border-left:.3rem solid #4285f4;background:#f1f5ff;border-radius:6px;font-size:.92rem;display:none}
+  .exp{margin:10px 0;padding:12px 14px;border-left:.3rem solid #1e40af;background:#e8f1ff;border-radius:0;font-size:.92rem;display:none}
   .exp.show{display:block}
-  .bar{height:8px;background:#eef0f3;border-radius:99px;overflow:hidden;margin:4px 0 16px}
-  .bar>div{height:100%;background:#4285f4;width:0;transition:width .25s}
+  .bar{height:8px;background:#e6e3da;border-radius:0;overflow:hidden;margin:4px 0 16px}
+  .bar>div{height:100%;background:#1e40af;width:0;transition:width .25s}
   .nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-  .btn{border:0;background:#4285f4;color:#fff;font-weight:700;padding:11px 22px;border-radius:10px;cursor:pointer;font-size:1rem}
-  .btn:disabled{background:#c3ccd6;cursor:default}
-  .score{font-size:2.2rem;font-weight:800;color:#1a56c4}
+  .btn{border:0;background:#1e40af;color:#fff;font-weight:700;padding:11px 22px;border-radius:0;cursor:pointer;font-size:1rem}
+  .btn:disabled{background:#b9b5a9;cursor:default}
+  .score{font-size:2.2rem;font-weight:800;color:#1e40af}
 </style>
 </head>
 <body>
@@ -33,7 +34,7 @@
     <div id="opts"></div>
     <div class="exp" id="exp"></div>
     <div class="nav">
-      <span id="count" style="color:#5f6368"></span>
+      <span id="count" style="color:#6b6b6b"></span>
       <button class="btn" id="next" disabled>次へ →</button>
     </div>
   </div>
@@ -49,46 +50,46 @@ const Q=[
  {q:'連続な確率変数で密度 f(x)=2.0 だった。これは「その点の確率が2.0」という意味？',
   o:['はい、確率が2.0','いいえ。密度は確率ではなく、確率は区間の面積（CDFの差）','確率は必ず0なので無意味'],a:1,
   w:['密度の「高さ」を確率と混同した典型。高さは単位あたりの濃さで、確率は 高さ×幅＝面積。だから密度は1を超えてよい。',null,'1点の確率は確かに0。でも密度は無意味ではなく、区間で積分すると意味のある確率になる。'],
-  e:'密度は確率ではない。連続では確率＝区間の面積＝CDFの差で、密度は1を超えてよい。（Module 2）'},
+  e:'密度は確率ではない。連続では確率＝区間の面積＝CDFの差で、密度は1を超えてよい。（第2章）'},
  {q:'感度99%・誤陽性1%の検査。有病率は0.1%。陽性のとき本当に病気の確率は？',
   o:['約99%','約9%','約50%'],a:1,
   w:['感度99%に引きずられた典型。感度は P(陽性｜病気)。知りたいのは P(病気｜陽性) で別物。稀な有病率0.1%が効く。',null,'「半々くらい」の直感だが、有病率0.1%が低いので事後はもっと低い（≈9%）。'],
-  e:'基準率の誤謬。事前0.1%が効き、事後≈0.099/(0.099+0.999)≈9%。稀な事象では「陽性≠本物」。（Module 1）'},
+  e:'基準率の誤謬。事前0.1%が効き、事後≈0.099/(0.099+0.999)≈9%。稀な事象では「陽性≠本物」。（第1章）'},
  {q:'「供給不足の確率を5%以下に抑えたい」。どの最適化形式が素直？',
   o:['期待値最小化','チャンス制約','決定論'],a:1,
   w:['期待値は平均コストを見るが、違反「確率」を直接は縛らない。5%以下という確率の指定はチャンス制約。',null,'決定論は不確実性を無視するので、「確率5%」という条件をそもそも表現できない。'],
-  e:'違反確率を ε 以下に＝チャンス制約。ε分位点に効く。（Module 6）'},
+  e:'違反確率を ε 以下に＝チャンス制約。ε分位点に効く。（第6章）'},
  {q:'不足コストが余剰コストよりずっと大きい。需要の「平均ぴったり」を確保するのは最適？',
   o:['最適（平均が一番）','最適でない。平均より多めが正解','少なめが正解'],a:1,
   w:['平均が最適なのは損が対称なとき。不足が重い非対称では平均は過小で、最適は臨界比の分位点＝平均より上。',null,'逆向き。不足が痛いのだから、備えは平均より多めが正解。少なめは不足を増やす。'],
-  e:'結果が非対称なら平均は最適でない（平均の罠）。最適は臨界比 c_s/(c_s+c_o) の分位点。（Module 0・6）'},
+  e:'結果が非対称なら平均は最適でない（平均の罠）。最適は臨界比 c_s/(c_s+c_o) の分位点。（第0章・6）'},
  {q:'モンテカルロ推定の誤差は、標本数 N でどう縮む？',
   o:['1/N','1/√N','1/N²'],a:1,
   w:['もっと速いと思いがちだが、独立標本の平均の標準誤差は σ/√N。分散が1/Nで縮む→誤差(標準偏差)は1/√N。',null,'それほど速くは縮まない。1/N² だと標本を少し増やすだけで超高精度になってしまう。実際は1/√N。'],
-  e:'標準誤差は σ/√N。精度を2倍にするには標本4倍、希少事象の評価は特に遅い。（Module 5）'},
+  e:'標準誤差は σ/√N。精度を2倍にするには標本4倍、希少事象の評価は特に遅い。（第5章）'},
  {q:'「測定の誤差」と「需要の本質的なばらつき」。情報を増やすと減るのはどちら？',
   o:['両方減る','測定の誤差だけ（認識論的）','ばらつきだけ'],a:1,
   w:['本質的なばらつき（偶然的）は、いくら情報を足しても減らない。減るのは知らないことに由来する誤差だけ。',null,'逆。ばらつき（偶然的）は減らず、誤差（認識論的）が情報で減る。'],
-  e:'認識論的（誤差）は情報で減る。偶然的（ばらつき）は減らない。この区別が形式選択を分ける。（Module 0）'},
+  e:'認識論的（誤差）は情報で減る。偶然的（ばらつき）は減らない。この区別が形式選択を分ける。（第0章）'},
  {q:'CVaR（95%）は何を測る？',
   o:['95%点の損失（それはVaR）','最悪5%の「平均」損失','平均損失'],a:1,
   w:['それは VaR（分位点そのもの）。CVaR はその先＝裾の「平均」で、VaR 以上の値になる。',null,'全体の平均ではなく、最悪5%に条件付けた平均。だから大損の重さを反映する。'],
-  e:'VaRは分位点、CVaRはその先（裾）の条件付き平均。大損の重さを測り、凸で扱いやすい。（Module 6）'},
+  e:'VaRは分位点、CVaRはその先（裾）の条件付き平均。大損の重さを測り、凸で扱いやすい。（第6章）'},
  {q:'EVPI（完全情報の価値）が大きいとは、どういう状況？',
   o:['不確実性が決定にあまり効かない','先に未来が分かれば大きく得する＝知らないことの代償が高い','確率モデルは要らない'],a:1,
   w:['逆。EVPI が大きい＝不確実性が決定に強く効き、先に分かれば大きく得する状況。',null,'EVPI は SP と WS の差で、確率モデルを使って初めて測れる量。要らないのではなく前提。'],
-  e:'EVPI = 確率計画(SP) − 完全情報(WS)。大きいほど「いま知らないこと」のコストが高い。（Module 6b）'},
+  e:'EVPI = 確率計画(SP) − 完全情報(WS)。大きいほど「いま知らないこと」のコストが高い。（第6b章）'},
 ];
-// 各問が対応するモジュール（間違えた問だけを名指しで復習提案するため）
+// 各問が対応する章（間違えた問だけを名指しで復習提案するため）
 const MOD=[
- {t:'Module 2 確率変数と分布',h:'../notes/02_random_variables_and_distributions/'},
- {t:'Module 1 事象と確率',h:'../notes/01_events_and_probability/'},
- {t:'Module 6 不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/'},
- {t:'Module 0 なぜ確率（平均の罠）',h:'../notes/00_why_probability/'},
- {t:'Module 5 シナリオとMC',h:'../notes/05_scenarios_and_monte_carlo/'},
- {t:'Module 0 なぜ確率（偶然/認識）',h:'../notes/00_why_probability/'},
- {t:'Module 6 不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/'},
- {t:'Module 6b 二段階（VSS/EVPI）',h:'../notes/06b_two_stage_stochastic_programming/'},
+ {t:'第2章 確率変数と分布',h:'../notes/02_random_variables_and_distributions/'},
+ {t:'第1章 事象と確率',h:'../notes/01_events_and_probability/'},
+ {t:'第6章 不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/'},
+ {t:'第0章 なぜ確率（平均の罠）',h:'../notes/00_why_probability/'},
+ {t:'第5章 シナリオとMC',h:'../notes/05_scenarios_and_monte_carlo/'},
+ {t:'第0章 なぜ確率（偶然/認識）',h:'../notes/00_why_probability/'},
+ {t:'第6章 不確実性下の最適化',h:'../notes/06_optimization_under_uncertainty/'},
+ {t:'第6b章 二段階（VSS/EVPI）',h:'../notes/06b_two_stage_stochastic_programming/'},
 ];
 let i=0, score=0, answered=false, curCorrect=0, wrong=[];
 function render(){
@@ -131,16 +132,16 @@ $('next').onclick=()=>{
     $('scoretext').textContent=`${score} / ${Q.length} 正解`;
     const adv = score>=7 ? 'みごと。「不確実性をどう表し、何を大事にして決めるか」が身についています。'
       : score>=4 ? 'いい線です。間違えた問の Module を復習すると一段深まります。'
-      : 'ここからが本番。<a href="../notes/how_to_use_probability/" target="_top">🧭 確率の使い方</a> と各ノートの「30秒まとめ」から戻りましょう。';
-    // 間違えた問のモジュールだけを名指しで復習提案（重複はまとめる）
+      : 'ここからが本番。<a href="../notes/how_to_use_probability/" target="_top">確率の使い方</a> と各ノートの「30秒まとめ」から戻りましょう。';
+    // 間違えた問の章だけを名指しで復習提案（重複はまとめる）
     let review='';
     if(wrong.length){
       const seen={}, links=[];
       wrong.forEach(qi=>{const m=MOD[qi]; if(m&&!seen[m.h]){seen[m.h]=1;links.push(`<a href="${m.h}" target="_top">${m.t}</a>`);}});
-      review=`<div style="margin-top:14px;padding:12px 14px;border:1px solid #dadce0;border-radius:10px;text-align:left">`+
+      review=`<div style="margin-top:14px;padding:12px 14px;border:1px solid #d8d5cc;border-radius:0;text-align:left">`+
         `<b>あなたの復習ポイント（間違えた問だけ）</b><br>`+links.map(l=>'・'+l).join('<br>')+`</div>`;
     } else {
-      review=`<div style="margin-top:10px;color:#137333">全問正解！復習は不要です 🎉</div>`;
+      review=`<div style="margin-top:10px;color:#1f6b2e">全問正解！復習は不要です 🎉</div>`;
     }
     $('advice').innerHTML=adv+review;
   }

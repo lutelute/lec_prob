@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDF・CDF・区間確率（インタラクティブ）</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
@@ -15,7 +16,7 @@
 <div class="wrap">
   <h1>PDF・CDF・区間確率ビジュアライザ</h1>
   <div class="sub">確率は密度の「高さ」ではなく区間の「面積」。その面積は CDF の「差」でもある。5ステップで確かめる。
-    <a href="../notes/02_random_variables_and_distributions/">Module 2 のノート →</a></div>
+    <a href="../notes/02_random_variables_and_distributions/">第2章のノート →</a></div>
 
   <div class="stage">
     <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
@@ -78,7 +79,7 @@
 <script src="lib/steps.js"></script>
 <script>
 const L = window.LP;
-const C = {pdf:'#4285f4', area:'rgba(52,168,83,.35)', areaLine:'#34a853', cdf:'#ea4335', probe:'#f9ab00', gray:'#bbb'};
+const C = {pdf:'#1e40af', area:'rgba(111,191,111,.4)', areaLine:'#1f6b2e', cdf:'#9a3a10', probe:'#d8a04d', gray:'#b9b5a9'};
 
 const DISTS = {
   normal: {
@@ -216,8 +217,8 @@ function draw(V){
   const cdf=xs.map(V.d.cdf), Fa=V.d.cdf(V.region[0]), Fb=V.d.cdf(V.region[1]);
   Plotly.react('cdfPlot',[
     {x:xs,y:cdf,mode:'lines',line:{color:C.cdf,width:3},name:'累積 F(x)'},
-    {x:[V.lo,V.region[0]],y:[Fa,Fa],mode:'lines',line:{color:'#999',dash:'dot',width:1},showlegend:false},
-    {x:[V.lo,V.region[1]],y:[Fb,Fb],mode:'lines',line:{color:'#999',dash:'dot',width:1},showlegend:false},
+    {x:[V.lo,V.region[0]],y:[Fa,Fa],mode:'lines',line:{color:'#9a9a9a',dash:'dot',width:1},showlegend:false},
+    {x:[V.lo,V.region[1]],y:[Fb,Fb],mode:'lines',line:{color:'#9a9a9a',dash:'dot',width:1},showlegend:false},
     {x:[V.region[0],V.region[1]],y:[Fa,Fb],mode:'markers',marker:{color:C.cdf,size:9},name:`F(b)−F(a)=${fmt(V.prob,3)}`},
     {x:[V.lo+(V.hi-V.lo)*0.02,V.lo+(V.hi-V.lo)*0.02],y:[Fa,Fb],mode:'lines',line:{color:C.areaLine,width:6},name:'差'}
   ],{margin:{t:30,r:10,b:35,l:45},title:{text:'CDF：同じ確率が「縦の差」',font:{size:13}},

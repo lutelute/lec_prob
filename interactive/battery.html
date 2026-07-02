@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>蓄電池運用・アービトラージ（インタラクティブ）</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
@@ -13,7 +14,7 @@
 <div class="wrap">
   <h1>蓄電池運用ビジュアライザ — アービトラージと SoC</h1>
   <div class="sub">安いとき充電・高いとき放電。5ステップで「予測の価値」まで追う。
-    <a href="../notes/06b_two_stage_stochastic_programming/">Module 6b のノート →</a></div>
+    <a href="../notes/06b_two_stage_stochastic_programming/">第6b章のノート →</a></div>
 
   <div class="stage">
     <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
@@ -60,7 +61,7 @@
 <script src="lib/steps.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-const C={price:'#ea4335',charge:'#4285f4',discharge:'#34a853',soc:'#f9ab00'};
+const C={price:'#9a3a10',charge:'#1e40af',discharge:'#1f6b2e',soc:'#d8a04d'};
 let S={cap:10,pmax:3,eff:0.9,base:20,day:12,eve:8,cpct:35,dpct:65,sigma:0};
 const T=24;
 const L=window.LP;
@@ -149,7 +150,7 @@ function renderExplain(key,V){
   }else if(key==='formula'){
     h+=`<h3>③ 仕組み：閾値ディスパッチ</h3>
     <p>価格が下位 ${S.cpct}%ile（<b>${V.cth.toFixed(1)}</b>）以下なら充電、上位 ${100-S.dpct}%（<b>${V.dth.toFixed(1)}</b>）以上なら放電。SoC遷移：SoC(t+1)=SoC(t)+√η·充電−放電/√η。</p>
-    <p>これは<b>近視眼的なルール</b>：価格が閾値を超えた瞬間に放電するため、後でもっと高い夕方ピークが来ても先に売り切ってしまうことがある。先読みする最適LPなら高値に温存できる（Module 6bへ）。</p>`;
+    <p>これは<b>近視眼的なルール</b>：価格が閾値を超えた瞬間に放電するため、後でもっと高い夕方ピークが来ても先に売り切ってしまうことがある。先読みする最適LPなら高値に温存できる（第6b章へ）。</p>`;
   }else if(key==='vary'){
     h+=`<h3>④ 価格予測誤差 σ を動かす</h3>
     <p>σ を自動で動かしています。σ=0（予測誤差なし）では固定計画と完全予測は一致しますが、σ が上がるほど両者の差＝「予測の価値」が開きます。</p>

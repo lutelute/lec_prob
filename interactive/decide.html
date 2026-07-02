@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>触って学ぶ：確率はどう「決定」に変わるか</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
@@ -118,9 +119,9 @@ function draw(V){
   const tx=xs.filter(x=>x>=V.q), ty=tx.map(x=>L.normPdf(x,MU,SD));
   const peak=L.normPdf(MU,MU,SD);
   Plotly.react('plot',[
-    {x:xs,y:pdf,type:'scatter',mode:'lines',line:{color:'#4285f4',width:2.5},name:'需要の分布',hoverinfo:'skip'},
-    {x:[V.q,...tx,tx[tx.length-1]||V.q],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(234,67,53,0.30)',name:'供給不足',hoverinfo:'skip'},
-    {x:[V.q,V.q],y:[0,peak*1.08],type:'scatter',mode:'lines',line:{color:'#202124',width:2,dash:'dot'},name:'確保量 q',hoverinfo:'skip'}
+    {x:xs,y:pdf,type:'scatter',mode:'lines',line:{color:'#1e40af',width:2.5},name:'需要の分布',hoverinfo:'skip'},
+    {x:[V.q,...tx,tx[tx.length-1]||V.q],y:[0,...ty,0],fill:'toself',mode:'none',fillcolor:'rgba(224,122,74,.35)',name:'供給不足',hoverinfo:'skip'},
+    {x:[V.q,V.q],y:[0,peak*1.08],type:'scatter',mode:'lines',line:{color:'#111111',width:2,dash:'dot'},name:'確保量 q',hoverinfo:'skip'}
   ],{margin:{t:8,r:10,b:42,l:48},xaxis:{title:'需要 ／ 確保量',range:[55,150]},
      yaxis:{title:'確率密度',rangemode:'tozero'},showlegend:true,
      legend:{orientation:'h',y:1.12},height:300},{displayModeBar:false,responsive:true});

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>モンテカルロ収束（インタラクティブ）</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
@@ -13,7 +14,7 @@
 <div class="wrap">
   <h1>モンテカルロ収束ビジュアライザ</h1>
   <div class="sub">平均は 1/√N で速く収束、希少事象（尾）は遅い——を5ステップで確かめる。
-    <a href="../notes/05_scenarios_and_monte_carlo/">Module 5 のノート →</a></div>
+    <a href="../notes/05_scenarios_and_monte_carlo/">第5章のノート →</a></div>
 
   <div class="stage">
     <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
@@ -62,7 +63,7 @@
 <script src="lib/steps.js"></script>
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
-const C={blue:'#4285f4',red:'#ea4335',purple:'#a142f4',green:'#34a853'};
+const C={blue:'#1e40af',red:'#9a3a10',purple:'#5b2a94',green:'#1f6b2e'};
 let S={mode:'mean',mu:100,sd:15,seed:42,c:145,cs:10,co:1};
 
 function gauss(n){ const g=L.gaussianGen(L.mulberry32('mc'+S.seed)); const a=new Float64Array(n);
@@ -98,7 +99,7 @@ function runMean(){
   const est=ns.map(n=>cum[n]/n), ciU=ns.map(n=>S.mu+1.96*S.sd/Math.sqrt(n)), ciL=ns.map(n=>S.mu-1.96*S.sd/Math.sqrt(n));
   Plotly.react('plot',[
     {x:ns,y:ciU,mode:'lines',line:{width:0},showlegend:false,hoverinfo:'skip'},
-    {x:ns,y:ciL,mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(66,133,244,.15)',name:'95%CI'},
+    {x:ns,y:ciL,mode:'lines',line:{width:0},fill:'tonexty',fillcolor:'rgba(122,167,232,.18)',name:'95%CI'},
     {x:ns,y:est,mode:'lines',line:{color:C.blue,width:1.5},name:'逐次推定 θ̂_N'},
     {x:[1,Nmax],y:[S.mu,S.mu],mode:'lines',line:{color:C.red,dash:'dash'},name:'真値 '+S.mu}
   ],{margin:{t:30,r:10,b:42,l:48},xaxis:{type:'log',title:'サンプル数 N（対数）'},

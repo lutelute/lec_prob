@@ -17,21 +17,12 @@ theme:
     - content.code.copy
     - toc.follow
     - search.suggest
+  # ブループリント（紙の設計図）デザイン：紙地×インクのライト単一
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/weather-night
-        name: ダークモードへ
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/weather-sunny
-        name: ライトモードへ
+    scheme: default
+  font:
+    text: Noto Sans JP
+    code: JetBrains Mono
 
 plugins:
   - same-dir
@@ -58,6 +49,7 @@ markdown_extensions:
       permalink: true
 
 extra_css:
+  - interactive/lib/blueprint.css
   - assets/stylesheets/extra.css
 
 extra_javascript:
@@ -81,74 +73,74 @@ exclude_docs: |
 
 nav:
   - ホーム: index.md
-  - 🧭 確率の使い方: notes/how_to_use_probability.md
-  - 🔢 分布をどう数値で扱うか: notes/distributions_and_methods.md
+  - はじめに:
+      - 確率の使い方: notes/how_to_use_probability.md
+      - 分布をどう数値で扱うか: notes/distributions_and_methods.md
   - ▶ ブラウザで動かす: interactive/index.md
-  - ロードマップ:
+  - 教科書:
+      - 第0章 なぜ確率が必要か: notes/00_why_probability.md
+      - 第1章 事象と確率: notes/01_events_and_probability.md
+      - 第2章 確率変数と分布: notes/02_random_variables_and_distributions.md
+      - 第3章 期待値・分散・相関: notes/03_expectation_variance_covariance.md
+      - 第4章 データから分布へ: notes/04_from_data_to_distribution.md
+      - 第5章 シナリオとモンテカルロ: notes/05_scenarios_and_monte_carlo.md
+      - 第6章 不確実性下の最適化: notes/06_optimization_under_uncertainty.md
+      - 第6b章 二段階確率計画（発展）: notes/06b_two_stage_stochastic_programming.md
+      - 第7章 ケーススタディ（実データ→決定）: notes/07_case_study.md
+  - 演習:
+      - 構成・使い方: exercises/README.md
+      - 初級:
+          - 第0章: exercises/basic/00_why_probability.md
+          - 第1章: exercises/basic/01_events_and_probability.md
+          - 第2章: exercises/basic/02_random_variables_and_distributions.md
+          - 第3章: exercises/basic/03_expectation_variance_covariance.md
+          - 第4章: exercises/basic/04_from_data_to_distribution.md
+          - 第5章: exercises/basic/05_scenarios_and_monte_carlo.md
+          - 第6章: exercises/basic/06_optimization_under_uncertainty.md
+          - 第6b章: exercises/basic/06b_two_stage_stochastic_programming.md
+      - 中級:
+          - 第0章: exercises/intermediate/00_why_probability.md
+          - 第1章: exercises/intermediate/01_events_and_probability.md
+          - 第2章: exercises/intermediate/02_random_variables_and_distributions.md
+          - 第3章: exercises/intermediate/03_expectation_variance_covariance.md
+          - 第4章: exercises/intermediate/04_from_data_to_distribution.md
+          - 第5章: exercises/intermediate/05_scenarios_and_monte_carlo.md
+          - 第6章: exercises/intermediate/06_optimization_under_uncertainty.md
+          - 第6b章: exercises/intermediate/06b_two_stage_stochastic_programming.md
+      - 発展:
+          - 第0章: exercises/advanced/00_why_probability.md
+          - 第1章: exercises/advanced/01_events_and_probability.md
+          - 第2章: exercises/advanced/02_random_variables_and_distributions.md
+          - 第3章: exercises/advanced/03_expectation_variance_covariance.md
+          - 第4章: exercises/advanced/04_from_data_to_distribution.md
+          - 第5章: exercises/advanced/05_scenarios_and_monte_carlo.md
+          - 第6章: exercises/advanced/06_optimization_under_uncertainty.md
+          - 第6b章: exercises/advanced/06b_two_stage_stochastic_programming.md
+      - 解答:
+          - 第0章: exercises/solutions/00_why_probability_solutions.md
+          - 第1章: exercises/solutions/01_events_and_probability_solutions.md
+          - 第2章: exercises/solutions/02_random_variables_and_distributions_solutions.md
+          - 第3章: exercises/solutions/03_expectation_variance_covariance_solutions.md
+          - 第4章: exercises/solutions/04_from_data_to_distribution_solutions.md
+          - 第5章: exercises/solutions/05_scenarios_and_monte_carlo_solutions.md
+          - 第6章: exercises/solutions/06_optimization_under_uncertainty_solutions.md
+          - 第6b章: exercises/solutions/06b_two_stage_solutions.md
+  - 学びの地図:
       - 学習地図: roadmap/learning_map.md
       - 概念地図: roadmap/concept_map.md
       - 最適化地図: roadmap/optimization_map.md
       - 記法規約: roadmap/notation.md
-  - ノート（本文）:
-      - 0 なぜ確率が必要か: notes/00_why_probability.md
-      - 1 事象と確率: notes/01_events_and_probability.md
-      - 2 確率変数と分布: notes/02_random_variables_and_distributions.md
-      - 3 期待値・分散・相関: notes/03_expectation_variance_covariance.md
-      - 4 データから分布へ: notes/04_from_data_to_distribution.md
-      - 5 シナリオとモンテカルロ: notes/05_scenarios_and_monte_carlo.md
-      - 6 不確実性下の最適化: notes/06_optimization_under_uncertainty.md
-      - 6b 二段階確率計画（発展）: notes/06b_two_stage_stochastic_programming.md
-      - 7 ケーススタディ（実データ→決定）: notes/07_case_study.md
-  - 演習:
-      - 構成・使い方: exercises/README.md
-      - 初級:
-          - Module 0: exercises/basic/00_why_probability.md
-          - Module 1: exercises/basic/01_events_and_probability.md
-          - Module 2: exercises/basic/02_random_variables_and_distributions.md
-          - Module 3: exercises/basic/03_expectation_variance_covariance.md
-          - Module 4: exercises/basic/04_from_data_to_distribution.md
-          - Module 5: exercises/basic/05_scenarios_and_monte_carlo.md
-          - Module 6: exercises/basic/06_optimization_under_uncertainty.md
-          - Module 6b: exercises/basic/06b_two_stage_stochastic_programming.md
-      - 中級:
-          - Module 0: exercises/intermediate/00_why_probability.md
-          - Module 1: exercises/intermediate/01_events_and_probability.md
-          - Module 2: exercises/intermediate/02_random_variables_and_distributions.md
-          - Module 3: exercises/intermediate/03_expectation_variance_covariance.md
-          - Module 4: exercises/intermediate/04_from_data_to_distribution.md
-          - Module 5: exercises/intermediate/05_scenarios_and_monte_carlo.md
-          - Module 6: exercises/intermediate/06_optimization_under_uncertainty.md
-          - Module 6b: exercises/intermediate/06b_two_stage_stochastic_programming.md
-      - 発展:
-          - Module 0: exercises/advanced/00_why_probability.md
-          - Module 1: exercises/advanced/01_events_and_probability.md
-          - Module 2: exercises/advanced/02_random_variables_and_distributions.md
-          - Module 3: exercises/advanced/03_expectation_variance_covariance.md
-          - Module 4: exercises/advanced/04_from_data_to_distribution.md
-          - Module 5: exercises/advanced/05_scenarios_and_monte_carlo.md
-          - Module 6: exercises/advanced/06_optimization_under_uncertainty.md
-          - Module 6b: exercises/advanced/06b_two_stage_stochastic_programming.md
-      - 解答:
-          - Module 0: exercises/solutions/00_why_probability_solutions.md
-          - Module 1: exercises/solutions/01_events_and_probability_solutions.md
-          - Module 2: exercises/solutions/02_random_variables_and_distributions_solutions.md
-          - Module 3: exercises/solutions/03_expectation_variance_covariance_solutions.md
-          - Module 4: exercises/solutions/04_from_data_to_distribution_solutions.md
-          - Module 5: exercises/solutions/05_scenarios_and_monte_carlo_solutions.md
-          - Module 6: exercises/solutions/06_optimization_under_uncertainty_solutions.md
-          - Module 6b: exercises/solutions/06b_two_stage_solutions.md
-  - ツール（ローカル実行）:
+  - 参考資料:
+      - チートシート（1枚）: reference/cheatsheet.md
+      - 用語集: reference/glossary.md
+      - 読書ガイド: references/reading_list.md
+  - ローカル実行（Python版）:
       - PDF・CDF・区間確率: apps/pdf_cdf_visualizer/README.md
       - ベイズ更新: apps/bayes_visualizer/README.md
       - モンテカルロ収束: apps/monte_carlo_visualizer/README.md
       - シナリオ木: apps/scenario_tree_visualizer/README.md
       - 蓄電池運用: apps/battery_dispatch/README.md
       - 6形式コンパレータ: apps/stochastic_optimization_comparator/README.md
-  - リファレンス:
-      - チートシート（1枚）: reference/cheatsheet.md
-      - 用語集: reference/glossary.md
-  - 文献:
-      - 読書ガイド: references/reading_list.md
   - 開発:
       - 構成・拡張ガイド: ARCHITECTURE.md
       - 開発ログ: development_log.md

@@ -4,32 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>決定計算機 — あなたのデータ → 6形式の推奨決定</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script src="lib/stats.js"></script>
 <style>
   .seg2{display:flex;gap:0;margin:2px 0 10px}
-  .seg2 button{flex:1;border:1px solid #4285f4;background:#fff;color:#4285f4;padding:8px;cursor:pointer;font-weight:600}
-  .seg2 button:first-child{border-radius:8px 0 0 8px} .seg2 button:last-child{border-radius:0 8px 8px 0;border-left:0}
-  .seg2 button.on{background:#4285f4;color:#fff}
-  textarea{width:100%;min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:.85rem;border:1px solid #dadce0;border-radius:8px;padding:8px;resize:vertical}
+  .seg2 button{flex:1;border:1px solid #1e40af;background:#fff;color:#1e40af;padding:8px;cursor:pointer;font-weight:600}
+  .seg2 button:first-child{border-radius:0} .seg2 button:last-child{border-radius:0;border-left:0}
+  .seg2 button.on{background:#1e40af;color:#fff}
+  textarea{width:100%;min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:.85rem;border:1px solid #d8d5cc;border-radius:0;padding:8px;resize:vertical}
   .num{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
-  .num label{flex:1;min-width:90px;font-size:.85rem;color:#3c4043}
-  .num input{width:100%;padding:6px 8px;border:1px solid #dadce0;border-radius:6px;font-size:.95rem}
+  .num label{flex:1;min-width:90px;font-size:.85rem;color:#444444}
+  .num input{width:100%;padding:6px 8px;border:1px solid #d8d5cc;border-radius:0;font-size:.95rem}
   table.res{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:6px}
-  table.res th,table.res td{border:1px solid #e0e0e0;padding:7px 9px;text-align:right}
-  table.res th{background:#4285f4;color:#fff;font-weight:600;text-align:center;font-size:.82rem}
+  table.res th,table.res td{border:1px solid #d8d5cc;padding:7px 9px;text-align:right}
+  table.res th{background:#1e40af;color:#fff;font-weight:600;text-align:center;font-size:.82rem}
   table.res td.f{text-align:left;font-weight:700}
-  table.res tr.best td{background:#e6f4ea}
-  table.res td .mini{color:#5f6368;font-size:.78rem;font-weight:400}
+  table.res tr.best td{background:#ecf7ec}
+  table.res td .mini{color:#6b6b6b;font-size:.78rem;font-weight:400}
   .act{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-  .act button{border:0;background:#34a853;color:#fff;font-weight:700;padding:9px 16px;border-radius:8px;cursor:pointer}
-  .act button.alt{background:#5f6368}
-  .summ{font-size:.85rem;color:#3c4043;background:#f1f5ff;border-left:.3rem solid #4285f4;border-radius:6px;padding:8px 10px;margin:8px 0}
-  .err{color:#c5221f;font-size:.85rem;margin:6px 0}
+  .act button{border:0;background:#1f6b2e;color:#fff;font-weight:700;padding:9px 16px;border-radius:0;cursor:pointer}
+  .act button.alt{background:#6b6b6b}
+  .summ{font-size:.85rem;color:#444444;background:#e8f1ff;border-left:.3rem solid #1e40af;border-radius:0;padding:8px 10px;margin:8px 0}
+  .err{color:#9a3a10;font-size:.85rem;margin:6px 0}
   #tableWrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   table.res{min-width:430px}
-  .rec{font-size:.92rem;background:#e6f4ea;border-left:.3rem solid #34a853;border-radius:6px;padding:9px 11px;margin:8px 0;font-weight:600;color:#137333}
+  .rec{font-size:.92rem;background:#ecf7ec;border-left:.3rem solid #1f6b2e;border-radius:0;padding:9px 11px;margin:8px 0;font-weight:600;color:#1f6b2e}
 </style>
 </head>
 <body>
@@ -59,7 +60,7 @@
       </div>
       <div id="dataIn">
         <textarea id="data" placeholder="需要を貼り付け（カンマ/改行/空白区切り）&#10;例: 98, 112, 87, 105, 120, 93, ..."></textarea>
-        <div style="font-size:.78rem;color:#5f6368;margin-top:2px"><a href="#" id="sample">サンプルデータを入れる</a></div>
+        <div style="font-size:.78rem;color:#6b6b6b;margin-top:2px"><a href="#" id="sample">サンプルデータを入れる</a></div>
       </div>
       <div id="paramIn" style="display:none">
         <div class="num"><label>平均 μ<input type="number" id="mu" value="100"></label><label>標準偏差 σ<input type="number" id="sd" value="15"></label></div>
@@ -78,7 +79,7 @@
       <div id="pins"></div>
       <div id="tableWrap"></div>
       <details id="sensDetails" class="note" style="display:none;padding:8px 10px">
-        <summary style="cursor:pointer;font-weight:700">📐 感度分析（コスト見積りがずれたら？）</summary>
+        <summary style="cursor:pointer;font-weight:700">感度分析（コスト見積りがずれたら？）</summary>
         <div id="sens" style="margin-top:6px"></div>
       </details>
       <div class="act" id="exports" style="display:none">
@@ -161,8 +162,8 @@ function compute(){
     (spanPct>20?' → <b>敏感</b>：コスト比の見積りを詰める価値が高い。':' → 頑健：多少のズレには鈍感。');
   // plot: 分布(ヒスト) + 各形式の確保量を縦線
   const xs=L.linspace(Math.min(...ds)-5,Math.max(...ds)+10,80);
-  const cols={'①決定論':'#9aa0a6','②期待値':'#4285f4','③ロバスト':'#ea4335','④チャンス制約':'#34a853','⑤CVaR':'#f9ab00','⑥分布ロバスト':'#a142f4'};
-  const traces=[{x:d,type:'histogram',histnorm:'probability density',marker:{color:'rgba(66,133,244,.25)'},name:'需要',nbinsx:24,hoverinfo:'skip'}];
+  const cols={'①決定論':'#9a9a9a','②期待値':'#1e40af','③ロバスト':'#9a3a10','④チャンス制約':'#1f6b2e','⑤CVaR':'#d8a04d','⑥分布ロバスト':'#5b2a94'};
+  const traces=[{x:d,type:'histogram',histnorm:'probability density',marker:{color:'rgba(122,167,232,.28)'},name:'需要',nbinsx:24,hoverinfo:'skip'}];
   const hmax=0.04;
   forms.forEach(o=>traces.push({x:[o.x,o.x],y:[0,hmax],type:'scatter',mode:'lines',line:{color:cols[o.f],width:2},name:o.f,hoverinfo:'name'}));
   Plotly.react('plot',traces,{margin:{t:6,r:8,b:34,l:42},height:280,xaxis:{title:'需要 / 確保量'},yaxis:{title:'密度',rangemode:'tozero'},showlegend:true,legend:{orientation:'h',font:{size:9},y:1.15}},{displayModeBar:false,responsive:true});

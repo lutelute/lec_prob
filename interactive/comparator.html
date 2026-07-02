@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>確率的最適化コンパレータ（6形式・インタラクティブ）</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <link rel="stylesheet" href="lib/steps.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
@@ -15,7 +16,7 @@
 <div class="wrap">
   <h1>確率的最適化コンパレータ（6形式）</h1>
   <div class="sub">同じ容量調達問題を6形式で解く。決定 x* がどう変わるかで「なぜこの形式を選ぶか」を学ぶ。教材の到達点。
-    <a href="../notes/06_optimization_under_uncertainty/">Module 6 のノート →</a></div>
+    <a href="../notes/06_optimization_under_uncertainty/">第6章のノート →</a></div>
 
   <div class="stage">
     <div class="stepper" id="stepper" role="tablist" aria-label="学習ステップ"></div>
@@ -61,7 +62,7 @@
 <script>
 const L=window.LP, $=id=>document.getElementById(id);
 let S={mu:100,sd:15,cs:10,co:1,eps:0.1,alpha:0.9,k:3};
-const COL={det:'#9aa0a6',exp:'#4285f4',chance:'#34a853',dro:'#a142f4',cvar:'#f9ab00',rob:'#ea4335'};
+const COL={det:'#9a9a9a',exp:'#1e40af',chance:'#1f6b2e',dro:'#5b2a94',cvar:'#d8a04d',rob:'#9a3a10'};
 function gauss(n,seed){const g=L.gaussianGen(L.mulberry32(seed));const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=S.mu+S.sd*g();return a;}
 const cost=(x,d)=>S.cs*Math.max(d-x,0)+S.co*Math.max(x-d,0);
 
@@ -108,7 +109,7 @@ function draw(forms,show){
   const lo=L.normPpf(0.001,S.mu,S.sd), hi=L.normPpf(0.999,S.mu,S.sd);
   const xs=L.linspace(lo,Math.max(hi,Math.max(...vis.map(f=>f.x))+5),300), pdf=xs.map(x=>L.normPdf(x,S.mu,S.sd));
   const ymax=Math.max(...pdf);
-  const traces=[{x:xs,y:pdf,mode:'lines',line:{color:'#bbb',width:2},fill:'tozeroy',fillcolor:'rgba(180,180,180,.15)',name:'需要 ξ'}];
+  const traces=[{x:xs,y:pdf,mode:'lines',line:{color:'#b9b5a9',width:2},fill:'tozeroy',fillcolor:'rgba(154,154,154,.15)',name:'需要 ξ'}];
   ord.forEach(f=>traces.push({x:[f.x,f.x],y:[0,ymax*1.05],mode:'lines',line:{color:f.col,width:2.5},name:`${f.name} ${f.x.toFixed(0)}`}));
   Plotly.react('mapPlot',traces,{margin:{t:30,r:8,b:38,l:42},title:{text:'決定マップ：最適容量 x*',font:{size:12}},
     xaxis:{title:'容量 x / 需要 ξ'},yaxis:{title:'密度',rangemode:'tozero'},legend:{font:{size:9}}},{displayModeBar:false,responsive:true});
@@ -122,11 +123,11 @@ function draw(forms,show){
   if(vis.length>=3){
     const minE=Math.min(...vis.map(f=>f.mean)), minC=Math.min(...vis.map(f=>f.cvar));
     let rows=vis.map(f=>{
-      const eb=Math.abs(f.mean-minE)<1e-6?' style="background:#e6f4ea;font-weight:700"':'';
-      const cb=Math.abs(f.cvar-minC)<1e-6?' style="background:#fef7e0;font-weight:700"':'';
+      const eb=Math.abs(f.mean-minE)<1e-6?' style="background:#ecf7ec;font-weight:700"':'';
+      const cb=Math.abs(f.cvar-minC)<1e-6?' style="background:#fff4de;font-weight:700"':'';
       return `<tr><td style="text-align:left;border-left:4px solid ${f.col}">${f.name}</td>
         <td>${f.x.toFixed(1)}</td><td${eb}>${f.mean.toFixed(1)}</td><td>${f.short.toFixed(3)}</td><td${cb}>${f.cvar.toFixed(1)}</td>
-        <td style="text-align:left;color:#5f6368">${f.note}</td></tr>`;
+        <td style="text-align:left;color:#6b6b6b">${f.note}</td></tr>`;
     }).join('');
     $('tableWrap').innerHTML=`<table class="mini" style="width:100%"><thead><tr>
       <th style="text-align:left">形式</th><th>最適 x*</th><th>期待費用 E[C]</th><th>不足確率</th><th>CVaR<sub>${S.alpha.toFixed(2)}</sub></th><th style="text-align:left">ねらい</th>

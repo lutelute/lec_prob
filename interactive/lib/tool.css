@@ -1,62 +1,76 @@
-/* tool.css — ブラウザ内インタラクティブツール共通スタイル */
-:root{
-  --blue:#3457d5;          /* ブランド色（サイト・コース・地図と統一） */
-  --viz:#4285f4;           /* データ可視化用の青（プロット） */
-  --green:#34a853; --red:#ea4335; --amber:#f9ab00; --purple:#a142f4;
-  --ink:#202124; --muted:#5f6368; --line:#dadce0; --bg:#ffffff; --soft:#f8f9fa;
-}
+/* tool.css — ブラウザ内インタラクティブツール共通スタイル（ブループリント調）
+ * 依存：lib/blueprint.css（デザイントークン）。先に読み込むこと。
+ */
 *{box-sizing:border-box}
-input[type=range]{accent-color:var(--blue)}
 html{overflow-x:hidden;max-width:100%}
 .plot,.plots>div{max-width:100%;overflow:hidden}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue","Hiragino Sans","Noto Sans JP",sans-serif;
-  margin:0;color:var(--ink);background:var(--bg);line-height:1.6;
+  font-family:var(--jp);
+  margin:0;color:var(--ink);background:var(--paper);line-height:1.65;
+  font-size:14px;-webkit-font-smoothing:antialiased;
   overflow-x:hidden; /* Plotly 計測要素等による微小な横はみ出しを抑制 */
 }
-.wrap{max-width:1100px;margin:0 auto;padding:16px}
-h1{font-size:1.3rem;margin:.2rem 0}
-.sub{color:var(--muted);font-size:.9rem;margin:.2rem 0 1rem}
-.panel{display:grid;grid-template-columns:300px 1fr;gap:18px}
+.wrap{max-width:1100px;margin:0 auto;padding:26px 22px 48px}
+h1{font-size:18px;font-weight:700;letter-spacing:.04em;margin:0 0 2px;
+  border-bottom:1px solid var(--ink);padding-bottom:9px}
+.sub{color:var(--ink-3);font-size:12px;margin:8px 0 16px;line-height:1.7}
+.sub a{color:var(--ev);text-decoration:none;font-weight:500}
+
+.panel{display:grid;grid-template-columns:300px 1fr;gap:16px}
 @media(max-width:820px){.panel{grid-template-columns:1fr}}
-.controls{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px}
-.controls h2{font-size:.95rem;margin:.2rem 0 .6rem;color:var(--muted);text-transform:none}
+.controls{background:var(--card);border:1px solid var(--ink);padding:13px 14px}
+.controls h2{font-family:var(--mono);font-size:10px;letter-spacing:.2em;margin:.2rem 0 .7rem;
+  color:var(--ink-3);font-weight:500;text-transform:uppercase}
 .ctl{margin:10px 0}
-.ctl label{display:flex;justify-content:space-between;font-size:.85rem;font-weight:600;margin-bottom:2px}
-.ctl label .val{color:var(--blue);font-variant-numeric:tabular-nums}
-input[type=range]{width:100%;accent-color:var(--blue)}
-select,.seg{width:100%;padding:6px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:.9rem}
-.seg{display:flex;gap:4px;padding:3px;background:#eef1f5}
-.seg button{flex:1;border:0;background:transparent;padding:6px 4px;border-radius:5px;cursor:pointer;font-size:.82rem;color:var(--muted)}
-.seg button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.02em;font-weight:500;margin-bottom:3px;color:var(--ink-2)}
+.ctl label .val{color:var(--ev);font-weight:700;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--ev)}
+select{width:100%;padding:6px;border:1px solid var(--ink);border-radius:0;background:var(--card);
+  font-family:var(--jp);font-size:.88rem;color:var(--ink)}
+.seg{width:100%;display:flex;gap:0;padding:0;background:var(--card);border:1px solid var(--ink)}
+.seg button{flex:1;border:0;border-right:1px solid var(--line);background:transparent;padding:6px 4px;
+  cursor:pointer;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.02em}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:#fff;font-weight:700}
+
 .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:680px){.plots{grid-template-columns:1fr}}
-.plot{width:100%;height:340px}
+.plot{width:100%;height:340px;background:var(--card);border:1px solid var(--line)}
+
 .metrics{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
-.metric{flex:1;min-width:150px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
-.metric .k{font-size:.72rem;color:var(--muted)}
-.metric .v{font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums}
-.note{background:#fff7e6;border-left:4px solid var(--amber);padding:10px 14px;border-radius:6px;font-size:.88rem;margin:10px 0}
-.ok{color:var(--green)} .warn{color:var(--red)}
-details{margin:8px 0;font-size:.88rem}
-summary{cursor:pointer;font-weight:600}
-table.mini{border-collapse:collapse;font-size:.85rem;margin:6px 0}
+.metric{flex:1;min-width:150px;background:var(--card);border:1px solid var(--ink);padding:8px 12px}
+.metric .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--ink-3);
+  border-bottom:1px dashed var(--line);padding-bottom:4px;margin-bottom:5px}
+.metric .v{font-family:var(--mono);font-size:1.12rem;font-weight:700;font-variant-numeric:tabular-nums}
+
+.note{background:var(--opbg);border:1px solid var(--opbd);border-left:4px solid var(--opbd);
+  padding:10px 14px;font-size:.86rem;margin:10px 0}
+.ok{color:var(--sp)} .warn{color:var(--er)}
+button{font-family:var(--jp)}
+details{margin:8px 0;font-size:.88rem;border:1px solid var(--line);background:var(--card);padding:8px 12px}
+summary{cursor:pointer;font-weight:600;color:var(--ink-2)}
+summary:hover{color:var(--ink)}
+table.mini{border-collapse:collapse;font-family:var(--mono);font-size:.82rem;margin:6px 0;background:var(--card)}
 table.mini td,table.mini th{border:1px solid var(--line);padding:4px 8px;text-align:center}
-.foot{color:var(--muted);font-size:.8rem;margin-top:14px;border-top:1px solid var(--line);padding-top:8px}
-a{color:var(--blue)}
+table.mini th{font-size:10px;letter-spacing:.08em;color:var(--ink-3);font-weight:500;background:var(--soft)}
+.foot{font-family:var(--mono);color:var(--ink-3);font-size:10px;letter-spacing:.05em;
+  margin-top:16px;border-top:1px solid var(--line);padding-top:9px;line-height:1.8}
+a{color:var(--ev)}
+
 /* ガイド付き観察（操作盤→先生） */
-.try{background:#eef7ee;border:1px solid #9fce9f;border-radius:9px;padding:10px 14px;margin:8px 0 14px;font-size:.9rem;line-height:1.55}
-.try b.h{color:#1f6b2e;font-size:.95rem}
+.try{background:var(--spbg);border:1px solid var(--spbd);padding:10px 14px;margin:8px 0 14px;font-size:.88rem;line-height:1.6}
+.try b.h{color:var(--sp);font-size:.93rem}
 .try ol{margin:6px 0 0;padding-left:20px}
 .try li{margin:3px 0}
-.try .ins{margin-top:7px;font-weight:600;color:#137333}
+.try .ins{margin-top:7px;font-weight:600;color:var(--sp)}
 .try .ins::before{content:"💡 "}
+
 /* キーボードフォーカスを明示（アクセシビリティ） */
-:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+:focus-visible{outline:2px solid var(--ev);outline-offset:2px}
 input[type=range]:focus-visible{outline-offset:4px}
 button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-/* 動きに敏感な人向け：アニメーション抑制 */
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
 /* 印刷：決定を綺麗なレポートとして出す（操作UIを隠し、結果を主役に） */
 @media print{
   .try,.lp-toolnav,.act,.seg,.seg2,#preset,details{display:none!important}
@@ -64,10 +78,13 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   .controls{border:none!important;background:none!important;padding:0!important}
   .plot,.plots>div,table,.metrics{page-break-inside:avoid}
   a[href]{color:#000;text-decoration:none}
+  html,body{background:#fff}
   body{font-size:11pt;color:#000}
   h1{font-size:15pt}
 }
+
 /* 全画面で開いたツールの戻り導線（埋め込み時は a11y.js が出さない） */
-.lp-toolnav{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
-.lp-toolnav a{color:var(--blue);text-decoration:none;font-weight:600}
+.lp-toolnav{margin-top:18px;padding-top:10px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-3)}
+.lp-toolnav a{color:var(--ev);text-decoration:none;font-weight:500}
 .lp-toolnav a:hover{text-decoration:underline}

@@ -4,11 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>やる/やらない計算機 — 期待値で決める</title>
+<link rel="stylesheet" href="lib/blueprint.css">
 <link rel="stylesheet" href="lib/tool.css">
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <style>
   .big{font-size:1.5rem;font-weight:800}
-  .go{color:#137333} .nogo{color:#c5221f}
+  .go{color:#1f6b2e} .nogo{color:#9a3a10}
 </style>
 </head>
 <body>
@@ -27,9 +28,9 @@
       <h2>入力</h2>
       <div class="ctl"><label>成功する確率 p<span class="val" id="pval">0.60</span></label><input type="range" id="p" min="0" max="1" step="0.01" value="0.6"></div>
       <div class="num" style="display:flex;gap:8px;flex-wrap:wrap">
-        <label style="flex:1;min-width:120px;font-size:.85rem;color:#3c4043">成功時の利得 G<input type="number" id="G" value="100" style="width:100%;padding:6px 8px;border:1px solid #dadce0;border-radius:6px"></label>
-        <label style="flex:1;min-width:120px;font-size:.85rem;color:#3c4043">失敗時の損失 L<input type="number" id="L" value="80" style="width:100%;padding:6px 8px;border:1px solid #dadce0;border-radius:6px"></label>
-        <label style="flex:1;min-width:120px;font-size:.85rem;color:#3c4043">実行コスト C<input type="number" id="C" value="0" style="width:100%;padding:6px 8px;border:1px solid #dadce0;border-radius:6px"></label>
+        <label style="flex:1;min-width:120px;font-size:.85rem;color:#444444">成功時の利得 G<input type="number" id="G" value="100" style="width:100%;padding:6px 8px;border:1px solid #d8d5cc;border-radius:0"></label>
+        <label style="flex:1;min-width:120px;font-size:.85rem;color:#444444">失敗時の損失 L<input type="number" id="L" value="80" style="width:100%;padding:6px 8px;border:1px solid #d8d5cc;border-radius:0"></label>
+        <label style="flex:1;min-width:120px;font-size:.85rem;color:#444444">実行コスト C<input type="number" id="C" value="0" style="width:100%;padding:6px 8px;border:1px solid #d8d5cc;border-radius:0"></label>
       </div>
       <div class="metrics">
         <div class="metric"><div class="k">やる の期待値 E[やる]</div><div class="v" id="edo">–</div></div>
@@ -61,16 +62,16 @@ function update(){
   for(let i=0;i<=100;i++){const pp=i/100; ps.push(pp); ys.push(pp*S.G-(1-pp)*S.L-S.C);}
   const ymin=Math.min(...ys,0), ymax=Math.max(...ys,0);
   Plotly.react('plot',[
-    {x:ps,y:ys,type:'scatter',mode:'lines',line:{color:'#3457d5',width:2.5},name:'E[やる]',hoverinfo:'skip'},
-    {x:[0,1],y:[0,0],type:'scatter',mode:'lines',line:{color:'#9aa0a6',width:1,dash:'dot'},name:'やらない=0',hoverinfo:'skip'},
-    {x:[S.p,S.p],y:[ymin,ymax],type:'scatter',mode:'lines',line:{color:'#ea4335',width:2},name:'今の p',hoverinfo:'skip'},
-    Number.isFinite(pstar)?{x:[pstar],y:[0],type:'scatter',mode:'markers',marker:{color:'#137333',size:9},name:'損益分岐 p*',hoverinfo:'name'}:{}
+    {x:ps,y:ys,type:'scatter',mode:'lines',line:{color:'#1e40af',width:2.5},name:'E[やる]',hoverinfo:'skip'},
+    {x:[0,1],y:[0,0],type:'scatter',mode:'lines',line:{color:'#9a9a9a',width:1,dash:'dot'},name:'やらない=0',hoverinfo:'skip'},
+    {x:[S.p,S.p],y:[ymin,ymax],type:'scatter',mode:'lines',line:{color:'#9a3a10',width:2},name:'今の p',hoverinfo:'skip'},
+    Number.isFinite(pstar)?{x:[pstar],y:[0],type:'scatter',mode:'markers',marker:{color:'#1f6b2e',size:9},name:'損益分岐 p*',hoverinfo:'name'}:{}
   ].filter(t=>t.x),{margin:{t:8,r:10,b:40,l:52},height:300,xaxis:{title:'成功確率 p',range:[0,1]},yaxis:{title:'E[やる]',zeroline:true},showlegend:true,legend:{orientation:'h',y:1.14,font:{size:10}}},{displayModeBar:false,responsive:true});
   // 後悔（外したとき）
   const regDo=S.L+S.C, regDont=Math.max(0,edo);
   $('regret').innerHTML=`<b>外したときの後悔</b>：<br>「やる」で失敗したら <b>${regDo.toFixed(0)}</b> の損（損失＋実行コスト）。<br>`+
     `「やらない」で本当は成功だったら <b>${regDont.toFixed(0)}</b> の逸失（取り逃した期待値）。<br>`+
-    `<span style="color:#5f6368">後悔の小さい方を選ぶ考え方でも、しきいは同じ p* に近づく。</span>`;
+    `<span style="color:#6b6b6b">後悔の小さい方を選ぶ考え方でも、しきいは同じ p* に近づく。</span>`;
 }
 ['p','G','L','C'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=+e.target.value; update();}));
 update();
